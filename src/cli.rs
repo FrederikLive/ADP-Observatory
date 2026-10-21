@@ -42,18 +42,33 @@ pub fn parse() -> Result<Request, String> {
 fn parse_args(args: Vec<OsString>) -> Result<Request, String> {
     if args.len() == 1 {
         if args[0] == "--help" || args[0] == "-h" {
-            return Ok(Request { mode: Mode::Help, target: PathBuf::from("."), output: None });
+            return Ok(Request {
+                mode: Mode::Help,
+                target: PathBuf::from("."),
+                output: None,
+            });
         }
         if args[0] == "--version" || args[0] == "-V" {
-            return Ok(Request { mode: Mode::Version, target: PathBuf::from("."), output: None });
+            return Ok(Request {
+                mode: Mode::Version,
+                target: PathBuf::from("."),
+                output: None,
+            });
         }
     }
     let mut items = args.into_iter().peekable();
     let mut verb = "dashboard";
     if let Some(head) = items.peek() {
-        if head == "dashboard" { verb = "dashboard"; items.next(); }
-        else if head == "scan" { verb = "scan"; items.next(); }
-        else if head == "report" { verb = "report"; items.next(); }
+        if head == "dashboard" {
+            verb = "dashboard";
+            items.next();
+        } else if head == "scan" {
+            verb = "scan";
+            items.next();
+        } else if head == "report" {
+            verb = "report";
+            items.next();
+        }
     }
 
     let mut project = None;
@@ -90,11 +105,27 @@ fn parse_args(args: Vec<OsString>) -> Result<Request, String> {
         return Err("report mode requires --output REPORT.html".into());
     }
     let mode = match verb {
-        "scan" => if json { Mode::Json } else { Mode::Text },
+        "scan" => {
+            if json {
+                Mode::Json
+            } else {
+                Mode::Text
+            }
+        }
         "report" => Mode::HtmlOnly,
-        _ => if json { Mode::Json } else { Mode::Dashboard { open: !no_open } },
+        _ => {
+            if json {
+                Mode::Json
+            } else {
+                Mode::Dashboard { open: !no_open }
+            }
+        }
     };
-    Ok(Request { mode, target: project.unwrap_or_else(|| PathBuf::from(".")), output })
+    Ok(Request {
+        mode,
+        target: project.unwrap_or_else(|| PathBuf::from(".")),
+        output,
+    })
 }
 
 #[cfg(test)]
