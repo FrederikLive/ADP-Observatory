@@ -72,3 +72,37 @@ Fixtures and unit/integration tests now exist, with bounded contract-file refere
 - Confirmed Observatory's own work index stays structurally readable and version uncertainty isn't promoted to a known version solely from a remote reference.
 - The dashboard's example ADP Actions are static copyable phrases for humans to ask agents, **not** local commands, enforcement rules or another ADP metadata source.
 - This is a pinned-commit smoke test plus existing fixtures, not an exhaustive historical compatibility, conformance or security certification.
+
+## First actual Windows coding-agent pilot follow-up — 2026-10-21
+
+The first user pilot confirmed JSON scan and HTML generation but the browser
+window was not visible, despite the agent reporting that it opened. The
+agent also created/committed/pushed an optional WORK.json and copied duplicate
+executables/artifacts. These represent **agent orchestration boundary and
+browser UX failures**, not proof that the compiled scanner modified the target.
+
+Implementation and automated coverage:
+- Windows opener uses ShellExecuteW (Shell API document association) and
+  converts `\\?\\` extended drive/UNC paths for shell compatibility.
+- `Browser launch: REQUESTED / FAILED / NOT_REQUESTED` emitted by CLI;
+  Python helper claims `BROWSER_OPEN_REQUESTED` only for an explicit
+  positive marker; older unmarked binaries return `REPORT_SAVED` with
+  `UNKNOWN` browser result.
+- Windows-path/Unicode tests in `src/output.rs`, Python negative/legacy/
+  single-report tests in `tests/test_agent_launch.py`, and Rust CLI
+  no-open/no-WORK-creation assertions in `tests/scanner.rs`.
+- Dashboard labels statuses as **recorded project claims**, not independently
+  verified contract completion; a matching renderer regression test exists.
+- Agent Skill and conditional installation guidance explicitly forbid
+  modifying project files, generating WORK.json, running target tests,
+  making Git commits/pushes, or duplicating installations as part of a view.
+- Cross-platform compiled binary tests and package provenance passed in
+  [package CI 39668145354](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39668145354);
+  subsequent full CI [39668349597](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39668349597)
+  passed; Windows/Linux/macOS preview install smoke [39668359113](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39668359113)
+  passed.
+
+**Still NOT VERIFIED:** real interactive Windows/Antigravity browser visibility,
+current system default HTML association, independent manual no-mutation
+acceptance with an updated installed executable/skill, and stable signed
+release distribution. See [WINDOWS-PILOT.md](WINDOWS-PILOT.md).
