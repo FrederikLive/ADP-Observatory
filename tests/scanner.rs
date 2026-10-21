@@ -111,17 +111,25 @@ fn scanner_never_writes_target_records() {
     assert_eq!(before, after);
 }
 
-
 #[test]
 fn referenced_contract_files_are_checked_without_interpreting_them_as_conformance() {
     let report = scan("references");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     assert_eq!(report["work_index"]["reference_inspection_limited"], false);
-    let refs = report["work_index"]["contract_files"].as_array().expect("references");
+    let refs = report["work_index"]["contract_files"]
+        .as_array()
+        .expect("references");
     let statuses: Vec<_> = refs.iter().map(|r| r["status"].as_str().unwrap()).collect();
     assert_eq!(
         statuses,
-        ["PRESENT", "MISSING", "OUTSIDE_ROOT", "INVALID_PATH", "NOT_FILE", "NOT_DIRECTORY"]
+        [
+            "PRESENT",
+            "MISSING",
+            "OUTSIDE_ROOT",
+            "INVALID_PATH",
+            "NOT_FILE",
+            "NOT_DIRECTORY"
+        ]
     );
     assert_eq!(
         refs[0]["source"],
