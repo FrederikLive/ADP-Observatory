@@ -18,6 +18,7 @@ M1 scanner calibration: WORK-SCANNER-001 (in_progress). Parallel M4 trusted dist
 ## First Windows coding-agent pilot corrections — 2026-10-21
 
 - A real local Windows agent generated the HTML report and scanned the target, but did not visibly open the user's browser. The agent also copied multiple binaries/reports and unnecessarily created, committed and pushed a WORK.json in the target project. The executable itself did not require these writes.
+- **Duplicate install diagnostics:** The optional Python launcher reports the chosen executable and any other discovered local installations without executing, updating or deleting them. This is intended to expose version drift from the first user pilot.
 - **Code:** Windows HTML opening now uses native ShellExecuteW with shell-compatible paths. CLI prints an explicit browser launch status; Python Agent Skill helper only claims an attempted open after receiving the positive marker.
 - **Safety:** Agent Skill/setup guide prohibit target work-index creation, application tests, Git changes/pushes, unnecessary duplicate installations, and repeated reports during visualization.
 - **Accuracy:** Dashboard differentiates statuses recorded in WORK.json from independent verification, and optional WORK remains optional.
