@@ -1,7 +1,7 @@
 # Continuity
 
 ## Active objective
-Develop a tolerant, version-aware, read-only Observatory that visualizes existing ADP project records without adding any mandatory agent token or maintenance overhead.
+Build a fault-tolerant, local-first ADP project scanner that supports human visualization with zero additional agent or protocol overhead.
 
 ## Active milestone
 M1 — Discovery and deterministic scanner.
@@ -13,51 +13,51 @@ Analysis engine.
 WORK-SCANNER-001 — docs/work/WORK-SCANNER-001.md.
 
 ## Current position
-The first compatibility implementation has passed CI. Files src/compatibility.rs, src/work.rs, src/records.rs, src/main.rs, and schema/scan-report.schema.json support scoped format/semantic/conformance status, explicit ADP version evidence, future WORK schema handling, independent context reads, source-linked active-contract conflicts, and JSON schema 0.2.0. tests/scanner.rs runs current/older/future/missing/malformed/conflicting CLI fixtures and read-only/determinism checks.
+Scanner development 0.3.0 adds explicit scan scope via src/discovery.rs and metadata-only checks for optional contract_file references via src/references.rs. src/work.rs reports referenced file statuses independently of structural WORK validity. src/main.rs and schema/scan-report.schema.json expose those results. Tests cover bounded traversal, symlinks, traversal rejection, malformed/missing references, and repository self-scan.
 
 ## Last known good state
-GitHub Actions run 39573431375 succeeded for code, formatting, lint, unit and CLI integration tests, and build. Code changes since that run must be verified separately; documentation changes are not new executable evidence.
+GitHub Actions run 39575987006 succeeded at its revision for formatting, Clippy, tests, and build. Current branch may contain documentation-only commits after that run; do not assume any unverified code changes are green.
 
 ## Current verification
-- ADP M0 baseline: VERIFIED, run 39567705133.
-- M1 compatibility scanner subset: VERIFIED, run 39573431375.
-- Full ADP conformance evaluation, comprehensive adapters and evidence metrics: NOT IMPLEMENTED / NOT ASSESSED.
-- Broader hostile-input fixtures, performance bounds and contract path resolution: NOT RUN / outstanding.
+- M0 baseline: VERIFIED — run 39567705133.
+- M1 initial compatibility behavior: VERIFIED — run 39573431375.
+- M1 reference safety, coverage reporting, self-scan, and version 0.3.0: VERIFIED — run 39575987006.
+- Full historical format support, complete conformance, and real-world false-positive calibration: NOT IMPLEMENTED or NOT ASSESSED.
 
 ## Work in progress
-Complete M1 acceptance: scan completeness semantics, secure contract-file reference inspection, missing/broken path reports, and larger fixture coverage.
+Calibrate parser and scope results against small/mature real ADP projects and grow targeted regression tests. M1 remains in progress.
 
 ## Blocker / investigation
-Canonical ADP WORK.json is optional. Reference fields may be absent and historical project layouts vary; preserve unknowns and report non-applicability, not false errors.
+No external blocker. Continue to distinguish optional source absence and unsupported semantics from normative ADP violations. Check actual adopted protocol versions in candidate projects.
 
 ## Next recommended phase
-Harden discovery and bounded reference checks, then calibrate against real ADP projects before starting M2 metrics.
+Complete M1 pilot calibration and source-link robustness before rule/metric expansion.
 
 ## Exact next action
-1. Inspect GitHub main HEAD and newest CI result; preserve unrelated changes.
-2. Read docs/work/WORK-SCANNER-001.md and existing work/context/version parsers.
-3. Implement safe optional contract_file reference resolution constrained to project root; report missing, symlinked, outside-root, and ambiguous targets independently.
-4. Add fixtures/tests for bad references and scan-completeness boundaries.
-5. Run formatting, lint, unit/integration tests, and build; record verification and update STATUS and this file.
+1. Inspect GitHub main HEAD/CI and project worktree if local.
+2. Read AGENTS.md, docs/STATUS.md, .project/WORK.json, and docs/work/WORK-SCANNER-001.md.
+3. Inspect real, representative ADP project layouts against current scanner output and record gaps with evidence.
+4. Fix a narrow verified issue, add fixture/tests, run CI quality gates, and update ADP status/continuity.
+5. Do not modify canonical ADP unless independently agent-beneficial and authorized.
 
 ## Decisions made since last checkpoint
-- Canonical ADP (2.7.1 baseline) remains unchanged; Observatory must adapt with zero extra required metadata.
-- Compatibility dimensions are separate; semantic support currently only covers WORK schema v1.
-- Conflicts preserve source references; no silent precedence by timestamp.
-- Invalid/unavailable input must not erase independent records.
-- Unknown/future versions have no unverified conformance verdict.
+- Project remains optional and ADP-first with no mandatory new metadata or agent reads.
+- scan_complete describes policy-bounded traversal; scan_scope counts deliberate exclusions separately from incomplete traversals.
+- Contract-file links are checked using safe relative metadata lookups; PRESENT does not imply verification.
+- Reference checks have a cap; incomplete inspection is explicitly reported.
+- Missing optional WORK.json is unknown, not noncompliance; full conformance is never inferred from schema readability.
 
 ## Workspace / Git state
-GitHub main is updated via API; local staged/unstaged/untracked state is unavailable remotely.
+GitHub default branch main updated through connector. Local staged/unstaged/untracked changes cannot be established remotely.
 
 ## Last checkpoint
-2026-10-21 — M1 compatibility scanner verified; remaining scanner work recorded.
+2026-10-21 — M1 scanner hardening and documentation synchronized.
 
 ## Git authorization and recovery
-- Initialized: existing GitHub repository.
+- Initialized: existing GitHub repo.
 - Branch: main.
-- HEAD: inspect GitHub before resuming, do not trust stale SHAs.
-- Staged/unstaged/untracked changes: unknown from remote API.
-- Authorization: user requested continued Observatory development; no normative ADP modifications.
-- Generated policy cannot grant commits/pushes/history rewrites.
-- Next safe action: verify branch and proceed under active M1 contract.
+- HEAD: inspect current remote; do not rely on stale SHA.
+- Staged/unstaged/untracked: unknown remotely.
+- Source of authorization: current user's instruction to continue Observatory development.
+- Generated policies do not self-authorize commits/push/history rewrites.
+- Next safe action: inspect CI and calibrate real project coverage.
