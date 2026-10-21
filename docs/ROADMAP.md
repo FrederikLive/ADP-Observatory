@@ -27,16 +27,19 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** every shipped rule has definition, tests, limitations, and source references.
 
 ## M3 — Local dashboard and snapshots
-- [ ] Build overview, finding detail, evidence navigation, and filters.
-- [ ] Harden loopback API against hostile origins, DNS rebinding, traversal, and XSS.
-- [ ] Add opt-in local snapshots and compatible comparisons.
-- [ ] Show scan scope, completeness, and unknown/unassessed values.
-**Exit:** partial scan cannot appear fully healthy; history is local, optional, transparent.
+**Status:** First offline HTML viewer slice verified; full M3 remains open.
+- [x] Build a responsive, self-contained offline project overview with contract filtering, source descriptions, compatibility limits and findings.
+- [x] Escape project-supplied text, avoid external resources and listening network services, generate files outside target repository.
+- [ ] Add complete evidence navigation, optional local snapshots and compatible historical comparisons.
+- [ ] Test real-browser accessibility, keyboard behavior and representative project usability.
+- [ ] A future live HTTP API, if justified, requires independent Host/Origin/rebinding and filesystem API security review; not required for the offline viewer.
+- [x] Show scan scope, completeness, and unknown/not-assessed values in the offline report.
+**Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
 ## M4 — Cross-platform release and launchers
-**Status:** Requirements documented in [docs/LAUNCHER.md](LAUNCHER.md); no installer or downloadable release exists yet.
-- [ ] Confirm and test actual Windows, macOS, and Linux OS/CPU support.
-- [ ] Package tagged executable artifacts and independently verifiable publisher/release metadata.
+**Status:** Experimental CI binaries for Windows x64, Linux x64 and macOS runner pass tests and have signed build-provenance attestations (run 39596794393). No official code-signed release or installer yet.
+- [x] Test Windows x64, Linux x64 and macOS runner binaries in CI; other architectures and real-machine install tests remain outstanding.
+- [x] Produce experimental workflow artifacts and signed build-provenance attestations; [ ] establish a protected tagged official release with independently verified release metadata.
 - [ ] Support install-once execution from any project directory: `adp-observatory .`; keep headless CLI mode for JSON and CI.
 - [ ] Provide a trusted per-user installation path without administrator/root privileges; keep binaries outside target repositories.
 - [ ] Evaluate an optional one-shot first-run launcher only when executable verification is feasible.
