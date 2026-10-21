@@ -1,6 +1,6 @@
 # Launching and distributing ADP-Observatory
 
-**Status:** Design baseline; **not implemented or released**. Observatory currently requires a Rust build/checkout and provides CLI scanning, not a dashboard or an installer.
+**Status:** Offline dashboard and headless CLI are implemented in development 0.4.0. Experimental unsigned CI binary packages are being tested; **no signed official release, installer or verified first-run downloader has shipped**.
 
 ## User experience
 
@@ -10,7 +10,7 @@ The desired experience is to open a terminal **inside any ADP project** and run:
 adp-observatory .
 ```
 
-When the graphical application is implemented, this should select the current working directory as the project root, launch a loopback-only dashboard, and open it in the browser. The user should not copy any Observatory files into their project.
+The 0.4.0 development executable accepts this command, treats the current working directory as the project, generates a single offline HTML report outside the project, and attempts to open it in the browser. No local web server is required for this first interface. The user should not copy any Observatory files into their project.
 
 For scripted, noninteractive, and agent usage, the desired command is:
 
@@ -18,7 +18,7 @@ For scripted, noninteractive, and agent usage, the desired command is:
 adp-observatory scan . --json
 ```
 
-This future CLI shape is **not implemented**. The current Rust prototype accepts `adp-observatory <project-directory> [--json]` and has no graphical dashboard. Preserve this positional form as a backwards-compatible alias when introducing subcommands, or document the breaking change before a stable release.
+The development executable now supports this headless command. The legacy `adp-observatory PROJECT --json` shortcut remains supported. Both report-format compatibility and release-distribution guarantees are **pre-stable**.
 
 ## First-run trade-off: one command versus trusted execution
 
@@ -59,13 +59,13 @@ A single OS-agnostic install-and-run line is not a portable promise. Publish exp
 
 | Usage | Intended behavior |
 | --- | --- |
-| `adp-observatory .` | Analyze current project and open local dashboard (future) |
-| `adp-observatory /path/to/project` | Analyze an explicitly selected project (future dashboard mode) |
-| `adp-observatory scan . --json` | Headless, versioned JSON report without browser (future) |
-| `adp-observatory --version` | Display executable and analyzer version (future) |
-| `adp-observatory --help` | Command and compatibility information (future) |
+| `adp-observatory .` | Generate offline local HTML and attempt to open it (implemented in development executable; not installed globally) |
+| `adp-observatory /path/to/project` | Analyze selected project and generate offline HTML (implemented in development executable) |
+| `adp-observatory scan . --json` | Headless JSON report without browser (implemented) |
+| `adp-observatory --version` | Display executable and analyzer version (implemented) |
+| `adp-observatory --help` | Command help (implemented) |
 
-**Existing prototype:** run `cargo run --manifest-path /path/to/ADP-Observatory/Cargo.toml -- . --json` from a project directory with Rust installed and Observatory checked out separately.
+**Developer use:** run `cargo run --manifest-path /path/to/ADP-Observatory/Cargo.toml -- .` from a project directory to open the offline report, or replace `.` with `scan . --json` for headless JSON. No signed or published installation experience is available yet.
 
 ## Delivery sequence and acceptance
 
