@@ -80,3 +80,15 @@ Limited compatibility behavior is implemented in src/compatibility.rs, src/recor
 Validation: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39573431375
 
 **Next exact action:** inspect active branch/CI, implement bounded file-reference checks (missing/symlinked/outside-root contract references), and improve scan completeness without turning missing optional ADP records into errors.
+
+## Verified scanner hardening checkpoint (2026-10-21)
+
+- Added src/references.rs: bounded metadata-only checks for explicitly referenced optional contract files, with source JSON pointers and statuses PRESENT, MISSING, SYMLINK, OUTSIDE_ROOT, INVALID_PATH, NOT_FILE, NOT_DIRECTORY, UNREADABLE.
+- Added src/discovery.rs: deterministic bounded traversal with separate counts for ignored directories, symlinks, oversized files, metadata/read errors, depth and entry limits. scan_complete now describes traversal under disclosed policy rather than evidence validity.
+- Extended WORK.json read-only inspection, CLI reporting, and schema/scan-report.schema.json 0.3.0. Advanced development package to 0.3.0.
+- Added CLI fixtures for valid/missing/unsafe references and a test that scans this repository's own ADP work records.
+- CI verification: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39575987006 (formatting, lint, tests, build all passed at that code revision).
+
+**Still open in M1:** broader adversarial and real-project tests, full parser coverage for historical versions, source-link and scan-scope calibration, and more complete schema validation. Do not mark the full scanner VERIFIED from one green subset.
+
+**Exact next action:** test selected real repositories against current discovery rules; investigate false positives/negatives and parser/layout variation, then implement only the next high-value improvement with regression fixtures. Do not amend canonical ADP for the analyzer.
