@@ -1,7 +1,9 @@
+use crate::references::{self, ContractFileReference};
 use serde::Serialize;
 use std::{collections::HashSet, fs, path::Path};
 
 const MAX_WORK_BYTES: u64 = 2 * 1024 * 1024;
+const MAX_REFERENCE_CHECKS: usize = 2000;
 
 #[derive(Serialize)]
 pub struct WorkInspection {
@@ -9,6 +11,8 @@ pub struct WorkInspection {
     pub project: Option<String>,
     pub active_contract: Option<String>,
     pub contract_count: Option<usize>,
+    pub contract_files: Vec<ContractFileReference>,
+    pub reference_inspection_limited: bool,
     pub findings: Vec<WorkFinding>,
 }
 
@@ -39,6 +43,8 @@ pub fn inspect(root: &Path) -> WorkInspection {
         project: None,
         active_contract: None,
         contract_count: None,
+        contract_files: Vec::new(),
+        reference_inspection_limited: false,
         findings: Vec::new(),
     };
     let parent = root.join(".project");
@@ -264,6 +270,18 @@ pub fn inspect(root: &Path) -> WorkInspection {
                 "error",
                 format!("Invalid status for {id}."),
             ));
+        }
+        if let Some(file) = entry.get("contract_file").and_then(|v| v.as_str()) {
+            if result.contract_files.len() < MAX_REFERENCE_CHECKS {
+                result.contract_files.push(references::inspect(root, id, index, file));
+            } else if !result.reference_inspection_limited {
+                result.reference_inspection_limited = true;
+                result.findings.push(finding(
+                    "work.reference_check_limit",
+                    "warning",
+                    "Contract-file reference check limit reached; remaining references were not assessed.",
+                ));
+            }
         }
         for key in ["workstream", "contract_file"] {
             if entry.get(key).is_some_and(|v| !nullable_string(v)) {
