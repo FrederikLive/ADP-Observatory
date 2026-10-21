@@ -41,3 +41,10 @@ Successful formatting, lint, test, and build; schema validation and fixture test
 
 ## Known gaps
 Fixtures and unit/integration tests now exist, with bounded contract-file reference inspection and explicit scan coverage. The parser remains a limited ADP 2.7.1 WORK schema-v1 reader. No full conformance engine, complete cross-file evidence linking, comprehensive hostile-input fixture suite, snapshots, dashboard, released platform binaries, or signing. Full recursive JSON Schema conformance tests are not yet implemented; the integration test checks top-level required report fields. CI for the 0.3.0 scanner implementation and tests passed in GitHub Actions run 39575987006; check the most recent repository CI after subsequent documentation updates.
+
+## Dashboard and cross-platform prototype checkpoint
+- Rust formatting, lint, unit/integration tests, and build passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011803.
+- Experimental unsigned Windows, macOS, and Linux test/build/smoke/package workflow passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011855.
+- Report renderer has HTML-escaping and no-external-assets tests; CLI integration tests cover offline export, no-open mode, and target write refusal.
+- No real-browser accessibility testing, signed publisher identity, installation verification, or complete conformance engine yet.
+
