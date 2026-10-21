@@ -61,3 +61,19 @@ environment; broader end-user one-prompt installation is **not implemented**.
 Continue WORK-DISTRIBUTION-001 to establish protected official releases and
 harness-native approved installation. Do not duplicate release/trust metadata
 in ADP or move analyzer implementation into the protocol.
+
+## ADP Actions routing separation — 2026-10-21
+
+The latest ADP introduces **ADP Actions** as non-normative natural-language
+requests. The Observatory skill now expressly distinguishes its own
+visualization trigger ("Show Observatory") from "Show ADP Actions",
+"Check ADP for updates", and "Update ADP". Those latter requests must be
+handled by the ADP Actions catalogue and project-update guidance without
+launching a browser, installing Observatory or changing work records.
+
+The offline Observatory report displays a small, static set of relevant
+agent prompts. No HTML element executes these prompts or modifies the
+project. The pinned upstream compatibility test in [CI 39659907217](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39659907217)
+confirmed the new ADP guidance and report are coherent. The complete
+one-prompt first-time installer remains gated by official release
+protections and local host authorization.
