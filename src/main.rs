@@ -97,6 +97,7 @@ fn main() {
             println!("  - {marker}");
         }
         println!("Work index: {}", report.work_index.status);
+        println!("Semantic scope: {}", report.compatibility.semantic_scope);
         println!(
             "Compatibility: format={}, semantics={}, conformance={}",
             report.compatibility.format,
@@ -217,6 +218,8 @@ fn scan(
                 | "STATUS.md"
                 | "CONTINUITY.md"
                 | ".project/WORK.json"
+                | "docs/STATUS.md"
+                | "docs/CONTINUITY.md"
                 | "docs/CONFORMANCE.md"
         ) {
             markers.push(relative);
