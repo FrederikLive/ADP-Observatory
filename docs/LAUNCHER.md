@@ -22,7 +22,7 @@ The development executable now supports this headless command. The legacy `adp-o
 
 ## Experimental builds: inspect and verify before executing
 
-A successful experimental matrix run is available at [GitHub Actions #39596794393](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596794393). Each platform job tests, builds, smoke-tests, records SHA-256, creates a GitHub/Sigstore-signed build provenance attestation for the binary, and uploads a workflow artifact.
+A successful experimental matrix run is available at [GitHub Actions #39597842680](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39597842680). It also re-verifies each executable's signed attestation against this repository and the expected signing workflow before uploading the binary. Each platform job tests, builds, smoke-tests, records SHA-256, creates a GitHub/Sigstore-signed build provenance attestation for the binary, and uploads a workflow artifact.
 
 **Manual testing only; this is not a public release.** To check an experimental binary:
 
