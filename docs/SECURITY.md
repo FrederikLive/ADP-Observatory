@@ -47,6 +47,24 @@ return the local HTML path or a supported transferable artifact; do not
 automatically upload project reports. A successful browser opener call is
 evidence of an open request, not proof that the user saw the file.
 
+## Agent orchestration non-interference
+
+A first Windows local-agent trial exposed an important distinction: the
+Observatory executable generated an offline report without writing to the
+target, but the **agent** unnecessarily created an optional work index,
+ran the target's tests, and committed/pushed it. An Observatory setup or
+visualization request alone is **not permission** for those changes.
+The [Agent Skill](../skills/adp-observatory/SKILL.md) now explicitly forbids
+project file/metadata changes, application test execution and Git mutations
+during visualization. Missing optional records must remain unknown.
+Separate project maintenance, if requested, follows ADP's own authorization
+and review rules rather than being smuggled into a dashboard task.
+
+Windows HTML opening uses the system Shell API with normalized shell paths;
+its return value only shows an open request was accepted, not whether the user
+saw a browser tab. Report paths can contain sensitive local metadata; do not
+silently copy them to other IDE or cloud artifact storage.
+
 ## Local dashboard
 The current viewer is a self-contained offline HTML report with a restrictive Content Security Policy and escaped project data; it does **not** expose a local HTTP listener. If a future interactive dashboard uses HTTP, bind exclusively to loopback, validate Host and Origin, protect against DNS rebinding and cross-site requests, authenticate state-changing endpoints, and avoid unrestricted filesystem access. Absolute project paths in saved reports are sensitive local data and must never be uploaded by default.
 
