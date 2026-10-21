@@ -7,7 +7,7 @@ M1 — Scanner calibration (active contract: WORK-SCANNER-001). Early M3/M4 slic
 - M0 ADP bootstrap: VERIFIED (CI run 39567705133).
 - M1 scanner: bounded read-only discovery, optional schema-v1 work records, version/compatibility evidence, conflicts and safe file references. CI verified (run 39596170547). Full ADP conformance remains NOT_ASSESSED.
 - Development 0.4.0 offline HTML viewer: VERIFIED at implementation/test level (run 39596170547); command `adp-observatory .` works with a built executable, `scan . --json` remains headless. No listening web server.
-- Windows x64, Linux x64, macOS runner prototype binaries: test/build/smoke/provenance-attestation jobs PASSED (run 39596794393).
+- Windows x64, Linux x64, macOS runner prototype binaries: test/build/smoke/provenance-attestation jobs PASSED (run 39597842680; independent signer-workflow verification passed before artifact upload).
 - WORK-DASHBOARD-001 verified; original WORK-UI-001 deferred/superseded to avoid duplicate task ownership; WORK-DISTRIBUTION-001 owns secure delivery.
 
 ## Not released / not yet verified
