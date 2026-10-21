@@ -29,7 +29,7 @@ To find candidate preview builds: [Prototype binary package workflow](https://gi
 ## Experimental validation
 
 - [x] CI: build, test, smoke-check, sign provenance and independently verify artifacts for Windows x64, Linux x64 and macOS ARM64.
-- [ ] Installer smoke CI: explicit SHA rejection and successful verified installation on all three platforms, then headless scan from an ADP fixture. Record an exact successful run.
+- [x] Installer smoke CI: incorrect SHA rejection, pinned verified download, per-user installation and headless scan passed on Windows x64, Linux x64, and macOS ARM64 ([run 39601029440](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39601029440)).
 - [ ] Additional malicious/expired/download-error and Unicode-path tests.
 - [ ] Manual inspection of application behavior and operating-system security warnings on actual end-user machines.
 
