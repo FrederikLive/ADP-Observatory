@@ -11,11 +11,11 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** fresh contributor can understand scope, run validation, and identify next task.
 
 ## M1 — Discovery and deterministic scanner
-**Status:** Read-only discovery prototype and initial WORK.json structural parser committed; parser CI pending.
+**Status:** Read-only discovery, optional WORK.json v1 parsing, limited protocol-version discovery, contextual conflict reporting, and fixture tests committed; CI passed in run 39573431375.
 - [x] Add a bounded, read-only filesystem discovery prototype.
 - [x] Add initial JSON output mode and schema.
 - [ ] Define and test precise scan-completeness semantics for ignored, oversized, unreadable, and symlinked paths.
-- [x] Begin parsing canonical ADP WORK.json records; deeper cross-document linking remains open.
+- [x] Parse core and optional ADP WORK.json schema-v1 fields; full cross-document evidence linking remains open.
 - [ ] Add valid, incomplete, contradictory, malformed, and hostile-input fixtures.
 **Exit:** deterministic results; no target code execution or target-file modification; tests cover scope and failure behavior.
 
@@ -59,10 +59,10 @@ Milestones are proposed work packages, not claims of completion.
 All milestones must preserve ADP's low-token, fast-agent, continuity-first design. Observatory adapts to existing records; no extra ADP files or agent bookkeeping may be required. See docs/ADP-INTEGRATION.md and docs/ARCHITECTURE.md.
 
 ### M1 additional acceptance work
-- [ ] Separate format, semantic, and conformance compatibility states.
-- [ ] Preserve partial results when individual records are absent, malformed, or conflicting.
+- [x] Separate format, semantic, and conformance compatibility states for the WORK schema-v1 adapter.
+- [x] Preserve independently readable context when WORK.json or a Markdown record is missing, malformed, or conflicting.
 - [ ] Add fixture matrix for optional WORK.json, old/current/newer/unknown versions, broken links, and hostile input.
-- [ ] Demonstrate scanning never changes the analyzed repository.
+- [x] Confirm basic read-only behavior in unit and CLI integration tests.
 - [ ] Show source provenance and scan completeness; no inferred passing verdicts.
 
 ### M2 additional acceptance work
