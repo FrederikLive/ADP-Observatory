@@ -36,6 +36,20 @@ Milestones are proposed work packages, not claims of completion.
 - [x] Show scan scope, completeness, unknown/not-assessed values and optional static ADP Actions prompts in the offline report. No added agent runtime work or required project records.
 **Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
+## Future M3 enhancement — Contract & Evidence Explorer (deferred)
+
+**State: PROPOSED / NOT IMPLEMENTED.** Captured after reviewing the first 30-contract project report. See [WORK-EXPLORER-001](work/WORK-EXPLORER-001.md) for the complete requirements, evidence semantics, safety design, MVP slices and open questions.
+
+- [ ] Make existing contracts selectable and display a focused document detail with recorded status, explicit links, limitations and source locations.
+- [ ] Pre-parse *bounded, safely resolved* referenced Markdown at **scan time** into a deterministic outline and meaningful source-backed excerpts (purpose, requirements, acceptance, verification claims, risks, decisions, next steps).
+- [ ] Render safe offline Markdown excerpts and permit internal source navigation with file paths and original line ranges; no browser filesystem/network reads or target-project writes.
+- [ ] Distinguish project-recorded claims, linked evidence, and independently assessed verification; unsupported evidence remains unknown/not assessed.
+- [ ] Permit source exploration of supported context files even if optional WORK.json is absent, without inventing contract statuses.
+- [ ] Validate against the real 30-contract pilot pattern and hostile/large/missing-source fixtures, with accessible keyboard navigation, bounded report size and privacy options.
+- [ ] Consider deeper cross-file insights, richer relationship views and optional AI explanation **only after** the deterministic explorer is trustworthy. No LLM, extra ADP bookkeeping or server in the baseline.
+
+This is a **future** slice, not a prerequisite for M1 completion or the Windows browser/user-installation gates. Do not silently change the active/next contract or treat this proposal as verified functionality.
+
 ## Optional Agent Launch (M3/M4 integration slice)
 
 - [x] Provide an optional skill triggered by "show Observatory", owning
