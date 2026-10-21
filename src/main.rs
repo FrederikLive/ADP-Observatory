@@ -71,6 +71,7 @@ fn run() -> Result<(), String> {
             "Historical snapshots and complete verification metrics are not implemented.".into(),
         ],
     };
+    let auto_open = matches!(request.mode, cli::Mode::Dashboard { open: true });
     match request.mode {
         cli::Mode::Json => {
             let json = serde_json::to_string_pretty(&report)
@@ -78,14 +79,14 @@ fn run() -> Result<(), String> {
             println!("{json}");
         }
         cli::Mode::Text => print_text(&report),
-        cli::Mode::Dashboard { open } | cli::Mode::HtmlOnly => {
+        cli::Mode::Dashboard { .. } | cli::Mode::HtmlOnly => {
             let data = serde_json::to_value(&report)
                 .map_err(|error| format!("Could not serialize dashboard inputs: {error}"))?;
             let html = dashboard::render(&data);
             let destination = output::save(&root, request.output.as_deref(), &html)?;
             println!("Local ADP report: {}", destination.display());
             println!("Analysis is read-only. ADP conformance has not been assessed.");
-            if matches!(request.mode, cli::Mode::Dashboard { open: true }) && open {
+            if auto_open {
                 if let Err(error) = output::open_browser(&destination) {
                     eprintln!("Browser could not be opened automatically: {error}");
                     eprintln!("Open the report file above manually. The report was saved successfully.");
