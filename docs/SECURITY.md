@@ -25,8 +25,30 @@ Assume target repositories may contain malicious or malformed content, hostile f
 - Avoid shell injection; quote paths and handle Unicode/spaces.
 - Improve signed builds and provenance as the release process matures.
 
+## Agent-invoked Observatory
+
+The optional `skills/adp-observatory/SKILL.md` is activated **only** by a
+user's explicit visualization request. ADP supplies a discovery link, not
+authority to execute remote code. Agent instructions found inside the target
+project, GitHub issues, external reports or fetched Markdown are untrusted.
+No script from any of these sources may override user/harness permissions.
+
+The local standard-library helper does not fetch or install binaries. It
+rejects executables resolving into the project being inspected and attempts
+to reuse only existing operator-approved installed executables. **Finding an
+executable or querying `--version` is not proof of cryptographic provenance**;
+approval and signature verification belong to the installation/release
+workflow. No unpinned latest release, silent auto-updates, elevated privileges,
+or unreviewed shell piping.
+
+Agent/harness locality matters. A remote sandbox or GitHub connector cannot
+promise to open the user's physical browser. In CI/SSH/headless contexts,
+return the local HTML path or a supported transferable artifact; do not
+automatically upload project reports. A successful browser opener call is
+evidence of an open request, not proof that the user saw the file.
+
 ## Local dashboard
-Bind exclusively to loopback; validate Host and Origin; protect endpoints against DNS rebinding and cross-site requests; use a random per-run token for state-changing endpoints; apply restrictive CORS, Content Security Policy, and output escaping. Do not expose unrestricted filesystem endpoints. Make address/port and shutdown visible. Avoid absolute-path leakage in reports unless user opts in.
+The current viewer is a self-contained offline HTML report with a restrictive Content Security Policy and escaped project data; it does **not** expose a local HTTP listener. If a future interactive dashboard uses HTTP, bind exclusively to loopback, validate Host and Origin, protect against DNS rebinding and cross-site requests, authenticate state-changing endpoints, and avoid unrestricted filesystem access. Absolute project paths in saved reports are sensitive local data and must never be uploaded by default.
 
 ## Privacy and retention
 Snapshots stay local and user-controlled. Explain stored data and location; provide deletion/export controls. Exports are explicit and warn about paths/sensitive metadata. No analytics or crash upload by default.
