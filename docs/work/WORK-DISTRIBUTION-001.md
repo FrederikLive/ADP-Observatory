@@ -17,6 +17,7 @@ Make a local-first Observable executable obtainable on supported platforms witho
 ## Acceptance criteria
 - [x] Matrix tests, builds and smoke checks for Windows x64, Linux x64 and macOS runner on 2026-10-21; run 39596011855.
 - [x] Attach GitHub/Sigstore-signed build provenance to each experimental packaged binary; all three matrix jobs passed (run 39596794393).
+- [x] Verify each attested executable against the exact repository and signer workflow before artifact upload; Windows, Linux and macOS matrix steps all passed (run 39597842680).
 - [ ] Document checksums vs cryptographic attestation and exact user-verification steps.
 - [ ] Test clean-machine install, PATH, offline use, platform mismatch, Unicode paths, update/uninstall.
 - [ ] Publish protected, verified tagged release and tested install instructions; only then update ADP human guidance.
