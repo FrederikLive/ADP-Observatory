@@ -9,14 +9,21 @@
 - **D-006 Derived history:** snapshots are optional local data, not project truth; no trend without a baseline.
 - **D-007 Verify before execute:** launchers verify official artifacts; no blind shell piping.
 - **D-008 Separate ADP changes:** normative amendments are proposed/reviewed in the canonical ADP repository.
+- **D-009 ADP-first, zero mandatory overhead:** no new required ADP files, metadata, event logging, or agent reading for Observatory. Protect agent speed, low token use, and continuity.
+- **D-010 Version-aware adapters:** format parsing, semantic understanding, and conformance coverage are independent. Unknown/newer ADP versions degrade safely.
+- **D-011 Fault isolation:** malformed/missing/conflicting records must not crash the whole scan or silently override other claims.
+- **D-012 No protocol amendment now:** test against real projects before proposing any change to canonical ADP 2.7.1.
+- **D-013 Optional means optional:** missing WORK.json alone is not a conformance failure.
+- **D-014 Conflict provenance:** preserve contradictory claims with source references; no automatic winner by file modification time.
 
 ## Open decisions
 - **Q-001 Core language:** validate Rust against packaging and maintenance needs.
 - **Q-002 Dashboard framework:** choose the smallest maintainable UI after a vertical slice.
-- **Q-003 Supported ADP layouts:** define with fixtures and real repositories.
+- **Q-003 Version adapter support matrix:** which historical ADP versions have independently tested semantics?
 - **Q-004 Platform matrix:** decide OS/architectures based on CI and release feasibility.
-- **Q-005 Metric configuration:** how to express project-specific policy without forcing a new ADP manifest.
+- **Q-005 Metric configuration:** project-specific policy without forcing a new ADP manifest.
 - **Q-006 Release signing:** choose a maintainable signing/provenance process.
 - **Q-007 Data location/retention:** specify paths, migration, export, and deletion.
-- **Q-008 Launcher UX:** compare signed binaries, PowerShell, batch, and shell wrappers; never execute unverified downloads.
+- **Q-008 Launcher UX:** compare signed binaries, PowerShell, batch, and shell wrappers.
 - **Q-009 Initial rules:** prioritize correctness, applicability, and low false-positive risk.
+- **Q-010 Markdown linking:** determine reliable explicit-reference extraction versus speculative inference.
