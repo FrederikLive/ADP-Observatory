@@ -25,7 +25,7 @@ fn scan(name: &str) -> Value {
 #[test]
 fn current_version_reads_structured_work_without_claiming_conformance() {
     let report = scan("current");
-    assert_eq!(report["schema_version"], "0.2.0");
+    assert_eq!(report["schema_version"], "0.3.0");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     assert_eq!(report["compatibility"]["protocol"]["value"], "2.7.1");
     assert_eq!(report["compatibility"]["format"], "READABLE");
