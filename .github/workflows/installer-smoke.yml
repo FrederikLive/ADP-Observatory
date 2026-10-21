@@ -57,6 +57,18 @@ jobs:
           "$RUNNER_TEMP/obs-bin/adp-observatory" scan . --json > "$RUNNER_TEMP/scan.json"
           python3 -c 'import json,sys; data=json.load(open(sys.argv[1])); assert data["compatibility"]["conformance"] == "NOT_ASSESSED"' "$RUNNER_TEMP/scan.json"
           test ! -e ./adp-observatory
+      - name: Offline scan and report in Unicode project path
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -R "$GITHUB_WORKSPACE/tests/fixtures/current" "$RUNNER_TEMP/ADP project ø with spaces"
+          env -u GH_TOKEN -u GITHUB_TOKEN "$RUNNER_TEMP/obs-bin/adp-observatory" \
+            scan "$RUNNER_TEMP/ADP project ø with spaces" --json > "$RUNNER_TEMP/offline-scan.json"
+          python3 -c 'import json,sys; x=json.load(open(sys.argv[1])); assert x["compatibility"]["conformance"]=="NOT_ASSESSED"; assert x["work_index"]["status"]=="STRUCTURALLY_VALID"' "$RUNNER_TEMP/offline-scan.json"
+          env -u GH_TOKEN -u GITHUB_TOKEN "$RUNNER_TEMP/obs-bin/adp-observatory" \
+            report "$RUNNER_TEMP/ADP project ø with spaces" --output "$RUNNER_TEMP/offline report æ.html"
+          test -s "$RUNNER_TEMP/offline report æ.html"
+          test ! -e "$RUNNER_TEMP/ADP project ø with spaces/offline report æ.html"
 
   windows:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
@@ -99,3 +111,20 @@ jobs:
           $data = & $exe scan . --json | Out-String | ConvertFrom-Json
           if ($data.compatibility.conformance -ne "NOT_ASSESSED") { throw "Incorrect conformance claim" }
           if (Test-Path ./adp-observatory.exe) { throw "Project unexpectedly modified" }
+      - name: Offline scan and HTML report from a Unicode project path
+        shell: pwsh
+        run: |
+          $folder = Join-Path $env:RUNNER_TEMP "ADP project ø with spaces"
+          Copy-Item -LiteralPath "$env:GITHUB_WORKSPACE/tests/fixtures/current" -Destination $folder -Recurse
+          $exe = Join-Path $env:RUNNER_TEMP "obs-bin/adp-observatory.exe"
+          Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue
+          Remove-Item Env:GITHUB_TOKEN -ErrorAction SilentlyContinue
+          $data = & $exe scan $folder --json | Out-String | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw "Offline scan failed" }
+          if ($data.compatibility.conformance -ne "NOT_ASSESSED") { throw "Invalid conformance result" }
+          if ($data.work_index.status -ne "STRUCTURALLY_VALID") { throw "Unicode fixture unreadable" }
+          $report = Join-Path $env:RUNNER_TEMP "offline report æ.html"
+          & $exe report $folder --output $report
+          if ($LASTEXITCODE -ne 0) { throw "Offline HTML report failed" }
+          if (-not (Test-Path -LiteralPath $report)) { throw "Offline report missing" }
+          if (Test-Path (Join-Path $folder "offline report æ.html")) { throw "Report modified target" }
