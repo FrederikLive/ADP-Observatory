@@ -17,6 +17,7 @@
 - **D-014 Conflict provenance:** preserve contradictory claims with source references; no automatic winner by file modification time.
 - **D-015 User-invoked visualization:** the eventual default UX is `adp-observatory .` from a project directory; headless scans remain available separately. No repository installation, agent prompt, or mandatory ADP file is added.
 - **D-016 Trusted first-run distribution:** prefer install-once, verified native releases; consider zero-install launchers only after authenticated artifact verification is implemented and tested. No blind script piping or unverified auto-updates.
+- **D-017 Experimental build provenance:** GitHub/Sigstore-signed CI attestations can verify the provenance of experimental binaries, but do not imply an OS-code-signed, protected, stable release or justify a blind first-run download-and-execute command.
 
 ## Open decisions
 - **Q-001 Core language:** validate Rust against packaging and maintenance needs.
