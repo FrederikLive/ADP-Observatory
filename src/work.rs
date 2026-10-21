@@ -37,7 +37,35 @@ pub fn inspect(root: &Path) -> WorkInspection {
         contract_count: None,
         findings: Vec::new(),
     };
-    let path = root.join(".project").join("WORK.json");
+    let parent = root.join(".project");
+    match fs::symlink_metadata(&parent) {
+        Ok(meta) if meta.file_type().is_symlink() || !meta.is_dir() => {
+            result.findings.push(finding(
+                "work.unsafe_parent",
+                "warning",
+                "Work-index parent is not a regular directory; refusing to follow it.",
+            ));
+            return result;
+        }
+        Ok(_) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            result.findings.push(finding(
+                "work.missing",
+                "info",
+                "Optional WORK.json not found; work-index checks not assessed.",
+            ));
+            return result;
+        }
+        Err(e) => {
+            result.findings.push(finding(
+                "work.metadata_error",
+                "warning",
+                format!("Cannot inspect work-index directory: {e}"),
+            ));
+            return result;
+        }
+    }
+    let path = parent.join("WORK.json");
     let meta = match fs::symlink_metadata(&path) {
         Ok(meta) => meta,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
@@ -97,11 +125,27 @@ pub fn inspect(root: &Path) -> WorkInspection {
         ));
         return result;
     };
-    if object.get("schema_version").and_then(|v| v.as_u64()) != Some(1) {
+    let schema_version = object.get("schema_version").and_then(|v| v.as_u64());
+    if schema_version.is_some_and(|version| version > 1) {
+        result.status = "UNSUPPORTED_SCHEMA";
+        result.project = object.get("project").and_then(|v| v.as_str()).map(str::to_owned);
+        result.active_contract = object
+            .get("active_contract")
+            .and_then(|v| v.as_str())
+            .map(str::to_owned);
+        result.contract_count = object.get("contracts").and_then(|v| v.as_array()).map(Vec::len);
+        result.findings.push(finding(
+            "work.unsupported_schema",
+            "info",
+            format!("WORK.json schema version {} is not supported; no schema-v1 verdict is issued.", schema_version.unwrap_or_default()),
+        ));
+        return result;
+    }
+    if schema_version != Some(1) {
         result.findings.push(finding(
             "work.schema_version",
             "error",
-            "Expected schema_version 1.",
+            "Missing or invalid schema_version; expected schema version 1.",
         ));
     }
     result.project = object
@@ -292,6 +336,46 @@ mod tests {
         with_work("{", |root| {
             assert_eq!(inspect(root).status, "INVALID");
         });
+    }
+
+    #[test]
+    fn unsupported_newer_schema_is_not_invalid() {
+        with_work(
+            r#"{"schema_version":2,"project":"Future","active_contract":"WORK-X","contracts":[]}"#,
+            |root| {
+                let r = inspect(root);
+                assert_eq!(r.status, "UNSUPPORTED_SCHEMA");
+                assert_eq!(r.project.as_deref(), Some("Future"));
+                assert!(r.findings.iter().any(|f| f.code == "work.unsupported_schema"));
+            },
+        );
+    }
+
+    #[test]
+    fn duplicate_contract_id_is_invalid() {
+        with_work(
+            r#"{"schema_version":1,"project":"P","contracts":[{"id":"WORK-A","title":"A","status":"ready","depends_on":[]},{"id":"WORK-A","title":"B","status":"ready","depends_on":[]}]}"#,
+            |root| {
+                let r = inspect(root);
+                assert_eq!(r.status, "INVALID");
+                assert!(r.findings.iter().any(|f| f.code == "work.duplicate_id"));
+            },
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn symlinked_work_directory_is_not_followed() {
+        use std::os::unix::fs::symlink;
+        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).expect("clock").as_nanos();
+        let root = std::env::temp_dir().join(format!("adp-observatory-work-symlink-{}-{nonce}", std::process::id()));
+        fs::create_dir_all(root.join("external")).expect("create");
+        fs::write(root.join("external/WORK.json"), r#"{"schema_version":1,"project":"P","contracts":[]}"#).expect("write");
+        symlink(root.join("external"), root.join(".project")).expect("symlink");
+        let r = inspect(&root);
+        assert_eq!(r.status, "UNKNOWN");
+        assert!(r.findings.iter().any(|f| f.code == "work.unsafe_parent"));
+        fs::remove_dir_all(root).expect("cleanup");
     }
 
     #[test]
