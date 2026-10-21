@@ -4,6 +4,13 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Release-candidate preparation (not published)
+- Added a read-only, fail-closed candidate gate checking full source SHA, main branch, Cargo package version, VERSION, and report schema version.
+- Added source-pinned multi-platform candidate builds and provenance verification, with temporary versioned artifacts, manifest and checksums, but no GitHub tag/release publication.
+- Added negative and positive release-gate unit tests; Windows x64, Linux x64 and macOS ARM64 candidate builds passed (run 39624399120).
+- Prepared exact owner-side GitHub branch/tag ruleset and release-approval checklist; no protected public release exists yet.
+
+
 ### Experimental per-user install workflow
 - Added pinned GitHub Actions preview installers for Linux x64/macOS ARM64 (Bash) and Windows x64 (PowerShell). Download only the requested run/commit, verify SHA-256 plus signed provenance and workflow identity, and install outside the target project without overwriting existing executables.
 - Added follow-on GitHub Actions smoke tests for SHA-mismatch refusal, download, verification, per-user installation, and headless scanning on all three supported CI platforms (run 39601029440).
