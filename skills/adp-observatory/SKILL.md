@@ -74,7 +74,10 @@ The CLI distinguishes `Browser launch: REQUESTED`, `FAILED`, and
    authorization policy. If verification/install capability is absent, explain
    the limitation and offer the supported manual route; don't claim success.
 5. **Report what actually happened.** The helper emits one JSON result,
-   including `report_path`, `executable`, and `browser_launch_status`.
+   including `report_path`, `executable`, `browser_launch_status`, and
+   `alternate_installations` if another executable is present. Use only
+   the executable actually selected. Do not silently delete, overwrite,
+   update or execute any alternative; explain the version-drift risk.
    `BROWSER_OPEN_REQUESTED` requires an explicit positive opener result and
    still does **not** prove that a window became visible. `REPORT_SAVED`
    can mean the opener failed, was disabled, or an older executable did not
