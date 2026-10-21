@@ -18,6 +18,11 @@ jobs:
   package:
     name: ${{ matrix.platform }}
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +61,11 @@ jobs:
           mkdir -p dist
           cp "target/release/$BINARY" "dist/$BINARY"
           python -c 'import hashlib,os,pathlib; p=pathlib.Path("dist")/os.environ["BINARY"]; (pathlib.Path("dist")/"SHA256SUMS.txt").write_text(hashlib.sha256(p.read_bytes()).hexdigest()+"  "+p.name+"\n")'
-          printf '%s\n' "EXPERIMENTAL BUILD: not signed, not an official verified release." "Platform: $PLATFORM" "See docs/LAUNCHER.md before executing downloaded software." > dist/NOTICE.txt
+          printf '%s\n' "EXPERIMENTAL BUILD: no official release or platform code-signing." "Platform: $PLATFORM" "See docs/LAUNCHER.md before executing downloaded software." > dist/NOTICE.txt
+      - name: Attest executable provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: dist/${{ matrix.binary }}
       - uses: actions/upload-artifact@v4
         with:
           name: adp-observatory-${{ matrix.platform }}-prototype
