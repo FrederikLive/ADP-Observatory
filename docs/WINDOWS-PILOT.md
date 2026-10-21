@@ -43,7 +43,8 @@ This is a human/local-agent testing procedure, **not** permission to update appl
    - `NOT_REQUESTED`: you passed `--no-open` or used headless mode. Do not claim the browser opened.
    - **No marker**: likely an older executable. Do not claim success; use the returned report path and identify the binary you launched.
 
-7. Once the result is understood, decide whether to replace the existing installed executable via the project's approved install/update procedure. **Do not silently copy new binaries into both installation locations** or change PATH/IDE settings just to make tests appear successful.
+7. If using the optional Python Agent Skill launcher, inspect its `executable` and `alternate_installations` JSON fields. The first is the binary actually selected; any alternates are **informational only**, and the launcher does not execute, update or delete them. This helps identify version drift when both the application directory and `.cargo\\bin` contain copies.
+8. Once the result is understood, decide whether to replace the existing installed executable via the project's approved install/update procedure. **Do not silently copy new binaries into both installation locations** or change PATH/IDE settings just to make tests appear successful.
 
 ## Agent-level non-interference acceptance
 
