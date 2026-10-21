@@ -126,7 +126,8 @@
         "format",
         "semantics",
         "conformance",
-        "protocol"
+        "protocol",
+        "semantic_scope"
       ],
       "properties": {
         "format": {
@@ -200,6 +201,9 @@
             }
           },
           "additionalProperties": false
+        },
+        "semantic_scope": {
+          "const": "WORK_JSON_SCHEMA_V1_ONLY"
         }
       },
       "additionalProperties": false
