@@ -38,6 +38,8 @@ Implemented in Observatory only:
 - Agent helper: only trust an explicit opener status; fail closed with
   `REPORT_SAVED` when an older binary has no status or the opener failed.
   Return the report's actual path. No repeat scans to force a browser.
+- Diagnostic: Python launcher reports other executable copies separately from its selected executable; no duplicate is executed, overwritten, cleaned up or used as authority to update PATH.
+- Follow-up issue [#2](https://github.com/FrederikLive/ADP-Observatory/issues/2) tracks the real Antigravity desktop visibility and no-target-mutation user retest.
 - Skill: strong instruction against creating WORK.json, editing code/docs,
   `.gitignore`, running target tests, committing/pushing, or installing
   duplicate executable copies as part of visualization.
