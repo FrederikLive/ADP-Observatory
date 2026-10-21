@@ -39,4 +39,4 @@
   detail stay in Observatory. No extra agent checkpoints, project records, MCP
   server, or automatic unverified downloads are introduced. A remote-only
   agent must not claim to have opened a user's browser.
-
+- **D-021 First real-world agent/browser pilot:** An Observatory setup/view request must never generate optional project WORK records, run application tests, mutate Git or push changes. Keep one approved per-user executable, one report per request and a truthful browser result. On Windows use the OS Shell API to open shell-compatible HTML paths; a successful API return indicates only an attempted open request, not visible browser confirmation. No additional ADP protocol rules or project metadata are required. The end-user desktop test remains an explicit release acceptance gate.
