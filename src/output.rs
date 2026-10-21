@@ -140,7 +140,7 @@ fn windows_shell_path(path: &Path) -> Result<PathBuf, String> {
         if chars.len() >= 3
             && chars[0].is_ascii_alphabetic()
             && chars[1] == b':'
-            && chars[2] == b'\'
+            && chars[2] == b'\\'
         {
             return Ok(PathBuf::from(drive));
         }
