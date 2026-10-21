@@ -1,0 +1,171 @@
+name: Release candidate verification (no publication)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-candidate.yml"
+      - "scripts/check_release_candidate.py"
+      - "tests/test_release_validation.py"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact VERSION/Cargo.toml version (example: 0.4.0)"
+        type: string
+        required: true
+      expected_sha:
+        description: "Full 40-character source commit SHA to build"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Pinned release candidate validation
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || steps.metadata.outputs.version }}
+      sha: ${{ steps.metadata.outputs.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Select immutable candidate inputs
+        id: metadata
+        shell: bash
+        env:
+          SELECTED_VERSION: ${{ inputs.version }}
+          SELECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]]; then
+            SELECTED_VERSION="$(cat VERSION)"
+            SELECTED_SHA="$GITHUB_SHA"
+          fi
+          printf 'version=%s\n' "$SELECTED_VERSION" >> "$GITHUB_OUTPUT"
+          printf 'sha=%s\n' "$SELECTED_SHA" >> "$GITHUB_OUTPUT"
+          python3 scripts/check_release_candidate.py \
+            --root . \
+            --version "$SELECTED_VERSION" \
+            --expected-sha "$SELECTED_SHA" \
+            --ref "$GITHUB_REF"
+      - name: Run release gate negative and positive tests
+        run: python3 -m unittest discover -s tests -p test_release_validation.py -v
+
+  package:
+    name: Candidate ${{ matrix.platform }}
+    needs: gate
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux-x64
+            binary: adp-observatory
+          - runner: windows-latest
+            platform: windows-x64
+            binary: adp-observatory.exe
+          - runner: macos-latest
+            platform: macos-arm64
+            binary: adp-observatory
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          components: rustfmt, clippy
+      - name: Verify this is the pinned source SHA and expected CPU architecture
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ needs.gate.outputs.sha }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          case "$PLATFORM" in
+            linux-x64) test "$(uname -m)" = x86_64 ;;
+            windows-x64) test "$PROCESSOR_ARCHITECTURE" = AMD64 ;;
+            macos-arm64) test "$(uname -m)" = arm64 ;;
+            *) exit 1 ;;
+          esac
+      - name: Format and lint
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --all-features -- -D warnings
+      - name: Test and build binary
+        run: |
+          cargo test --all-targets --all-features
+          cargo build --locked --release
+      - name: Scan fixture and produce release-candidate assets
+        shell: bash
+        env:
+          BINARY: ${{ matrix.binary }}
+          PLATFORM: ${{ matrix.platform }}
+          VERSION: ${{ needs.gate.outputs.version }}
+          EXPECTED_SHA: ${{ needs.gate.outputs.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          "target/release/$BINARY" --version
+          "target/release/$BINARY" scan tests/fixtures/current --json > dist/test-scan.json
+          python3 -c 'import json; d=json.load(open("dist/test-scan.json")); assert d["compatibility"]["conformance"] == "NOT_ASSESSED"'
+          rm dist/test-scan.json
+          cp "target/release/$BINARY" "dist/$BINARY"
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path("dist")
+          binary=root/os.environ["BINARY"]
+          digest=hashlib.sha256(binary.read_bytes()).hexdigest()
+          (root/"SHA256SUMS.txt").write_text(f"{digest}  {binary.name}\n",encoding="utf-8")
+          metadata={
+            "version":os.environ["VERSION"],
+            "source_repository":"FrederikLive/ADP-Observatory",
+            "source_commit":os.environ["EXPECTED_SHA"],
+            "platform":os.environ["PLATFORM"],
+            "binary":binary.name,
+            "sha256":digest,
+            "release_state":"candidate_only",
+            "official_release":False,
+            "code_signed":False,
+            "conformance_claim":"NOT_ASSESSED"
+          }
+          (root/"release-candidate.json").write_text(json.dumps(metadata,sort_keys=True,indent=2)+"\n",encoding="utf-8")
+          PY
+          printf '%s\n' "UNPUBLISHED RELEASE CANDIDATE - NOT AN OFFICIAL RELEASE" \
+            "No Windows/macOS platform code-signing or notarization is claimed." \
+            "GitHub artifact attestation identifies source and workflow, not release approval." \
+            "See docs/RELEASING.md for the required owner-controlled governance gates." \
+            > dist/NOTICE.txt
+      - name: Sign executable provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: dist/${{ matrix.binary }}
+      - name: Independently verify source and signing workflow
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ needs.gate.outputs.sha }}
+          BINARY: ${{ matrix.binary }}
+        run: |
+          set -euo pipefail
+          gh attestation verify "dist/$BINARY" \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release-candidate.yml" \
+            --source-digest "$EXPECTED_SHA" \
+            --source-ref refs/heads/main
+      - name: Upload candidate asset (no GitHub Release created)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: adp-observatory-v${{ needs.gate.outputs.version }}-${{ matrix.platform }}-candidate
+          path: dist/
+          retention-days: 14
+          if-no-files-found: error
