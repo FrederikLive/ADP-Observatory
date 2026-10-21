@@ -20,6 +20,34 @@ adp-observatory scan . --json
 
 The development executable now supports this headless command. The legacy `adp-observatory PROJECT --json` shortcut remains supported. Both report-format compatibility and release-distribution guarantees are **pre-stable**.
 
+## Agent-activated launch (implemented, conditional)
+
+In an ADP project a user can ask their coding agent: **"Show Observatory."**
+The portable ADP guidance contains a brief optional discovery pointer to the
+[Agent Skill](../skills/adp-observatory/SKILL.md), not a mandatory launcher or
+extra project metadata. Agents load the skill only on this user request.
+
+A local agent with a trusted, already-installed binary can run:
+
+```sh
+python3 /path/to/ADP-Observatory/skills/adp-observatory/scripts/launch.py --project /path/to/ADP-project
+```
+
+The helper checks user installation locations and PATH, refuses executables
+resolved inside the analyzed project, invokes the existing offline dashboard,
+and emits a JSON status with the confirmed HTML report location. For remote,
+CI, SSH or other headless sessions, or with `--no-open`, it generates the
+report without attempting local browser opening. `BROWSER_OPEN_REQUESTED`
+is only confirmation that the opener was called without an error, not proof
+that a browser window was visible to the user.
+
+The helper is **not a downloader**, release authenticator or replacement for
+user consent to first-time installation. If Observatory is not installed,
+the skill loads its [conditional installation reference](../skills/adp-observatory/references/installation.md)
+and either follows an approved verified installation route or reports the
+capability limitation. As of October 2026 there is no official protected
+release enabling safe unattended first-time setup.
+
 ## Experimental builds: inspect and verify before executing
 
 A successful experimental matrix run is available at [GitHub Actions #39597842680](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39597842680). It also re-verifies each executable's signed attestation against this repository and the expected signing workflow before uploading the binary. Each platform job tests, builds, smoke-tests, records SHA-256, creates a GitHub/Sigstore-signed build provenance attestation for the binary, and uploads a workflow artifact.
