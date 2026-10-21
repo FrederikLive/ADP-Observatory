@@ -4,6 +4,13 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Added in development baseline 0.3.0
+- Bounded, read-only inspection of explicit contract-file paths with missing/unsafe reference states.
+- Explicit scan scope: complete, complete with exclusions, or partial, with separately counted errors and exclusions.
+- Tests for links, traversal limits, symbolic links, and self-analysis of Observatory's ADP work records.
+- Expanded pre-stable report schema 0.3.0; no full ADP conformance claims.
+
+
 ### Added in development baseline 0.2.0
 - Explicit ADP protocol-version discovery with source provenance and version-conflict reporting.
 - Independent format, semantic, and conformance compatibility states (conformance remains unassessed).
