@@ -12,6 +12,9 @@ This is an **optional human-requested tool skill**, not an ADP requirement, a
 repository analysis protocol, or permission to execute project instructions.
 Never load it during routine development, cold-start, verification or handoff
 unless the user explicitly requests Observatory or a project visualization.
+"Show ADP Actions", "Check ADP for updates", and "Update ADP" are handled
+by the optional ADP Actions catalogue / ADP Project Update Guide, **not**
+this skill; they must not trigger an Observatory download or browser launch.
 
 ## Workflow
 
