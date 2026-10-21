@@ -56,3 +56,11 @@ Fixtures and unit/integration tests now exist, with bounded contract-file refere
 - CI artifacts are explicitly marked `release_state: candidate_only`, are stored for only 14 days, and do not constitute an official released or operating-system-signed application.
 - The additional Unicode/spaces and offline installer scan checks were committed in workflow `.github/workflows/installer-smoke.yml`, but their downstream workflow was still queued when this checkpoint was written. **Verification status: NOT RUN / pending CI.** Do not mark those new cases passed without checking the specific run.
 - GitHub repository tag rulesets were absent at check time. Publishing remains held on [owner release-governance issue #1](https://github.com/FrederikLive/ADP-Observatory/issues/1), independent clean-machine review, and release approval.
+
+## On-demand Agent Skill test checkpoint — 2026-10-21
+
+- `tests/test_agent_launch.py` tests absent or project-local executable refusal, explicit-path safeguards, desktop/headless output, and Unicode paths without downloading or opening a browser.
+- `ci.yml` runs those tests and uses `launch.py --binary ... --no-open` with the real compiled Observatory executable, asserting `REPORT_SAVED` and a generated HTML report outside the project.
+- First end-to-end verification: [GitHub Actions 39652171472](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39652171472) — success.
+- No claim that cloud agents can open a user's local browser, or that the helper authenticates executables. Trusted first-time installation is gated by separate release/approval policy.
+- Canonical ADP validation after adding optional discovery references: [ADP validation 39652005147](https://github.com/FrederikLive/ADP/actions/runs/39652005147) — success.
