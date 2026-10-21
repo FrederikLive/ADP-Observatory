@@ -53,3 +53,34 @@ user's local browser.
 Future integrations should use the same discover-on-demand pattern rather
 than adding another ADP protocol or mandatory event log. For older projects,
 adopt the optional hint manually or install the skill at the harness/user level.
+
+## Current ADP Actions compatibility test (2026-10-21)
+
+The current ADP `main` revision `9b5ab4694321735e83b93962e1b9975cced130bf`
+contains the optional `docs/COMMANDS.md` (**ADP Actions**), `docs/UPDATING_ADP.md`,
+the tiny conditional agent-router references, and the canonical full/compact
+protocol headers still declaring **2.7.1**.
+
+The Observatory CI workflow checks out that **exact pinned ADP revision**,
+executes the compiled scanner against the real upstream repository, and
+produces an offline HTML report. Verification in [CI 39659907217](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39659907217)
+confirmed:
+- version status `KNOWN` and value `2.7.1` from canonical protocol files;
+- optional `.project/WORK.json` absent => `NOT_PRESENT`/`NOT_ASSESSED`,
+  without a conformance failure;
+- dashboard displays static ADP Actions examples but **does not run them**;
+- Observatory's own `.project/WORK.json` remains structurally readable;
+- the pre-existing fixtures for older/newer/conflicting/malformed/missing data
+  remain covered by Rust CI.
+
+This establishes real-source compatibility for **one pinned revision**, not
+all future ADP versions and not full ADP conformance. The protocol version
+is based on source file declarations; those do not establish release
+provenance or verify a copied file's full content. No routine external
+network requests, new required ADP markers or project writes were added.
+
+**Intents stay distinct:** `Show ADP Actions` is handled by the coding agent
+using ADP's optional catalogue; `Update ADP` uses ADP's optional update
+guide. Only an explicit visualization request should invoke the Observatory
+Agent Skill. A user can therefore update ADP independently of installing
+Observatory.
