@@ -180,7 +180,10 @@ mod tests {
         let (project, outside) = roots();
         let destination = outside.join("scan.html");
         let saved = save(&project, Some(&destination), "offline html").expect("save");
-        assert_eq!(saved, fs::canonicalize(&destination).expect("canonical destination"));
+        assert_eq!(
+            saved,
+            fs::canonicalize(&destination).expect("canonical destination")
+        );
         assert_eq!(fs::read_to_string(&saved).expect("read"), "offline html");
         assert!(save(&project, Some(&destination), "overwrite").is_err());
         fs::remove_dir_all(project.parent().unwrap()).expect("cleanup");
