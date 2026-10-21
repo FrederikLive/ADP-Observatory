@@ -1,0 +1,8 @@
+/target/
+/dist/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.env
+.DS_Store
+Thumbs.db
