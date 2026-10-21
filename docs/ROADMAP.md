@@ -37,13 +37,13 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
 ## M4 — Cross-platform release and launchers
-**Status:** Experimental CI binaries for Windows x64, Linux x64 and macOS runner pass tests and have signed build-provenance attestations (run 39597842680, including signer-workflow verification). No official code-signed release or installer yet.
+**Status:** Signed-provenance experimental binaries and per-user preview installers pass CI across Windows x64, Linux x64 and macOS ARM64 (packaging run 39600862632; installer run 39601029440). No official protected release, OS code signing, or automatic first-run setup yet.
 - [x] Test Windows x64, Linux x64 and macOS runner binaries in CI; other architectures and real-machine install tests remain outstanding.
 - [x] Produce experimental workflow artifacts and signed build-provenance attestations; [ ] establish a protected tagged official release with independently verified release metadata.
-- [ ] Support install-once execution from any project directory: `adp-observatory .`; keep headless CLI mode for JSON and CI.
-- [ ] Provide a trusted per-user installation path without administrator/root privileges; keep binaries outside target repositories.
+- [x] Demonstrate pinned, verified, per-user preview installation and `adp-observatory .` executable behavior on CI runners (run 39601029440); [ ] graduate to an official general-user installation.
+- [x] Provide manual preview helpers with per-user installation directories, no privilege escalation or target-repository writes; [ ] evaluate end-user security/installer UX and official packages.
 - [ ] Evaluate an optional one-shot first-run launcher only when executable verification is feasible.
-- [ ] Test Unix/Windows paths, Unicode, corrupted or malicious downloads, offline use, platform mismatch, and uninstall.
+- [x] Test Linux/macOS/Windows pinned artifact acquisition, rejection of incorrect commit SHA, and successful installation in CI; [ ] add Unicode paths, malicious/expired artifact simulation, offline operation, update and uninstall acceptance.
 - [ ] Provide a verified update/version pinning story; document provenance/SBOM and signing.
 - [ ] Update ADP's human-only Observatory guide with real, verified install commands only after releases exist.
 **Exit:** an end user can install without a compiler and invoke Observatory from a project directory, with verified release integrity and repeatable platform acceptance tests.
