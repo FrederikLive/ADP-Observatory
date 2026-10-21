@@ -14,6 +14,15 @@ M1 scanner calibration remains active: WORK-SCANNER-001, in_progress. M4 distrib
 - docs/RELEASING.md contains owner-side GitHub branch/tag ruleset and release-environment setup steps; release-governance issue #1 tracks manual owner actions.
 - Added Unicode/spaced-path/offline installer checks to the existing installer smoke workflow. Their new follow-on CI has not completed and must remain NOT VERIFIED.
 
+## Agent-activated Observatory checkpoint
+
+- User approved a small, optional ADP discovery hint pointing to the official Observatory Agent Skill, with no normative protocol changes (ADP remains 2.7.1).
+- The Agent Skill and conditional installer reference live in `skills/adp-observatory/`. `scripts/launch.py` discovers an existing trusted local executable without network access, refuses one inside the project, and returns `REPORT_SAVED` or `BROWSER_OPEN_REQUESTED` (an attempt, not proof of user visibility).
+- Regression tests and full compiled-app offline report passed in GitHub CI run 39652171472. ADP repository validation for the new optional pointer passed run 39652005147. WORK-AGENT-LAUNCH-001 is verified for the local/headless slice.
+- Existing ADP projects are not silently updated; agent-level skill installation or a one-line router hint remains an optional adoption path.
+- Missing official release/approved auto-install and cloud-only browser access must remain explicit limitations. Do not turn the skill reference into permission to run remote code.
+- Next development work: finish release governance in WORK-DISTRIBUTION-001 and test real local desktop agent harnesses; do not add more normative ADP rules just for Observatory.
+
 ## Blocker / investigation
 - No repository rulesets existed at last check. The connector cannot create these admin controls or read branch protection (403). Owner must configure and verify active main/v* tag rulesets and release approval environment before publication.
 - Candidate binaries have signed build provenance, **not** operating-system signatures. Clean-machine acceptance and platform signing policy remain open.
