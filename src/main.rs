@@ -1,3 +1,5 @@
+mod work;
+
 use serde::Serialize;
 use std::{
     env, fs,
@@ -14,6 +16,7 @@ struct Report {
     files_examined: usize,
     files_skipped: usize,
     adp_markers: Vec<String>,
+    work_index: work::WorkInspection,
     limitations: Vec<String>,
 }
 
@@ -57,8 +60,9 @@ fn main() {
         files_examined: examined,
         files_skipped: skipped,
         adp_markers: markers,
+        work_index: work::inspect(&root),
         limitations: vec![
-            "Initial discovery prototype only; this is not a conformance assessment.".into(),
+            "Initial structural work-index inspection only; this is not a full ADP conformance assessment.".into(),
             "No project scripts or commands are executed.".into(),
             "Dashboard, metric calculations, and historical snapshots are not implemented.".into(),
         ],
@@ -81,7 +85,11 @@ fn main() {
         for marker in &report.adp_markers {
             println!("  - {marker}");
         }
-        println!("Discovery only: no conformance verdict is produced.");
+        println!("Work index: {}", report.work_index.status);
+        for finding in &report.work_index.findings {
+            println!("  [{}] {}: {}", finding.severity, finding.code, finding.message);
+        }
+        println!("No full ADP conformance verdict is produced.");
         for item in &report.limitations {
             println!("- {item}");
         }
