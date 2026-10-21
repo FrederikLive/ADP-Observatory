@@ -229,9 +229,15 @@ fn no_open_dashboard_mode_writes_report_without_browser() {
         .arg(&output_path)
         .output()
         .expect("offline dashboard");
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert!(output_path.is_file());
-    assert!(fs::read_to_string(&output_path).unwrap().contains("No explicit contract-file references"));
+    assert!(fs::read_to_string(&output_path)
+        .unwrap()
+        .contains("No explicit contract-file references"));
     fs::remove_dir_all(root).expect("cleanup");
 }
 
@@ -253,10 +259,16 @@ fn in_project_html_export_is_refused_without_writing() {
 #[test]
 fn help_and_version_require_no_project_directory() {
     let executable = env!("CARGO_BIN_EXE_adp-observatory");
-    let help = Command::new(executable).arg("--help").output().expect("help");
+    let help = Command::new(executable)
+        .arg("--help")
+        .output()
+        .expect("help");
     assert!(help.status.success());
     assert!(String::from_utf8_lossy(&help.stdout).contains("adp-observatory scan"));
-    let version = Command::new(executable).arg("--version").output().expect("version");
+    let version = Command::new(executable)
+        .arg("--version")
+        .output()
+        .expect("version");
     assert!(version.status.success());
     assert!(String::from_utf8_lossy(&version.stdout).contains("ADP-Observatory"));
 }
