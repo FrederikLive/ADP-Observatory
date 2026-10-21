@@ -60,6 +60,14 @@ runs one report and checks actual desktop visibility; compare target
 Git status/files before and after. No changes to user target project
 are authorized by this checkpoint.
 
+## Deferred future exploration proposal — 2026-10-21
+
+- First user-supplied 30-contract dashboard screenshots exposed the need for clickable source exploration rather than a long noninteractive list; the current parser only checks `contract_file` presence and renders WORK.json metadata.
+- Created [WORK-EXPLORER-001](work/WORK-EXPLORER-001.md) and [issue #3](https://github.com/FrederikLive/ADP-Observatory/issues/3). **DEFERRED / NOT STARTED**, sequenced after scanner reference-reading safety work; active and next contract remain unchanged.
+- Proposed: deterministic read-once document parsing at scan time; bounded Markdown outlines, meaningful source-backed excerpts, safe offline rendering and accessible contract-detail selection; later explicit evidence relationships. Do not claim AI summaries or independent verification unless supported.
+- No extra ADP project metadata/agent tasks, no target Git/file writes, no browser filesystem/network reads, and no hidden source embedding into shared reports without privacy/size safeguards.
+- Do not begin implementing this queued idea when continuing browser launch issue #2 or approved distribution issue #1 unless the user deliberately selects it.
+
 ## Remaining work
 - M1: independent real-world source checks beyond ADP itself, false-positive baselines, hostile/symlink/large-tree tests, historical adapters and source evidence.
 - M2/M3: version-aware metrics, rules, snapshots and historical comparisons; no full conformance yet.
