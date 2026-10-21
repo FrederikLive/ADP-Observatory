@@ -5,11 +5,7 @@ mod references;
 mod work;
 
 use serde::Serialize;
-use std::{
-    env, fs,
-    path::PathBuf,
-    process,
-};
+use std::{env, fs, path::PathBuf, process};
 
 #[derive(Serialize)]
 struct Report {
@@ -91,7 +87,10 @@ fn main() {
         println!("Work index: {}", report.work_index.status);
         println!("Semantic scope: {}", report.compatibility.semantic_scope);
         for reference in &report.work_index.contract_files {
-            println!("Contract file [{}]: {} -> {}", reference.contract_id, reference.path, reference.status);
+            println!(
+                "Contract file [{}]: {} -> {}",
+                reference.contract_id, reference.path, reference.status
+            );
         }
         println!(
             "Compatibility: format={}, semantics={}, conformance={}",
@@ -126,4 +125,3 @@ fn main() {
         }
     }
 }
-
