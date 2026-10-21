@@ -9,6 +9,11 @@ M1 — Discovery and deterministic scanner. Active Contract: WORK-SCANNER-001 (i
 - M1 scanner hardening: development 0.3.0; bounded contract-file reference checks, traversal coverage semantics, fixture and self-scan tests. Run 39575987006 passed formatting, lint, tests, and build.
 - Canonical ADP stays unchanged. Observatory adds no mandatory token or record overhead to analyzed ADP projects.
 
+## User-facing integration decision
+- Added docs/LAUNCHER.md: planned install-once native release and `adp-observatory .` UX, with optional authenticated first-run helper only after safe verification is implemented.
+- ADP's human-facing README and docs/OBSERVATORY.md now explain current prototype usage and the proposed launch experience; ADP's normative rules, AGENTS.md, and schemas remain unchanged.
+- No release, installed launcher, or dashboard has shipped; do not claim the conceptual command works today.
+
 ## In progress
 - WORK-SCANNER-001: broaden tested layouts, adversarial inputs, and reference/evidence correctness.
 - Assess historical ADP version behavior using real projects, not inferred rules.
