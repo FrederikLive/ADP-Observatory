@@ -33,6 +33,32 @@ To find candidate preview builds: [Prototype binary package workflow](https://gi
 - [ ] Additional malicious/expired/download-error and Unicode-path tests.
 - [ ] Manual inspection of application behavior and operating-system security warnings on actual end-user machines.
 
+## Release-candidate pipeline (implemented; no publication)
+
+The [release-candidate workflow](../.github/workflows/release-candidate.yml) has a fail-closed source/version gate and manually selectable full SHA. It uses immutable pinned action revisions, checks formatting/lint/tests/build on supported OS/CPU runners, verifies signed executable provenance against the expected repository, workflow, main ref and source SHA, and uploads temporary versioned artifacts with a release-candidate manifest and checksum. **It cannot publish a GitHub Release or create a tag.**
+
+First successful versioned candidate: [workflow run 39624399120](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120), source commit `cfe14a008aea130427506f03a65a01bc6d7e9f4d`, development version `0.4.0`:
+
+- `adp-observatory-v0.4.0-linux-x64-candidate`
+- `adp-observatory-v0.4.0-windows-x64-candidate`
+- `adp-observatory-v0.4.0-macos-arm64-candidate`
+
+Candidate artifacts expire after 14 days. A later official release must build and review a **fresh pinned candidate matching the protected release tag**, rather than blindly reusing expired or differently sourced artifacts.
+
+### Required owner-side configuration
+
+The GitHub connection used for project work can read rulesets but cannot create them or access branch-protection settings. At the 2026-10-21 review, the repository rulesets API returned `[]`. The repository owner must configure protections in GitHub before publication:
+
+1. In **Repository → Settings → Rules → Rulesets**, create an **Active branch ruleset** targeting `main`. Require pull requests (with approvals as appropriate), block force pushes/deletion, and require the verified CI check (the workflow's Rust job) before merging. Review the checks in the GitHub UI before selecting the exact check name. This will change how agents and maintainers may update `main`.
+2. Create an **Active tag ruleset** targeting `v*`; restrict tag creation, updates and deletions to authorized release maintainers through explicit bypass permissions. Verify the rule is effective before creating a release tag.
+3. In **Settings → Environments**, create `release-production` with required reviewers. Prefer an independent reviewer and prevent self-review where an additional maintainer is available. Restrict deployment sources to appropriately protected release tags/branches.
+4. Limit GitHub Actions' default permissions, maintain a manual release review checklist, and require source SHA, tag, uploaded asset checksums, and signed-provenance results to match. Do not infer security from the mere presence of a green CI run.
+5. Once protections and human release approval are independently verified, implement or authorize an explicit protected-tag publication step. No current workflow publishes a release automatically.
+
+See [GitHub's ruleset documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository) and [environment review guidance](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments).
+
+**Release status: blocked on owner-controlled repository protection, human release approval, production signing policy and clean-machine validation.** The release-candidate workflow is a verified preparation step, not release authorization.
+
 ## Before an official GitHub release
 
 **Repository governance requires owner action.** At the October 2026 review, GitHub returned no active repository rulesets; the connection could not read branch protection. Do not claim protected tags or release approval gates exist.
