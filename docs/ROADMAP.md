@@ -53,3 +53,27 @@ Milestones are proposed work packages, not claims of completion.
 - [ ] Check overlap, normative impact, compatibility, and implementation burden.
 - [ ] Submit protocol changes separately to the ADP repository.
 **Exit:** no protocol change solely to accommodate Observatory or because a metric is easy to collect.
+
+## Compatibility-first implementation constraint
+
+All milestones must preserve ADP's low-token, fast-agent, continuity-first design. Observatory adapts to existing records; no extra ADP files or agent bookkeeping may be required. See docs/ADP-INTEGRATION.md and docs/ARCHITECTURE.md.
+
+### M1 additional acceptance work
+- [ ] Separate format, semantic, and conformance compatibility states.
+- [ ] Preserve partial results when individual records are absent, malformed, or conflicting.
+- [ ] Add fixture matrix for optional WORK.json, old/current/newer/unknown versions, broken links, and hostile input.
+- [ ] Demonstrate scanning never changes the analyzed repository.
+- [ ] Show source provenance and scan completeness; no inferred passing verdicts.
+
+### M2 additional acceptance work
+- [ ] Apply rules only where ADP version and evidence make applicability defensible.
+- [ ] Keep inferred relationships labeled as candidates, not authoritative facts.
+- [ ] Report unsupported coverage and denominators for every relevant metric.
+
+### M5 additional acceptance work
+- [ ] Validate no extra agent token or documentation burden is imposed on scanned projects.
+- [ ] Test compatibility with small, mature, incomplete, and older-version projects.
+- [ ] Quantify false positives, scan failure isolation, and coverage limitations.
+
+### M6 gate
+- [ ] Do not amend ADP unless repeated real-project evidence shows an agent-beneficial interoperability gap independent of Observatory.
