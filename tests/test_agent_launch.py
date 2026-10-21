@@ -57,13 +57,53 @@ class AgentLaunchTests(unittest.TestCase):
         self.assertIn("--no-open", runner.call_args.args[0])
 
     def test_desktop_attempt_is_not_claimed_browser_visible(self):
-        output = subprocess.CompletedProcess([], 0, "Local ADP report: " + str(self.report) + "\n", "")
+        output = subprocess.CompletedProcess([], 0, "Local ADP report: " + str(self.report) + "\nBrowser launch: REQUESTED (visibility not confirmed)\n", "")
         with mock.patch.object(launch, "find_executable", return_value=(self.binary, "")):
             with mock.patch.object(launch, "browser_capable", return_value=True):
                 with mock.patch.object(subprocess, "run", return_value=output):
                     answer, code = launch.launch(self.project, None, False, 10)
         self.assertEqual(code, 0)
         self.assertEqual(answer["status"], "BROWSER_OPEN_REQUESTED")
+
+    def test_failed_browser_open_does_not_claim_success(self):
+        output = subprocess.CompletedProcess(
+            [], 0,
+            "Local ADP report: " + str(self.report) + "\nBrowser launch: FAILED\n",
+            "Browser could not be opened automatically: no desktop association",
+        )
+        with mock.patch.object(launch, "find_executable", return_value=(self.binary, "")):
+            with mock.patch.object(launch, "browser_capable", return_value=True):
+                with mock.patch.object(subprocess, "run", return_value=output):
+                    answer, code = launch.launch(self.project, None, False, 10)
+        self.assertEqual(code, 0)
+        self.assertEqual(answer["status"], "REPORT_SAVED")
+        self.assertEqual(answer["browser_launch_status"], "FAILED")
+        self.assertTrue(answer["browser_open_attempted"])
+        self.assertEqual(answer["report_path"], str(self.report))
+
+    def test_old_executable_without_browser_marker_does_not_claim_success(self):
+        output = subprocess.CompletedProcess(
+            [], 0, "Local ADP report: " + str(self.report) + "\n", ""
+        )
+        with mock.patch.object(launch, "find_executable", return_value=(self.binary, "")):
+            with mock.patch.object(launch, "browser_capable", return_value=True):
+                with mock.patch.object(subprocess, "run", return_value=output):
+                    answer, code = launch.launch(self.project, None, False, 10)
+        self.assertEqual(code, 0)
+        self.assertEqual(answer["status"], "REPORT_SAVED")
+        self.assertEqual(answer["browser_launch_status"], "UNKNOWN")
+
+    def test_only_generates_one_report_per_launch_request(self):
+        output = subprocess.CompletedProcess(
+            [], 0, "Local ADP report: " + str(self.report) + "\nBrowser launch: NOT_REQUESTED\n", ""
+        )
+        with mock.patch.object(launch, "find_executable", return_value=(self.binary, "")):
+            with mock.patch.object(subprocess, "run", return_value=output) as runner:
+                reply, code = launch.launch(self.project, None, True, 10)
+        self.assertEqual(code, 0)
+        self.assertEqual(reply["browser_launch_status"], "NOT_REQUESTED")
+        runner.assert_called_once()
+        self.assertNotIn("scan", runner.call_args.args[0])
 
     def test_remote_host_does_not_claim_browser(self):
         for variable in ("CI", "SSH_CONNECTION", "SSH_TTY"):
