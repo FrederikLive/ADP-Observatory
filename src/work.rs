@@ -273,7 +273,9 @@ pub fn inspect(root: &Path) -> WorkInspection {
         }
         if let Some(file) = entry.get("contract_file").and_then(|v| v.as_str()) {
             if result.contract_files.len() < MAX_REFERENCE_CHECKS {
-                result.contract_files.push(references::inspect(root, id, index, file));
+                result
+                    .contract_files
+                    .push(references::inspect(root, id, index, file));
             } else if !result.reference_inspection_limited {
                 result.reference_inspection_limited = true;
                 result.findings.push(finding(
