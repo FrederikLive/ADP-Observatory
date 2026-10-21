@@ -178,3 +178,85 @@ fn observatory_can_inspect_its_own_adp_work_records() {
     assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
     assert_eq!(report["context"]["conflicts"].as_array().unwrap().len(), 0);
 }
+
+#[test]
+fn standalone_html_report_is_generated_outside_project() {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("clock")
+        .as_nanos();
+    let root = std::env::temp_dir().join(format!("observatory-report-test-{nonce}"));
+    fs::create_dir_all(&root).expect("report directory");
+    let output_path = root.join("dashboard.html");
+    let output = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("report")
+        .arg(fixture("current"))
+        .arg("--output")
+        .arg(&output_path)
+        .output()
+        .expect("run report command");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let html = fs::read_to_string(&output_path).expect("offline HTML");
+    assert!(html.contains("A clearer view of your project"));
+    assert!(html.contains("WORK-A"));
+    assert!(html.contains("NOT_ASSESSED"));
+    assert!(html.contains("connect-src 'none'"));
+    assert!(html.contains("id=\"contract-search\""));
+    assert!(!html.contains("<!--__"));
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn no_open_dashboard_mode_writes_report_without_browser() {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("clock")
+        .as_nanos();
+    let root = std::env::temp_dir().join(format!("observatory-offline-test-{nonce}"));
+    fs::create_dir_all(&root).expect("report directory");
+    let output_path = root.join("offline.html");
+    let output = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("dashboard")
+        .arg(fixture("partial"))
+        .arg("--no-open")
+        .arg("--output")
+        .arg(&output_path)
+        .output()
+        .expect("offline dashboard");
+    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(output_path.is_file());
+    assert!(fs::read_to_string(&output_path).unwrap().contains("No explicit contract-file references"));
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn in_project_html_export_is_refused_without_writing() {
+    let root = fixture("current");
+    let forbidden = root.join("should-not-exist.html");
+    let output = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("report")
+        .arg(&root)
+        .arg("--output")
+        .arg(&forbidden)
+        .output()
+        .expect("run report");
+    assert!(!output.status.success());
+    assert!(!forbidden.exists());
+}
+
+#[test]
+fn help_and_version_require_no_project_directory() {
+    let executable = env!("CARGO_BIN_EXE_adp-observatory");
+    let help = Command::new(executable).arg("--help").output().expect("help");
+    assert!(help.status.success());
+    assert!(String::from_utf8_lossy(&help.stdout).contains("adp-observatory scan"));
+    let version = Command::new(executable).arg("--version").output().expect("version");
+    assert!(version.status.success());
+    assert!(String::from_utf8_lossy(&version.stdout).contains("ADP-Observatory"));
+}
