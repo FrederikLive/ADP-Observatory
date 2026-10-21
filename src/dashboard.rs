@@ -41,8 +41,8 @@ fn safe_tag(status: &str) -> &'static str {
     match status {
         "PRESENT" | "READABLE" | "STRUCTURALLY_VALID" | "COMPLETE" => "ok",
         "INVALID" | "INVALID_PATH" | "OUTSIDE_ROOT" | "CONFLICT" | "error" => "error",
-        "MISSING" | "UNREADABLE" | "UNSUPPORTED" | "UNSUPPORTED_SCHEMA"
-        | "PARTIAL" | "SYMLINK" | "NOT_FILE" | "NOT_DIRECTORY" | "warning" => "warn",
+        "MISSING" | "UNREADABLE" | "UNSUPPORTED" | "UNSUPPORTED_SCHEMA" | "PARTIAL" | "SYMLINK"
+        | "NOT_FILE" | "NOT_DIRECTORY" | "warning" => "warn",
         _ => "neutral",
     }
 }
@@ -88,7 +88,10 @@ fn row(title: &str, detail: &str, status: &str, filterable: bool) -> String {
 
 fn show_contracts(report: &Value) -> String {
     let mut html = String::new();
-    if let Some(items) = report.pointer("/work_index/contract_files").and_then(Value::as_array) {
+    if let Some(items) = report
+        .pointer("/work_index/contract_files")
+        .and_then(Value::as_array)
+    {
         for item in items {
             let title = at(item, "/contract_id", "Unnamed contract");
             let path = at(item, "/path", "Unknown file");
@@ -114,24 +117,38 @@ fn show_contracts(report: &Value) -> String {
 fn append_findings(report: &Value) -> (String, usize) {
     let mut lines = String::new();
     let mut total = 0;
-    if let Some(findings) = report.pointer("/work_index/findings").and_then(Value::as_array) {
+    if let Some(findings) = report
+        .pointer("/work_index/findings")
+        .and_then(Value::as_array)
+    {
         for finding in findings {
             let code = at(finding, "/code", "Finding");
             let description = at(finding, "/message", "No description");
             let source = at(finding, "/source", "");
             let severity = at(finding, "/severity", "info");
-            lines.push_str(&row(code, &format!("{source} · {description}"), severity, false));
+            lines.push_str(&row(
+                code,
+                &format!("{source} · {description}"),
+                severity,
+                false,
+            ));
             total += 1;
         }
     }
-    if let Some(refs) = report.pointer("/work_index/contract_files").and_then(Value::as_array) {
+    if let Some(refs) = report
+        .pointer("/work_index/contract_files")
+        .and_then(Value::as_array)
+    {
         for reference in refs {
             let status = at(reference, "/status", "UNKNOWN");
             if status != "PRESENT" {
                 let id = at(reference, "/contract_id", "Unnamed contract");
                 let path = at(reference, "/path", "");
                 let source = at(reference, "/source", "");
-                let detail = reference.get("detail").and_then(Value::as_str).unwrap_or("");
+                let detail = reference
+                    .get("detail")
+                    .and_then(Value::as_str)
+                    .unwrap_or("");
                 lines.push_str(&row(
                     &format!("{id}: contract reference {status}"),
                     &format!("{path} · {source} · {detail}"),
@@ -142,16 +159,27 @@ fn append_findings(report: &Value) -> (String, usize) {
             }
         }
     }
-    if let Some(conflicts) = report.pointer("/context/conflicts").and_then(Value::as_array) {
+    if let Some(conflicts) = report
+        .pointer("/context/conflicts")
+        .and_then(Value::as_array)
+    {
         for conflict in conflicts {
             let field = at(conflict, "/field", "Project record");
-            let descriptions = conflict.get("claims").and_then(Value::as_array).map(|claims| {
-                claims.iter().map(|claim| {
-                    let path = at(claim, "/path", "Unknown path");
-                    let value = at(claim, "/value", "Unknown value");
-                    format!("{path}: {value}")
-                }).collect::<Vec<_>>().join(" · ")
-            }).unwrap_or_default();
+            let descriptions = conflict
+                .get("claims")
+                .and_then(Value::as_array)
+                .map(|claims| {
+                    claims
+                        .iter()
+                        .map(|claim| {
+                            let path = at(claim, "/path", "Unknown path");
+                            let value = at(claim, "/value", "Unknown value");
+                            format!("{path}: {value}")
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" · ")
+                })
+                .unwrap_or_default();
             lines.push_str(&row(
                 &format!("Conflicting {field} claims"),
                 &descriptions,
@@ -161,10 +189,18 @@ fn append_findings(report: &Value) -> (String, usize) {
             total += 1;
         }
     }
-    if let Some(limits) = report.pointer("/compatibility/protocol/limitations").and_then(Value::as_array) {
+    if let Some(limits) = report
+        .pointer("/compatibility/protocol/limitations")
+        .and_then(Value::as_array)
+    {
         for limitation in limits {
             if let Some(detail) = limitation.as_str() {
-                lines.push_str(&row("Protocol version limitation", detail, "UNKNOWN", false));
+                lines.push_str(&row(
+                    "Protocol version limitation",
+                    detail,
+                    "UNKNOWN",
+                    false,
+                ));
                 total += 1;
             }
         }
@@ -178,7 +214,11 @@ fn append_findings(report: &Value) -> (String, usize) {
         ));
         total += 1;
     }
-    if report.pointer("/work_index/reference_inspection_limited").and_then(Value::as_bool) == Some(true) {
+    if report
+        .pointer("/work_index/reference_inspection_limited")
+        .and_then(Value::as_bool)
+        == Some(true)
+    {
         lines.push_str(&row(
             "Contract-reference budget reached",
             "Additional contract references were not checked.",
@@ -207,7 +247,10 @@ fn show_records(report: &Value) -> String {
         for record in records {
             html.push_str(&row(
                 at(record, "/path", "Unnamed record"),
-                record.get("limitation").and_then(Value::as_str).unwrap_or("Available for limited analysis"),
+                record
+                    .get("limitation")
+                    .and_then(Value::as_str)
+                    .unwrap_or("Available for limited analysis"),
                 at(record, "/state", "UNKNOWN"),
                 false,
             ));
@@ -222,14 +265,35 @@ fn show_records(report: &Value) -> String {
 
 fn show_compatibility(report: &Value) -> String {
     let pairs = [
-        ("Detected ADP", at(report, "/compatibility/protocol/value", "Unknown")),
-        ("Version evidence", at(report, "/compatibility/protocol/status", "UNKNOWN")),
-        ("WORK.json format", at(report, "/compatibility/format", "UNKNOWN")),
-        ("Known semantics", at(report, "/compatibility/semantics", "UNKNOWN")),
-        ("Semantic scope", at(report, "/compatibility/semantic_scope", "UNKNOWN")),
-        ("Conformance", at(report, "/compatibility/conformance", "NOT_ASSESSED")),
+        (
+            "Detected ADP",
+            at(report, "/compatibility/protocol/value", "Unknown"),
+        ),
+        (
+            "Version evidence",
+            at(report, "/compatibility/protocol/status", "UNKNOWN"),
+        ),
+        (
+            "WORK.json format",
+            at(report, "/compatibility/format", "UNKNOWN"),
+        ),
+        (
+            "Known semantics",
+            at(report, "/compatibility/semantics", "UNKNOWN"),
+        ),
+        (
+            "Semantic scope",
+            at(report, "/compatibility/semantic_scope", "UNKNOWN"),
+        ),
+        (
+            "Conformance",
+            at(report, "/compatibility/conformance", "NOT_ASSESSED"),
+        ),
     ];
-    pairs.into_iter().map(|(key, value)| keyval(key, value)).collect::<String>()
+    pairs
+        .into_iter()
+        .map(|(key, value)| keyval(key, value))
+        .collect::<String>()
 }
 
 fn show_scope(report: &Value) -> String {
@@ -245,7 +309,10 @@ fn show_scope(report: &Value) -> String {
         ("Depth limits", count(&scope["depth_limit_hits"])),
         ("Entry limits", count(&scope["entry_limit_hits"])),
     ];
-    pairs.into_iter().map(|(key, value)| keyval(key, &value)).collect::<String>()
+    pairs
+        .into_iter()
+        .map(|(key, value)| keyval(key, &value))
+        .collect::<String>()
 }
 
 /// A completely self-contained HTML report. Untrusted project data is escaped
@@ -256,13 +323,33 @@ pub fn render(report: &Value) -> String {
     let work = at(report, "/work_index/status", "UNKNOWN");
     let scope = at(report, "/scan_scope/status", "PARTIAL");
     let semantics = at(report, "/compatibility/semantics", "UNKNOWN");
-    let available = report.pointer("/work_index/contract_count").map(count).unwrap_or_else(|| "—".into());
+    let available = report
+        .pointer("/work_index/contract_count")
+        .map(count)
+        .unwrap_or_else(|| "—".into());
     let summary = [
-        metric("ADP version", version, "Based on recognized local version declarations"),
-        metric("Work contracts", &available, "Records in optional WORK.json"),
-        metric("Scan scope", scope, "Files excluded or unassessed are disclosed"),
-        metric("Semantic coverage", semantics, "Not a complete protocol conformance check"),
-    ].join("");
+        metric(
+            "ADP version",
+            version,
+            "Based on recognized local version declarations",
+        ),
+        metric(
+            "Work contracts",
+            &available,
+            "Records in optional WORK.json",
+        ),
+        metric(
+            "Scan scope",
+            scope,
+            "Files excluded or unassessed are disclosed",
+        ),
+        metric(
+            "Semantic coverage",
+            semantics,
+            "Not a complete protocol conformance check",
+        ),
+    ]
+    .join("");
     let (findings, finding_count) = append_findings(report);
     TEMPLATE
         .replace("/*__STYLES__*/", STYLE)
