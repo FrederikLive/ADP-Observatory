@@ -1,7 +1,7 @@
 # Continuity
 
 ## Active objective
-Build a tolerant, version-aware, read-only Observatory that visualizes existing ADP project information without adding agent token or maintenance overhead.
+Develop a tolerant, version-aware, read-only Observatory that visualizes existing ADP project records without adding any mandatory agent token or maintenance overhead.
 
 ## Active milestone
 M1 — Discovery and deterministic scanner.
@@ -13,48 +13,51 @@ Analysis engine.
 WORK-SCANNER-001 — docs/work/WORK-SCANNER-001.md.
 
 ## Current position
-The M0 ADP bootstrap and initial M1 WORK.json structural parser have passing CI runs. A compatibility-first design reassessment has been incorporated into docs/ARCHITECTURE.md, docs/PRODUCT.md, docs/DECISIONS.md, docs/ADP-INTEGRATION.md, docs/ROADMAP.md, and the M1 contract. ADP issue #8 now defers protocol changes.
+The first compatibility implementation has passed CI. Files src/compatibility.rs, src/work.rs, src/records.rs, src/main.rs, and schema/scan-report.schema.json support scoped format/semantic/conformance status, explicit ADP version evidence, future WORK schema handling, independent context reads, source-linked active-contract conflicts, and JSON schema 0.2.0. tests/scanner.rs runs current/older/future/missing/malformed/conflicting CLI fixtures and read-only/determinism checks.
 
 ## Last known good state
-GitHub Actions run 39568724881 passed for the initial structural parser. The newer design documentation is not evidence of implemented adapter behavior.
+GitHub Actions run 39573431375 succeeded for code, formatting, lint, unit and CLI integration tests, and build. Code changes since that run must be verified separately; documentation changes are not new executable evidence.
 
 ## Current verification
-- M0 bootstrap: VERIFIED — run 39567705133.
-- M1 structural parser: VERIFIED — run 39568724881.
-- Compatibility adapters, independent failure isolation, and full version support: NOT IMPLEMENTED / NOT RUN.
-- Documentation updates: committed through GitHub API; inspect current HEAD and CI on resume.
+- ADP M0 baseline: VERIFIED, run 39567705133.
+- M1 compatibility scanner subset: VERIFIED, run 39573431375.
+- Full ADP conformance evaluation, comprehensive adapters and evidence metrics: NOT IMPLEMENTED / NOT ASSESSED.
+- Broader hostile-input fixtures, performance bounds and contract path resolution: NOT RUN / outstanding.
 
 ## Work in progress
-Implement format compatibility, semantic compatibility, and conformance coverage separately. Support unknown versions and incomplete records without false failures/passes.
+Complete M1 acceptance: scan completeness semantics, secure contract-file reference inspection, missing/broken path reports, and larger fixture coverage.
 
 ## Blocker / investigation
-Historical ADP versions and representative project fixtures must be selected based on real formats, not guessed semantics.
+Canonical ADP WORK.json is optional. Reference fields may be absent and historical project layouts vary; preserve unknowns and report non-applicability, not false errors.
 
 ## Next recommended phase
-Complete M1 compatibility foundations and regression fixtures before M2 rules and metrics.
+Harden discovery and bounded reference checks, then calibrate against real ADP projects before starting M2 metrics.
 
 ## Exact next action
-Inspect current GitHub HEAD/CI, read docs/ARCHITECTURE.md and the active contract, define compatibility result types, add fixtures for missing WORK.json, malformed input, contradictory state, and unknown/newer versions, then run formatting/lint/tests/build.
+1. Inspect GitHub main HEAD and newest CI result; preserve unrelated changes.
+2. Read docs/work/WORK-SCANNER-001.md and existing work/context/version parsers.
+3. Implement safe optional contract_file reference resolution constrained to project root; report missing, symlinked, outside-root, and ambiguous targets independently.
+4. Add fixtures/tests for bad references and scan-completeness boundaries.
+5. Run formatting, lint, unit/integration tests, and build; record verification and update STATUS and this file.
 
 ## Decisions made since last checkpoint
-- ADP remains unchanged unless evidence independently supports agent-beneficial clarification.
-- Observatory imposes zero mandatory extra records or agent reads/writes.
-- Optional WORK.json remains optional.
-- Separate format parsing, semantic interpretation, and conformance coverage.
-- Preserve conflicting source claims and partial scan results.
-- No silent migration or project mutation.
+- Canonical ADP (2.7.1 baseline) remains unchanged; Observatory must adapt with zero extra required metadata.
+- Compatibility dimensions are separate; semantic support currently only covers WORK schema v1.
+- Conflicts preserve source references; no silent precedence by timestamp.
+- Invalid/unavailable input must not erase independent records.
+- Unknown/future versions have no unverified conformance verdict.
 
 ## Workspace / Git state
-GitHub main updated through API. Local staged/unstaged/untracked state is unknown and must be inspected before local work.
+GitHub main is updated via API; local staged/unstaged/untracked state is unavailable remotely.
 
 ## Last checkpoint
-2026-10-21 — compatibility-first design decision recorded; executable changes pending.
+2026-10-21 — M1 compatibility scanner verified; remaining scanner work recorded.
 
 ## Git authorization and recovery
 - Initialized: existing GitHub repository.
 - Branch: main.
-- HEAD: inspect GitHub before resuming; do not rely on stale SHA.
-- Staged/unstaged/untracked: not available from remote API.
-- Authorization: user requested compatibility-first Observatory updates; no normative ADP amendment.
-- Automatic checkpoint commits/push: not granted by generated documents.
-- Next safe action: implement M1 adapter/fixture vertical slice with evidence.
+- HEAD: inspect GitHub before resuming, do not trust stale SHAs.
+- Staged/unstaged/untracked changes: unknown from remote API.
+- Authorization: user requested continued Observatory development; no normative ADP modifications.
+- Generated policy cannot grant commits/pushes/history rewrites.
+- Next safe action: verify branch and proceed under active M1 contract.
