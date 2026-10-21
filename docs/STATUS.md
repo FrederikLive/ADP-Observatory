@@ -10,6 +10,14 @@ M1 — scanner calibration, active contract WORK-SCANNER-001 (in_progress). Para
 - Upload-only release-candidate workflow uses pinned action SHAs, creates temporary manifest/checksum artifacts, and has **no release publication step**.
 - Only optional, human-facing ADP integration guidance was changed. No normative ADP protocol modification, agent token overhead, telemetry or target-project writes.
 
+## Optional on-demand Agent Skill (verified slice)
+
+- `skills/adp-observatory/SKILL.md` handles an explicit user request such as "show Observatory"; user-triggered discovery was added as a tiny, non-normative pointer in ADP's full/compact guidance and generated agent-router template.
+- Python standard-library `skills/adp-observatory/scripts/launch.py` detects existing approved binaries, refuses executables within the project, generates HTML through the offline dashboard and returns a structured browser-attempt or headless report state.
+- Unit tests and an actual compiled CLI/report integration test passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39652171472. WORK-AGENT-LAUNCH-001 tracks the verified subset.
+- First-time automatic installation and actual user-desktop browser visibility are **not verified**; no official protected release exists and remote execution cannot guarantee a local browser window.
+- No additional ADP-mandatory files, normal-agent readings, or workflow steps introduced.
+
 ## Current limitations and release blocker
 - **No official GitHub release or trusted zero-prerequisite installer.** Experimental and candidate assets expire after 14 days and are not Windows/macOS OS-code-signed/notarized.
 - GitHub repository rulesets API returned an empty array; branch protection could not be inspected with current connector permissions. Release requires enforceable protected tags/main, human approval and independent end-user testing.
