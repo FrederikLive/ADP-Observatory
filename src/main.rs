@@ -1,4 +1,5 @@
 mod compatibility;
+mod discovery;
 mod records;
 mod references;
 mod work;
@@ -6,7 +7,7 @@ mod work;
 use serde::Serialize;
 use std::{
     env, fs,
-    path::{Path, PathBuf},
+    path::PathBuf,
     process,
 };
 
@@ -18,6 +19,7 @@ struct Report {
     scan_complete: bool,
     files_examined: usize,
     files_skipped: usize,
+    scan_scope: discovery::ScanScope,
     adp_markers: Vec<String>,
     work_index: work::WorkInspection,
     compatibility: compatibility::Compatibility,
@@ -43,21 +45,7 @@ fn main() {
         }
     };
 
-    let mut markers = Vec::new();
-    let mut examined = 0usize;
-    let mut skipped = 0usize;
-    let mut complete = true;
-    scan(
-        &root,
-        &root,
-        0,
-        &mut examined,
-        &mut skipped,
-        &mut markers,
-        &mut complete,
-    );
-
-    markers.sort();
+    let discovery = discovery::Discovery::inspect(&root);
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
@@ -66,15 +54,17 @@ fn main() {
         schema_version: "0.2.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
         target: root.display().to_string(),
-        scan_complete: complete,
-        files_examined: examined,
-        files_skipped: skipped,
-        adp_markers: markers,
+        scan_complete: discovery.scope.status != "PARTIAL",
+        files_examined: discovery.files_examined,
+        files_skipped: discovery.files_skipped,
+        scan_scope: discovery.scope,
+        adp_markers: discovery.markers,
         work_index,
         compatibility,
         context,
         limitations: vec![
             "Structural and contextual inspection only; this is not a full ADP conformance assessment.".into(),
+            "scan_complete means traversal completed within policy; intentionally excluded files and independent parse errors are reported separately.".into(),
             "No project scripts or commands are executed.".into(),
             "Dashboard, metric calculations, and historical snapshots are not implemented.".into(),
         ],
@@ -89,6 +79,7 @@ fn main() {
         println!("ADP-Observatory {}", report.analyzer_version);
         println!("Target: {}", report.target);
         println!("Scan complete: {}", report.scan_complete);
+        println!("Scan scope: {}", report.scan_scope.status);
         println!(
             "Files examined: {}; skipped: {}",
             report.files_examined, report.files_skipped
@@ -99,6 +90,9 @@ fn main() {
         }
         println!("Work index: {}", report.work_index.status);
         println!("Semantic scope: {}", report.compatibility.semantic_scope);
+        for reference in &report.work_index.contract_files {
+            println!("Contract file [{}]: {} -> {}", reference.contract_id, reference.path, reference.status);
+        }
         println!(
             "Compatibility: format={}, semantics={}, conformance={}",
             report.compatibility.format,
@@ -133,97 +127,3 @@ fn main() {
     }
 }
 
-fn scan(
-    root: &Path,
-    dir: &Path,
-    depth: usize,
-    examined: &mut usize,
-    skipped: &mut usize,
-    markers: &mut Vec<String>,
-    complete: &mut bool,
-) {
-    if depth > 8 || *examined + *skipped >= 20_000 {
-        *complete = false;
-        *skipped += 1;
-        return;
-    }
-
-    let entries = match fs::read_dir(dir) {
-        Ok(entries) => entries,
-        Err(_) => {
-            *complete = false;
-            *skipped += 1;
-            return;
-        }
-    };
-
-    for item in entries {
-        if *examined + *skipped >= 20_000 {
-            *complete = false;
-            *skipped += 1;
-            break;
-        }
-
-        let entry = match item {
-            Ok(entry) => entry,
-            Err(_) => {
-                *complete = false;
-                *skipped += 1;
-                continue;
-            }
-        };
-        let path = entry.path();
-        let name = entry.file_name().to_string_lossy().to_string();
-
-        if name == ".git" || name == "target" || name == "node_modules" || name == "vendor" {
-            *skipped += 1;
-            continue;
-        }
-
-        let meta = match fs::symlink_metadata(&path) {
-            Ok(meta) => meta,
-            Err(_) => {
-                *complete = false;
-                *skipped += 1;
-                continue;
-            }
-        };
-
-        if meta.file_type().is_symlink() {
-            *complete = false;
-            *skipped += 1;
-            continue;
-        }
-        if meta.is_dir() {
-            scan(root, &path, depth + 1, examined, skipped, markers, complete);
-            continue;
-        }
-        if !meta.is_file() || meta.len() > 2_097_152 {
-            *complete = false;
-            *skipped += 1;
-            continue;
-        }
-
-        *examined += 1;
-        let relative = path
-            .strip_prefix(root)
-            .unwrap_or(&path)
-            .to_string_lossy()
-            .replace('\\', "/");
-
-        if matches!(
-            relative.as_str(),
-            "ADP.md"
-                | "ADP.min.md"
-                | "AGENTS.md"
-                | "STATUS.md"
-                | "CONTINUITY.md"
-                | ".project/WORK.json"
-                | "docs/STATUS.md"
-                | "docs/CONTINUITY.md"
-                | "docs/CONFORMANCE.md"
-        ) {
-            markers.push(relative);
-        }
-    }
-}
