@@ -146,6 +146,7 @@ fn scan(
         };
 
         if meta.file_type().is_symlink() {
+            *complete = false;
             *skipped += 1;
             continue;
         }
@@ -162,6 +163,7 @@ fn scan(
             continue;
         }
         if !meta.is_file() || meta.len() > 2_097_152 {
+            *complete = false;
             *skipped += 1;
             continue;
         }
