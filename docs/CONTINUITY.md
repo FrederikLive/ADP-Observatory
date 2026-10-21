@@ -1,78 +1,39 @@
 # Continuity
 
 ## Active objective
-Build a fault-tolerant, local-first ADP project scanner that supports human visualization with zero additional agent or protocol overhead.
+Build a reliable, optional, local-first Observatory that lets humans visualize existing ADP evidence without requiring additional agent tokens, records, or project mutations.
 
-## Active milestone
-M1 — Discovery and deterministic scanner.
-
-## Active workstream
-Analysis engine.
-
-## Active contract
-WORK-SCANNER-001 — docs/work/WORK-SCANNER-001.md.
-
-## Current position
-Scanner development 0.3.0 adds explicit scan scope via src/discovery.rs and metadata-only checks for optional contract_file references via src/references.rs. src/work.rs reports referenced file statuses independently of structural WORK validity. src/main.rs and schema/scan-report.schema.json expose those results. Tests cover bounded traversal, symlinks, traversal rejection, malformed/missing references, and repository self-scan.
+## Active milestone / workstream / contract
+M1 — analysis engine — WORK-SCANNER-001 (in_progress). Parallel experimental distribution: WORK-DISTRIBUTION-001 (in_progress). Initial offline UI: WORK-DASHBOARD-001 (verified). Original WORK-UI-001 umbrella retained as deferred/superseded historical work.
 
 ## Last known good state
-GitHub Actions run 39575987006 succeeded at its revision for formatting, Clippy, tests, and build. Current branch may contain documentation-only commits after that run; do not assume any unverified code changes are green.
+- Development 0.4.0 implements `adp-observatory .`, `report . --output ...` and headless `scan . --json` with standalone offline HTML output.
+- Analyzer reports declared work contracts, referenced files, context/conflicts, source-backed limits and three distinct compatibility dimensions. No full ADP conformance verdict.
+- Output is generated outside the analyzed project; HTML is escaped and has no external page resources/listening server.
+- Rust formatting, lint, tests and build: VERIFIED in CI run 39596170547.
+- Experimental Windows x64/Linux x64/macOS binaries with GitHub/Sigstore-signed build provenance: VERIFIED at CI job level, run 39596794393. No official tagged release or OS code signature.
 
-## Current verification
-- M0 baseline: VERIFIED — run 39567705133.
-- M1 initial compatibility behavior: VERIFIED — run 39573431375.
-- M1 reference safety, coverage reporting, self-scan, and version 0.3.0: VERIFIED — run 39575987006.
-- Full historical format support, complete conformance, and real-world false-positive calibration: NOT IMPLEMENTED or NOT ASSESSED.
-
-## Human-facing integration checkpoint
-- The separate canonical ADP repository now has a non-normative docs/OBSERVATORY.md guide and short README/USING_ADP links; ADP validator passed on documentation-only commit 3dd321e7 (GitHub Actions run 39592315852).
-- Observatory docs/LAUNCHER.md defines a future, trusted install-once binary and `adp-observatory .` local-dashboard UX, plus planned headless `scan . --json` command.
-- The launcher, signed downloads, and dashboard remain NOT IMPLEMENTED. Avoid copying one-shot examples into docs until supported release artifacts are independently verified. The active M1 scanner contract and exact next action remain unchanged.
-
-## Work in progress
-Calibrate parser and scope results against small/mature real ADP projects and grow targeted regression tests. M1 remains in progress.
-
-## Blocker / investigation
-No external blocker. Continue to distinguish optional source absence and unsupported semantics from normative ADP violations. Check actual adopted protocol versions in candidate projects.
-
-## Next recommended phase
-Complete M1 pilot calibration and source-link robustness before rule/metric expansion.
+## Unfinished work
+- M1: representative real-ADP-project pilots; version/layout coverage; false positives; hostile-input and scale tests; deeper source linking.
+- M3: historical snapshots, richer evidence navigation, browser accessibility.
+- M4: clean-machine/manual attestation verification, protected tagged releases, platform-specific trusted install/update/uninstall. Do not ship blind download-to-shell.
+- ADP's canonical normative files remain unchanged; ADP docs/OBSERVATORY.md is optional human documentation only.
 
 ## Exact next action
-1. Inspect GitHub main HEAD/CI and project worktree if local.
-2. Read AGENTS.md, docs/STATUS.md, .project/WORK.json, and docs/work/WORK-SCANNER-001.md.
-3. Inspect real, representative ADP project layouts against current scanner output and record gaps with evidence.
-4. Fix a narrow verified issue, add fixture/tests, run CI quality gates, and update ADP status/continuity.
-5. Do not modify canonical ADP unless independently agent-beneficial and authorized.
+1. Inspect GitHub default-branch HEAD, latest CI, work index and active contracts. Preserve unrelated changes.
+2. Test the scanner on representative ADP projects and record supported/unsupported evidence. Fix the narrowest reproducible issue with fixtures.
+3. For distribution, download a pinned CI artifact and independently run `gh attestation verify <binary> --repo FrederikLive/ADP-Observatory` on clean supported machines; do not claim code signing or publish an installer prematurely.
+4. Run format, lint, unit/integration tests and platform package jobs for modified code. Update this file and STATUS with exact evidence.
 
-## Decisions made since last checkpoint
-- Project remains optional and ADP-first with no mandatory new metadata or agent reads.
-- scan_complete describes policy-bounded traversal; scan_scope counts deliberate exclusions separately from incomplete traversals.
-- Contract-file links are checked using safe relative metadata lookups; PRESENT does not imply verification.
-- Reference checks have a cap; incomplete inspection is explicitly reported.
-- Missing optional WORK.json is unknown, not noncompliance; full conformance is never inferred from schema readability.
+## Decisions
+- ADP optimizes agents and low token use; Observatory adapts to optional, imperfect, and version-diverse records.
+- Presence of a referenced file is not verification. Unknown, partial, and unsupported data never become zero or a passing conformance result.
+- The first dashboard is a generated offline report, avoiding an unnecessary HTTP server.
+- Signed build provenance identifies GitHub build identity but does not automatically authorize trusting a downloaded binary, nor replace OS code signing.
+- Separate verified dashboard slice and in-progress distribution contract; retain superseded umbrella as history.
 
-## Workspace / Git state
-GitHub default branch main updated through connector. Local staged/unstaged/untracked changes cannot be established remotely.
+## Git recovery / authorization
+Branch main, updates through GitHub connector under user's continue request. Inspect HEAD before changes. Local worktree cannot be inferred via API. Generated policy is not standing authorization for destructive operations, deployment, or release publication.
 
 ## Last checkpoint
-2026-10-21 — M1 scanner hardening and documentation synchronized.
-
-## Git authorization and recovery
-- Initialized: existing GitHub repo.
-- Branch: main.
-- HEAD: inspect current remote; do not rely on stale SHA.
-- Staged/unstaged/untracked: unknown remotely.
-- Source of authorization: current user's instruction to continue Observatory development.
-- Generated policies do not self-authorize commits/push/history rewrites.
-- Next safe action: inspect CI and calibrate real project coverage.
-
-## Implemented dashboard vertical slice — 2026-10-21
-- Development version 0.4.0: `src/dashboard.rs`, `web/report.html`, `web/report.css`, `web/report.js` render a self-contained offline HTML visualization. `src/cli.rs` adds dashboard/report/scan modes. `src/output.rs` handles path-safe HTML output and browser opener; `src/work.rs` exposes contract summaries.
-- Cross-platform tests revealed Windows and macOS canonical path aliases; fixed by canonicalizing the analyzed project before output containment checks.
-- Verified code run: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011803.
-- Verified experimental unsigned platform packages: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011855.
-- New related contract: WORK-UI-001. Active contract remains WORK-SCANNER-001; no normative ADP changes.
-- No signed release or installer has shipped. A user may use Rust from a checkout; a system-wide `adp-observatory .` requires installing the executable.
-- Exact next UI action: evaluate tested publisher verification/signing and installation flow, then run clean-machine manual browser accessibility checks. Do not advertise unsigned artifacts as official trusted downloads.
-
+2026-10-21 — offline dashboard 0.4.0, platform-attested experimental binaries, ADP work-contract reconciliation, and human usage guidance.
