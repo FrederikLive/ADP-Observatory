@@ -454,8 +454,8 @@ mod tests {
                 let r = inspect(root);
                 assert_eq!(r.status, "STRUCTURALLY_VALID");
                 assert_eq!(r.contract_count, Some(1));
-            assert_eq!(r.contracts[0].id, "WORK-1");
-            assert_eq!(r.contracts[0].status, "in_progress");
+                assert_eq!(r.contracts[0].id, "WORK-1");
+                assert_eq!(r.contracts[0].status, "in_progress");
             },
         );
     }
