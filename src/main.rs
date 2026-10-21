@@ -84,7 +84,10 @@ fn run() -> Result<(), String> {
                 .map_err(|error| format!("Could not serialize dashboard inputs: {error}"))?;
             let html = dashboard::render(&data);
             let destination = output::save(&root, request.output.as_deref(), &html)?;
-            println!("Local ADP report: {}", output::report_location(&destination));
+            println!(
+                "Local ADP report: {}",
+                output::report_location(&destination)
+            );
             println!("Analysis is read-only. ADP conformance has not been assessed.");
             if auto_open {
                 match output::open_browser(&destination) {
