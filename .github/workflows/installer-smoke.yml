@@ -81,6 +81,8 @@ jobs:
           $ErrorActionPreference = "Stop"
           if ($negativeExit -eq 0) { throw "Installer accepted incorrect SHA" }
           if (Test-Path "$env:RUNNER_TEMP/obs-negative") { throw "Installer touched destination on failed validation" }
+          Write-Host "Incorrect source SHA rejected without a destination write"
+          $global:LASTEXITCODE = 0
       - name: Download, verify, install and scan
         shell: pwsh
         env:
