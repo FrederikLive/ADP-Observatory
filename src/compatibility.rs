@@ -8,6 +8,7 @@ const MAX_PROTOCOL_BYTES: u64 = 256 * 1024;
 pub struct Compatibility {
     pub format: &'static str,
     pub semantics: &'static str,
+    pub semantic_scope: &'static str,
     pub conformance: &'static str,
     pub protocol: ProtocolVersion,
 }
@@ -49,6 +50,7 @@ pub fn inspect(root: &Path, work: &WorkInspection) -> Compatibility {
     Compatibility {
         format,
         semantics,
+        semantic_scope: "WORK_JSON_SCHEMA_V1_ONLY",
         conformance: "NOT_ASSESSED",
         protocol,
     }
