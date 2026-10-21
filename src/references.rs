@@ -67,7 +67,7 @@ pub fn inspect(root: &Path, id: &str, index: usize, raw: &str) -> ContractFileRe
         .split('/')
         .filter(|c| !c.is_empty() && *c != ".")
         .collect();
-    if components.iter().any(|c| *c == "..") {
+    if components.contains(&"..") {
         return outcome(
             id,
             index,
