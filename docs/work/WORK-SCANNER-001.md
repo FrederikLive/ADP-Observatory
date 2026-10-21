@@ -92,3 +92,24 @@ Validation: https://github.com/FrederikLive/ADP-Observatory/actions/runs/3957343
 **Still open in M1:** broader adversarial and real-project tests, full parser coverage for historical versions, source-link and scan-scope calibration, and more complete schema validation. Do not mark the full scanner VERIFIED from one green subset.
 
 **Exact next action:** test selected real repositories against current discovery rules; investigate false positives/negatives and parser/layout variation, then implement only the next high-value improvement with regression fixtures. Do not amend canonical ADP for the analyzer.
+
+## Real upstream ADP Actions smoke checkpoint — 2026-10-21
+
+- Added CI checkout of actual `FrederikLive/ADP` at source commit
+  `9b5ab4694321735e83b93962e1b9975cced130bf`, including the optional
+  Actions catalogue, update guide and agent router.
+- JSON and HTML scanning verified: recognized protocol version 2.7.1,
+  `WORK.json` absent as an **optional** record, no false conformance pass,
+  and no added requirement to inspect Actions/Updater documents.
+- The Observatory self-scan also found structurally valid actual work
+  records without incorrectly inferring a local protocol version from an
+  upstream-only reference.
+- [CI 39659907217](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39659907217)
+  passed Rust formatting, Clippy, tests, real upstream checkout/scan,
+  real project self-scan and Agent Skill end-to-end launch.
+- **M1 still OPEN**: wider real-project samples, stress/hostile-input
+  calibration, historical version adapters and complete evidence linking
+  remain out of scope for this specific compatibility checkpoint.
+
+**Next action:** expand independent real-project fixtures and false-positive
+analysis without introducing a mandatory canonical ADP data interface.
