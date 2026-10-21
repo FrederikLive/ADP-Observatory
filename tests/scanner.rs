@@ -25,7 +25,7 @@ fn scan(name: &str) -> Value {
 #[test]
 fn current_version_reads_structured_work_without_claiming_conformance() {
     let report = scan("current");
-    assert_eq!(report["schema_version"], "0.3.0");
+    assert_eq!(report["schema_version"], "0.4.0");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     assert_eq!(report["compatibility"]["protocol"]["value"], "2.7.1");
     assert_eq!(report["compatibility"]["format"], "READABLE");
@@ -237,7 +237,7 @@ fn no_open_dashboard_mode_writes_report_without_browser() {
     assert!(output_path.is_file());
     assert!(fs::read_to_string(&output_path)
         .unwrap()
-        .contains("No explicit contract-file references"));
+        .contains("No structured work contracts are available"));
     fs::remove_dir_all(root).expect("cleanup");
 }
 
