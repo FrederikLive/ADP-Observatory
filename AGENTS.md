@@ -41,7 +41,7 @@ Default HIGH autonomy inside the actual authorization envelope. Use Project → 
 - No automatic uploads, telemetry, or mandatory cloud service.
 - Never treat unknown/unassessed data as zero, success, or a conformance pass.
 - Trace findings and metrics to sources; expose scope, completeness, and limitations.
-- Local dashboard must bind loopback and protect against hostile origins, DNS rebinding, and unsafe filesystem access.
+- Current dashboard is a static offline HTML report: escape all project data and do not load remote resources. If introducing an HTTP server later, restrict it to loopback and defend against hostile origins, DNS rebinding, and unsafe filesystem access.
 - Downloaded release artifacts must be verified before execution.
 - Do not overwrite unrelated work, reveal secrets, or perform destructive actions without authorization.
 
