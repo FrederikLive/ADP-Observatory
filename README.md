@@ -8,6 +8,14 @@ It is an optional companion—not part of ADP's normative core, not a replacemen
 
 > **Project status:** Early development (M1 scanner). Metrics and product behavior described here are intended requirements until implemented and verified. The first releases must label unavailable data honestly and must not present illustrative data as real project results.
 
+## Compatibility with current ADP Actions (21 October 2026)
+
+The current [ADP main revision](https://github.com/FrederikLive/ADP/commit/9b5ab4694321735e83b93962e1b9975cced130bf) still declares **protocol 2.7.1**. Its optional [ADP Actions](https://github.com/FrederikLive/ADP/blob/main/docs/COMMANDS.md), [project-update guide](https://github.com/FrederikLive/ADP/blob/main/docs/UPDATING_ADP.md), and agent-router hints introduce **no required scanner inputs**. Observatory works with the same optional `WORK.json`, protocol files and status/continuity records; it never requires projects to copy the Actions catalogue.
+
+**Verified integration:** [CI 39659907217](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39659907217) checked out the exact upstream ADP revision and ran both JSON scanning and HTML reporting, correctly recognizing version 2.7.1 while leaving missing optional WORK records unassessed. The report now offers static examples of ADP Actions as prompts for the **coding agent**, not dashboard-executed commands. The separate [Agent Skill](skills/adp-observatory/SKILL.md) handles an explicit **"Show Observatory"** request; **"Show ADP Actions"** or **"Update ADP"** do not trigger an Observatory launch.
+
+With a previously approved installed binary, a local agent can invoke the skill's [offline launch helper](skills/adp-observatory/scripts/launch.py). Browser opening depends on real local desktop/process access; hosted agents cannot guarantee a window on the user's desktop. First-time automatic installation remains blocked on verified official release governance; no download is executed merely because the project uses ADP.
+
 ## Goals
 
 - Let a project owner launch analysis with a small platform-appropriate launcher.
