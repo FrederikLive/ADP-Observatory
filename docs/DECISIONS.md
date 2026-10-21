@@ -18,6 +18,7 @@
 - **D-015 User-invoked visualization:** the eventual default UX is `adp-observatory .` from a project directory; headless scans remain available separately. No repository installation, agent prompt, or mandatory ADP file is added.
 - **D-016 Trusted first-run distribution:** prefer install-once, verified native releases; consider zero-install launchers only after authenticated artifact verification is implemented and tested. No blind script piping or unverified auto-updates.
 - **D-017 Experimental build provenance:** GitHub/Sigstore-signed CI attestations can verify the provenance of experimental binaries, but do not imply an OS-code-signed, protected, stable release or justify a blind first-run download-and-execute command.
+- **D-018 Pinned preview installers:** reviewed local Bash/PowerShell helpers require an explicit successful CI run plus exact 40-character source SHA and validate checksum, source signature and signing workflow before per-user installation. Installed executable runs `adp-observatory .` from a project; no automatic path changes or official installer claim. All three platform installer smoke checks passed (run 39601029440).
 
 ## Open decisions
 - **Q-001 Core language:** validate Rust against packaging and maintenance needs.
