@@ -1,0 +1,65 @@
+name: Prototype binary packages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "web/**"
+      - "tests/**"
+      - "Cargo.toml"
+      - ".github/workflows/prototype-packages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux-x64
+            binary: adp-observatory
+          - runner: windows-latest
+            platform: windows-x64
+            binary: adp-observatory.exe
+          - runner: macos-latest
+            platform: macos-runner
+            binary: adp-observatory
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test all targets
+        run: cargo test --all-targets --all-features
+      - name: Build standalone CLI and local report generator
+        run: cargo build --release
+      - name: Smoke-test command line
+        shell: bash
+        env:
+          BINARY: ${{ matrix.binary }}
+        run: |
+          set -euo pipefail
+          "target/release/$BINARY" --version
+          "target/release/$BINARY" scan tests/fixtures/current --json > /dev/null
+      - name: Prepare experimental unsigned package
+        shell: bash
+        env:
+          BINARY: ${{ matrix.binary }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp "target/release/$BINARY" "dist/$BINARY"
+          python -c 'import hashlib,os,pathlib; p=pathlib.Path("dist")/os.environ["BINARY"]; (pathlib.Path("dist")/"SHA256SUMS.txt").write_text(hashlib.sha256(p.read_bytes()).hexdigest()+"  "+p.name+"\n")'
+          printf '%s\n' "EXPERIMENTAL BUILD: not signed, not an official verified release." "Platform: $PLATFORM" "See docs/LAUNCHER.md before executing downloaded software." > dist/NOTICE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adp-observatory-${{ matrix.platform }}-prototype
+          path: dist/
+          retention-days: 14
+          if-no-files-found: error
