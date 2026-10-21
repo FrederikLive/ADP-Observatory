@@ -19,6 +19,7 @@
 - **D-016 Trusted first-run distribution:** prefer install-once, verified native releases; consider zero-install launchers only after authenticated artifact verification is implemented and tested. No blind script piping or unverified auto-updates.
 - **D-017 Experimental build provenance:** GitHub/Sigstore-signed CI attestations can verify the provenance of experimental binaries, but do not imply an OS-code-signed, protected, stable release or justify a blind first-run download-and-execute command.
 - **D-018 Pinned preview installers:** reviewed local Bash/PowerShell helpers require an explicit successful CI run plus exact 40-character source SHA and validate checksum, source signature and signing workflow before per-user installation. Installed executable runs `adp-observatory .` from a project; no automatic path changes or official installer claim. All three platform installer smoke checks passed (run 39601029440).
+- **D-019 Release separation:** candidate builds may run on main with read-only permissions and signed provenance, but cannot publish. Official public release requires owner-enforced tag/main protection, human approval, a protected source tag matching reviewed assets, and final installation review. No new agent requirements in ADP.
 
 ## Open decisions
 - **Q-001 Core language:** validate Rust against packaging and maintenance needs.
