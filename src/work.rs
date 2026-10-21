@@ -128,16 +128,25 @@ pub fn inspect(root: &Path) -> WorkInspection {
     let schema_version = object.get("schema_version").and_then(|v| v.as_u64());
     if schema_version.is_some_and(|version| version > 1) {
         result.status = "UNSUPPORTED_SCHEMA";
-        result.project = object.get("project").and_then(|v| v.as_str()).map(str::to_owned);
+        result.project = object
+            .get("project")
+            .and_then(|v| v.as_str())
+            .map(str::to_owned);
         result.active_contract = object
             .get("active_contract")
             .and_then(|v| v.as_str())
             .map(str::to_owned);
-        result.contract_count = object.get("contracts").and_then(|v| v.as_array()).map(Vec::len);
+        result.contract_count = object
+            .get("contracts")
+            .and_then(|v| v.as_array())
+            .map(Vec::len);
         result.findings.push(finding(
             "work.unsupported_schema",
             "info",
-            format!("WORK.json schema version {} is not supported; no schema-v1 verdict is issued.", schema_version.unwrap_or_default()),
+            format!(
+                "WORK.json schema version {} is not supported; no schema-v1 verdict is issued.",
+                schema_version.unwrap_or_default()
+            ),
         ));
         return result;
     }
@@ -346,7 +355,10 @@ mod tests {
                 let r = inspect(root);
                 assert_eq!(r.status, "UNSUPPORTED_SCHEMA");
                 assert_eq!(r.project.as_deref(), Some("Future"));
-                assert!(r.findings.iter().any(|f| f.code == "work.unsupported_schema"));
+                assert!(r
+                    .findings
+                    .iter()
+                    .any(|f| f.code == "work.unsupported_schema"));
             },
         );
     }
@@ -367,10 +379,20 @@ mod tests {
     #[test]
     fn symlinked_work_directory_is_not_followed() {
         use std::os::unix::fs::symlink;
-        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).expect("clock").as_nanos();
-        let root = std::env::temp_dir().join(format!("adp-observatory-work-symlink-{}-{nonce}", std::process::id()));
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "adp-observatory-work-symlink-{}-{nonce}",
+            std::process::id()
+        ));
         fs::create_dir_all(root.join("external")).expect("create");
-        fs::write(root.join("external/WORK.json"), r#"{"schema_version":1,"project":"P","contracts":[]}"#).expect("write");
+        fs::write(
+            root.join("external/WORK.json"),
+            r#"{"schema_version":1,"project":"P","contracts":[]}"#,
+        )
+        .expect("write");
         symlink(root.join("external"), root.join(".project")).expect("symlink");
         let r = inspect(&root);
         assert_eq!(r.status, "UNKNOWN");
