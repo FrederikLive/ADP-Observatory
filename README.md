@@ -87,7 +87,7 @@ This is the target architecture, not a claim that all components are implemented
 
 The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **The offline dashboard and headless scan are implemented in the development CLI**, and experimental binaries can be verified manually; no trusted installed launcher or official release exists yet. Today the application runs from a Rust checkout or experimental CI artifact.
 
-Install-once, verified native releases are the preferred first delivery mechanism. A safe first-run download-and-execute helper may follow, but it must verify publisher identity and artifact integrity before running. We will not use blind remote-script execution or require installation inside every ADP repository. See [the launcher and distribution design](docs/LAUNCHER.md).
+Install-once, verified native releases are the preferred final delivery. Experimental Bash/PowerShell **preview installers** now support pinned CI artifacts and signed-provenance verification (all three OS installation smoke tests passed), but require a reviewed local script plus GitHub CLI. They are not a production installer. We will not use blind remote-script execution or require installation inside every ADP repository. See the [launcher and distribution design](docs/LAUNCHER.md) and [preview installation instructions](docs/RELEASING.md).
 
 ## Current prototype
 
