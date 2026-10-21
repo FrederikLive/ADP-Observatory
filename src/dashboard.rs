@@ -108,7 +108,8 @@ fn show_contracts(report: &Value) -> String {
                 })
                 .filter(|s| !s.is_empty())
                 .unwrap_or_else(|| "None declared".into());
-            let mut description = format!("Workstream: {workstream} · Dependencies: {dependencies}");
+            let mut description =
+                format!("Workstream: {workstream} · Dependencies: {dependencies}");
             if let Some(path) = item.get("contract_file").and_then(Value::as_str) {
                 let state = references
                     .and_then(|links| {
