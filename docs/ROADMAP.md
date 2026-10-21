@@ -50,6 +50,25 @@ Milestones are proposed work packages, not claims of completion.
 - [ ] Validate browser opening in supported desktop harnesses. Never confuse
   a cloud-browser report with the user's local browser.
 
+## Real-world pilot follow-up — P0/P1
+
+- [x] Windows HTML opener changed from Explorer to ShellExecuteW with
+  shell-compatible canonical path conversion and explicit launch status.
+- [x] Agent Skill now prohibits project edits, optional WORK-index generation,
+  target test runs, Git commit/push and duplicate installations/reports.
+- [x] Headless/desktop launcher tests distinguish requested, failed,
+  unconfirmed (legacy), and not-requested browser states.
+- [x] Offline report labels WORK statuses as recorded project claims rather
+  than independent evidence; missing optional WORK remains unmodified.
+- [x] Cross-platform compile, unit, verified preview installer and headless
+  report tests run on GitHub-hosted CI runners.
+- [ ] Confirm actual report visibility inside an **interactive Windows
+  Antigravity** desktop session. No hosted CI can prove this.
+- [ ] Independent real-project pilot verifies target's Git and file state
+  unchanged across setup/open; no unnecessary duplicated binaries or reports.
+- [ ] Consider opt-in report retention/cleanup after real usage evidence,
+  never quietly delete project files or prior reports.
+
 ## M4 — Cross-platform release and launchers
 **Status:** Preview installation passes three-platform CI (39601029440); signed and SHA-pinned candidate assets pass three-platform packaging (39624399120). No GitHub tag rulesets yet and no official release, OS code-signing, or automatic first-run setup.
 - [x] Test Windows x64, Linux x64 and macOS runner binaries in CI; other architectures and real-machine install tests remain outstanding.
