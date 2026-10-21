@@ -89,6 +89,12 @@ The intended human experience is to enter an ADP project and run `adp-observator
 
 Install-once, verified native releases are the preferred final delivery. Experimental Bash/PowerShell **preview installers** now support pinned CI artifacts and signed-provenance verification (all three OS installation smoke tests passed), but require a reviewed local script plus GitHub CLI. They are not a production installer. We will not use blind remote-script execution or require installation inside every ADP repository. See the [launcher and distribution design](docs/LAUNCHER.md) and [preview installation instructions](docs/RELEASING.md).
 
+## Release readiness
+
+A source/version-pinned, signed-provenance **release candidate** has passed Windows x64, Linux x64 and macOS ARM64 builds: [v0.4.0 candidate run](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120). This is temporary CI output, **not an official GitHub Release or OS-code-signed installer**. The release-candidate workflow cannot publish a release.
+
+Official publication is blocked until GitHub main/tag protection, required release approval and clean-machine acceptance are verified. The exact owner actions are tracked in [release-governance issue #1](https://github.com/FrederikLive/ADP-Observatory/issues/1) and [RELEASING.md](docs/RELEASING.md). The current preview installers require a reviewed local script and an independently installed GitHub CLI.
+
 ## Current prototype
 
 The Rust CLI and offline HTML viewer now discover selected ADP markers and safely inspects optional `.project/WORK.json` records using the supported schema-v1 structural rules. It can detect explicit protocol versions, display a limited compatibility report, examine `docs/STATUS.md` and `docs/CONTINUITY.md`, and preserve conflicting active-contract claims with source references. Missing or invalid files do not stop independent analysis.
