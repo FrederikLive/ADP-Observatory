@@ -48,6 +48,37 @@ and either follows an approved verified installation route or reports the
 capability limitation. As of October 2026 there is no official protected
 release enabling safe unattended first-time setup.
 
+## First real-world Windows launch regression
+
+A first local-agent setup test proved scanning and HTML report generation, but
+did **not** visibly open the user's browser. The agent also created/committed
+an optional work index and installed two copies of the binary. These are not
+acceptable default setup behaviors.
+
+The Windows CLI now uses `ShellExecuteW` with a path converted from Rust's
+Windows extended-length format into shell-compatible drive/UNC syntax.
+Printed `Local ADP report:` paths no longer use the extended path prefix for
+supported locations. The CLI emits an explicit `Browser launch:` state:
+
+| Outcome | Meaning |
+| --- | --- |
+| `REQUESTED (visibility not confirmed)` | OS accepted the request; a tab may still be invisible in IDE/remote contexts |
+| `FAILED` | Opener returned an error; local HTML was saved and can be opened manually |
+| `NOT_REQUESTED` | Headless/report-only invocation; no browser attempt was made |
+| Missing state | Installed binary predates explicit launch-status support; do not infer success |
+
+The [local Agent Skill](../skills/adp-observatory/SKILL.md) requires that
+the user-requested setup/view be **non-mutating for the target project**:
+no WORK.json generation, project test runs, Git commits, pushes or automatic
+cache/report duplication. Prefer one pre-approved user-level executable
+location; do not copy an additional binary into a second PATH directory
+unless the user explicitly requests it.
+
+See [Windows pilot testing](WINDOWS-PILOT.md) for a no-mutation PowerShell
+acceptance sequence and manual `Invoke-Item -LiteralPath` fallback.
+Automated Windows runner tests cannot prove an IDE-hosted browser window was
+actually visible.
+
 ## Experimental builds: inspect and verify before executing
 
 A successful experimental matrix run is available at [GitHub Actions #39597842680](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39597842680). It also re-verifies each executable's signed attestation against this repository and the expected signing workflow before uploading the binary. Each platform job tests, builds, smoke-tests, records SHA-256, creates a GitHub/Sigstore-signed build provenance attestation for the binary, and uploads a workflow artifact.
