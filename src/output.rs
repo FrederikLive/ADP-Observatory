@@ -1,7 +1,7 @@
 use std::{
     env, fs,
     fs::OpenOptions,
-    io::{ErrorKind, Write},
+    io::Write,
     path::{Path, PathBuf},
     process::Command,
     time::{SystemTime, UNIX_EPOCH},
