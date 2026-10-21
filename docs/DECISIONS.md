@@ -15,6 +15,8 @@
 - **D-012 No protocol amendment now:** test against real projects before proposing any change to canonical ADP 2.7.1.
 - **D-013 Optional means optional:** missing WORK.json alone is not a conformance failure.
 - **D-014 Conflict provenance:** preserve contradictory claims with source references; no automatic winner by file modification time.
+- **D-015 User-invoked visualization:** the eventual default UX is `adp-observatory .` from a project directory; headless scans remain available separately. No repository installation, agent prompt, or mandatory ADP file is added.
+- **D-016 Trusted first-run distribution:** prefer install-once, verified native releases; consider zero-install launchers only after authenticated artifact verification is implemented and tested. No blind script piping or unverified auto-updates.
 
 ## Open decisions
 - **Q-001 Core language:** validate Rust against packaging and maintenance needs.
@@ -24,6 +26,6 @@
 - **Q-005 Metric configuration:** project-specific policy without forcing a new ADP manifest.
 - **Q-006 Release signing:** choose a maintainable signing/provenance process.
 - **Q-007 Data location/retention:** specify paths, migration, export, and deletion.
-- **Q-008 Launcher UX:** compare signed binaries, PowerShell, batch, and shell wrappers.
+- **Q-008 Launcher packaging:** decide per-OS signed installer/package manager routes and whether authenticated one-shot helpers are worth the extra attack surface. See docs/LAUNCHER.md.
 - **Q-009 Initial rules:** prioritize correctness, applicability, and low false-positive risk.
 - **Q-010 Markdown linking:** determine reliable explicit-reference extraction versus speculative inference.
