@@ -43,11 +43,11 @@ Never collapse these into a single boolean. A future ADP version may be format-r
 - Partial scan: retain usable results but clearly mark incomplete scope.
 
 ## Components
-- CLI and launcher; safe discovery; adapter registry; normalized evidence model; applicability/rule engine; metric engine; optional SQLite snapshot store; loopback-only API/dashboard; verified cross-platform packaging.
+- Existing vertical slice: read-only CLI/scanner, compatibility assessment, structured work/context records, static offline HTML report, and optional Agent Skill. Future candidates: richer adapter registry, applicability/rule engine, metric engine, optional local snapshots, and independently reviewed distribution. A loopback-only API is not required by the current viewer.
 - Rust core is the current prototype direction. UI framework is undecided pending a vertical slice.
 
 ## Security
-Read-only default, no project command execution, no network upload/telemetry by default, bounded traversal, safe symlink handling, escaping, and no arbitrary path APIs. Local web UI must bind loopback, validate Host/Origin, resist DNS rebinding, and use a per-process token for state-changing operations. Release launchers must verify official artifacts before execution.
+Read-only default, no project command execution, no network upload/telemetry by default, bounded traversal, safe symlink handling, escaping, and no arbitrary path APIs. The current static HTML viewer has no listening server or state-changing endpoints. Any future local HTTP service must bind loopback, validate Host/Origin, resist DNS rebinding and authenticate state-changing operations. Release launchers must verify official artifacts before execution.
 
 ## Machine-readable output
 Versioned reports should disclose analyzer/schema version, detected ADP version and evidence, format/semantic/conformance compatibility, scan completeness, paths included/excluded/failed, sourced records, findings, metrics, limitations, and adapter coverage. Avoid unqualified project-health scores.
