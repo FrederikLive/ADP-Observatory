@@ -29,6 +29,10 @@ fn finding(code: &'static str, severity: &'static str, message: impl Into<String
     }
 }
 
+fn nullable_string(value: &serde_json::Value) -> bool {
+    value.is_null() || value.is_string()
+}
+
 pub fn inspect(root: &Path) -> WorkInspection {
     let mut result = WorkInspection {
         status: "UNKNOWN",
@@ -128,7 +132,21 @@ pub fn inspect(root: &Path) -> WorkInspection {
     let schema_version = object.get("schema_version").and_then(|v| v.as_u64());
     if schema_version.is_some_and(|version| version > 1) {
         result.status = "UNSUPPORTED_SCHEMA";
-        result.project = object
+        for key in [
+        "active_milestone",
+        "active_contract",
+        "next_milestone",
+        "next_contract",
+    ] {
+        if object.get(key).is_some_and(|v| !nullable_string(v)) {
+            result.findings.push(finding(
+                "work.optional_field_type",
+                "error",
+                format!("{key} must be a string or null."),
+            ));
+        }
+    }
+    result.project = object
             .get("project")
             .and_then(|v| v.as_str())
             .map(str::to_owned);
@@ -247,6 +265,44 @@ pub fn inspect(root: &Path) -> WorkInspection {
                 format!("Invalid status for {id}."),
             ));
         }
+        for key in ["workstream", "contract_file"] {
+            if entry.get(key).is_some_and(|v| !nullable_string(v)) {
+                result.findings.push(finding(
+                    "work.contract_optional_type",
+                    "error",
+                    format!("{key} in {id} must be a string or null."),
+                ));
+            }
+        }
+        if let Some(execution) = entry.get("execution") {
+            if !execution.is_null() {
+                if let Some(fields) = execution.as_object() {
+                    for (key, value) in fields {
+                        let valid = match key.as_str() {
+                            "mode" => matches!(value.as_str(), Some("direct" | "delegated")),
+                            "mutation" => {
+                                matches!(value.as_str(), Some("read_only" | "mutating"))
+                            }
+                            "branch" => nullable_string(value),
+                            _ => false,
+                        };
+                        if !valid {
+                            result.findings.push(finding(
+                                "work.execution_field",
+                                "error",
+                                format!("Unsupported or invalid execution field {key} in {id}."),
+                            ));
+                        }
+                    }
+                } else {
+                    result.findings.push(finding(
+                        "work.execution_type",
+                        "error",
+                        format!("Execution metadata in {id} must be an object or null."),
+                    ));
+                }
+            }
+        }
         match entry.get("depends_on").and_then(|v| v.as_array()) {
             Some(deps) => {
                 let mut seen = HashSet::new();
@@ -359,6 +415,20 @@ mod tests {
                     .findings
                     .iter()
                     .any(|f| f.code == "work.unsupported_schema"));
+            },
+        );
+    }
+
+    #[test]
+    fn invalid_optional_fields_are_not_called_structurally_valid() {
+        with_work(
+            r#"{"schema_version":1,"project":"P","active_milestone":42,"contracts":[{"id":"WORK-A","title":"A","status":"ready","depends_on":[],"workstream":true,"execution":{"mode":"unknown","branch":9,"extra":true}}]}"#,
+            |root| {
+                let r = inspect(root);
+                assert_eq!(r.status, "INVALID");
+                assert!(r.findings.iter().any(|f| f.code == "work.optional_field_type"));
+                assert!(r.findings.iter().any(|f| f.code == "work.contract_optional_type"));
+                assert!(r.findings.iter().any(|f| f.code == "work.execution_field"));
             },
         );
     }
