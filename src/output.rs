@@ -34,8 +34,21 @@ fn cache_directory() -> PathBuf {
     env::temp_dir().join("adp-observatory")
 }
 
-fn ensure_directory(directory: &Path, project: &Path) -> Result<PathBuf, String> {
-    fs::create_dir_all(directory).map_err(|e| format!("Cannot create report directory: {e}"))?;
+fn ensure_directory(directory: &Path, project: &Path, create: bool) -> Result<PathBuf, String> {
+    if create {
+        // Refuse an in-project cache root before creating any directories.
+        let mut ancestor = directory;
+        while !ancestor.exists() {
+            ancestor = ancestor.parent().ok_or("No existing report-directory ancestor")?;
+        }
+        let existing = fs::canonicalize(ancestor)
+            .map_err(|e| format!("Cannot resolve report-directory ancestor: {e}"))?;
+        if existing.starts_with(project) {
+            return Err("Reports must be stored outside the analyzed project".into());
+        }
+        fs::create_dir_all(directory)
+            .map_err(|e| format!("Cannot create report directory: {e}"))?;
+    }
     let metadata = fs::symlink_metadata(directory)
         .map_err(|e| format!("Cannot inspect report directory: {e}"))?;
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
@@ -79,13 +92,13 @@ pub fn save(project: &Path, requested: Option<&Path>, html: &str) -> Result<Path
             .parent()
             .filter(|p| !p.as_os_str().is_empty())
             .unwrap_or(Path::new("."));
-        let parent = ensure_directory(directory, project)?;
+        let parent = ensure_directory(directory, project, false)?;
         let destination = parent.join(file_name);
         write_new(&destination, html)?;
         return Ok(destination);
     }
 
-    let directory = ensure_directory(&cache_directory(), project)?;
+    let directory = ensure_directory(&cache_directory(), project, true)?;
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|e| format!("Cannot get time for report filename: {e}"))?
