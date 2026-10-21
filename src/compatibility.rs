@@ -29,12 +29,14 @@ pub struct VersionSource {
 pub fn inspect(root: &Path, work: &WorkInspection) -> Compatibility {
     let protocol = detect_version(root);
     let format = match work.status {
-        "STRUCTURALLY_VALID" => "READABLE",
+        "STRUCTURALLY_VALID" | "UNSUPPORTED_SCHEMA" => "READABLE",
         "INVALID" => "INVALID",
         _ if work.findings.iter().any(|f| f.code == "work.missing") => "NOT_PRESENT",
         _ => "UNREADABLE",
     };
-    let semantics = if format != "READABLE" {
+    let semantics = if work.status == "UNSUPPORTED_SCHEMA" {
+        "UNSUPPORTED"
+    } else if format != "READABLE" {
         "NOT_ASSESSED"
     } else {
         match (protocol.status, protocol.value.as_deref()) {
@@ -214,6 +216,27 @@ mod tests {
             fs::create_dir_all(root.join(".project")).expect("mkdir");
             fs::write(root.join(".project/WORK.json"), r#"{"schema_version":1,"project":"P","contracts":[]}"#)
                 .expect("write");
+            let report = inspect(root, &work::inspect(root));
+            assert_eq!(report.format, "READABLE");
+            assert_eq!(report.semantics, "UNSUPPORTED");
+            assert_eq!(report.conformance, "NOT_ASSESSED");
+        });
+    }
+
+    #[test]
+    fn newer_work_schema_is_displayable_but_not_semantically_supported() {
+        with_project(|root| {
+            fs::write(
+                root.join("ADP.md"),
+                "# ADP.md\n> **Agent Development Protocol — Version 2.7.1**",
+            )
+            .expect("write");
+            fs::create_dir_all(root.join(".project")).expect("mkdir");
+            fs::write(
+                root.join(".project/WORK.json"),
+                r#"{"schema_version":2,"project":"P","contracts":[]}"#,
+            )
+            .expect("write");
             let report = inspect(root, &work::inspect(root));
             assert_eq!(report.format, "READABLE");
             assert_eq!(report.semantics, "UNSUPPORTED");
