@@ -15,6 +15,15 @@ M1 scanner calibration: WORK-SCANNER-001 (in_progress). Parallel M4 trusted dist
 - Experimental Windows x64, Linux x64 and macOS ARM64 preview installation passed (including signature-verification, wrong-SHA rejection, Unicode/spaced-path projects and offline reports): https://github.com/FrederikLive/ADP-Observatory/actions/runs/39660008091.
 - Version-pinned upload-only 0.4.0 release candidate passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120. Artifacts are temporary and **not an official OS-signed release**.
 
+## First Windows coding-agent pilot corrections — 2026-10-21
+
+- A real local Windows agent generated the HTML report and scanned the target, but did not visibly open the user's browser. The agent also copied multiple binaries/reports and unnecessarily created, committed and pushed a WORK.json in the target project. The executable itself did not require these writes.
+- **Code:** Windows HTML opening now uses native ShellExecuteW with shell-compatible paths. CLI prints an explicit browser launch status; Python Agent Skill helper only claims an attempted open after receiving the positive marker.
+- **Safety:** Agent Skill/setup guide prohibit target work-index creation, application tests, Git changes/pushes, unnecessary duplicate installations, and repeated reports during visualization.
+- **Accuracy:** Dashboard differentiates statuses recorded in WORK.json from independent verification, and optional WORK remains optional.
+- **Automated verification:** Rust format/lint/tests and Windows/Linux/macOS native package checks passed after the P0 changes (CI 39668145620; package 39668145354), with additional launcher safety and wording passing CI 39668349597. Final documentation-only commits require latest CI check.
+- **Not yet demonstrated:** Visible browser tab in the user's actual Antigravity session and a manual confirmation that the target project's files/Git state were untouched. Instructions and evidence fields: [docs/WINDOWS-PILOT.md](WINDOWS-PILOT.md).
+
 ## Open items / release governance
 - Official protected GitHub release, operating-system code signing/notarization, one-prompt unattended first-time installation and actual local-desktop browser smoke tests are **not complete**. GitHub rulesets were absent at the last review; owner-controlled protections/approvals remain necessary. See https://github.com/FrederikLive/ADP-Observatory/issues/1.
 - M1 remains open for wider representative user-project calibration, historical version adapters, hostile-input/race hardening, evidence graph and full JSON Schema coverage.
