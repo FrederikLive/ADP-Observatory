@@ -83,9 +83,20 @@ This is the target architecture, not a claim that all components are implemented
 - `docs/DECISIONS.md` — durable architecture/product decisions and open questions.
 - `CHANGELOG.md` — changes to this project.
 
-## Development status
+## Current prototype
 
-The repository is being bootstrapped. See [the roadmap](docs/ROADMAP.md) for planned milestones and acceptance criteria. Features are only considered implemented when the code, tests, documentation, and validation agree.
+A first Rust command-line discovery prototype is present. It walks the selected directory within fixed depth/file limits, skips common generated/vendor directories and symbolic links, and reports a small set of recognized ADP filenames. It does **not** parse project records or assess conformance.
+
+Build and run from a Rust development environment:
+
+```bash
+cargo run -- /path/to/your/project
+cargo run -- /path/to/your/project --json
+```
+
+The JSON output is an early schema and may evolve before a stable release. The prototype is not yet packaged as a downloadable binary, and no launcher or dashboard is available.
+
+See [the roadmap](docs/ROADMAP.md) for milestones and acceptance criteria. Features are only considered implemented when the code, tests, documentation, and validation agree.
 
 ## Contributing
 
