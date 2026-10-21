@@ -3,16 +3,120 @@
   "$id": "https://github.com/FrederikLive/ADP-Observatory/blob/main/schema/scan-report.schema.json",
   "title": "ADP-Observatory scan report",
   "type": "object",
-  "required": ["schema_version", "analyzer_version", "target", "scan_complete", "files_examined", "files_skipped", "adp_markers", "limitations"],
+  "required": [
+    "schema_version",
+    "analyzer_version",
+    "target",
+    "scan_complete",
+    "files_examined",
+    "files_skipped",
+    "adp_markers",
+    "limitations",
+    "work_index"
+  ],
   "properties": {
-    "schema_version": {"type": "string"},
-    "analyzer_version": {"type": "string"},
-    "target": {"type": "string"},
-    "scan_complete": {"type": "boolean"},
-    "files_examined": {"type": "integer", "minimum": 0},
-    "files_skipped": {"type": "integer", "minimum": 0},
-    "adp_markers": {"type": "array", "items": {"type": "string"}},
-    "limitations": {"type": "array", "items": {"type": "string"}}
+    "schema_version": {
+      "type": "string"
+    },
+    "analyzer_version": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "scan_complete": {
+      "type": "boolean"
+    },
+    "files_examined": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_skipped": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "adp_markers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "work_index": {
+      "type": "object",
+      "required": [
+        "status",
+        "project",
+        "active_contract",
+        "contract_count",
+        "findings"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "UNKNOWN",
+            "INVALID",
+            "STRUCTURALLY_VALID"
+          ]
+        },
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "active_contract": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code",
+              "severity",
+              "message",
+              "source"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "severity": {
+                "enum": [
+                  "info",
+                  "warning",
+                  "error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
   },
   "additionalProperties": false
 }
