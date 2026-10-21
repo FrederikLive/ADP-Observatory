@@ -1,21 +1,34 @@
-# ADP Integration Proposal
+# ADP Integration — Compatibility-First Decision
 
-**Status: proposal only.** This document does not change the normative ADP specification. Any amendment must be reviewed and merged separately in FrederikLive/ADP under its contribution and versioning rules.
+**Status: design decision, not a normative ADP amendment.** Canonical ADP remains in FrederikLive/ADP. No changes to ADP.md, ADP.min.md, or its schema are authorized or needed at this stage.
 
-## Principle
-ADP defines project behavior and evidence semantics. Observatory reads and analyzes those records. It must not become a required ADP dependency or create a competing source of truth.
+## Protected ADP intent
+ADP optimizes agent throughput, low token consumption, minimal context retrieval, project understanding, durable history, and reliable cold-session continuity. Observatory exists to help humans visualize that existing information. **The analyzer must adapt to the protocol, never require the protocol to serve the analyzer.**
 
-## Candidate minimal additions
-Prefer a short optional subsection in an existing ADP section rather than a new core protocol:
-1. **Optional analysis tooling:** projects MAY use local or CI analyzers; no specific product or dashboard is required.
-2. **Evidence traceability:** where machine-readable records already exist, tools SHOULD preserve stable identifiers and source references. Do not mandate a new manifest solely for visualization.
-3. **Metric transparency:** metrics SHOULD state definition, applicability, evidence sources, calculation time, completeness, and limitations.
-4. **Unknown semantics:** missing or unsupported data MUST NOT be silently treated as zero, complete, or passing.
-5. **Source-of-truth protection:** analysis output is derived evidence and MUST NOT supersede canonical project records.
-6. **Authorization boundary:** analysis tooling SHOULD be read-only by default; modifying status, reconciling findings, or writing canonical records requires explicit authorization.
+## Assessment against ADP 2.7.1
+ADP already has a reading policy, AGENTS.md router, source-of-truth ownership, continuity records, evidence and verification requirements, optional WORK.json, and external-analysis reconciliation. Its WORK schema already supports IDs, statuses, dependencies, contract paths, and execution metadata. These are sufficient to start Observatory without changing the protocol.
 
-## Change threshold
-Add normative requirements only if they improve interoperable ADP behavior for projects that do not use Observatory too. Keep metric catalogues, schemas, UI, launchers, storage, and implementation-specific checks here. Before proposing an amendment, map candidate rules to existing ADP sections, check overlap/conflicts, explain compatibility/security/autonomy/continuity/burden, update ADP.md and ADP.min.md plus metadata/validator as required, and test against a project using an analyzer and one without one. Prefer PATCH for clarification/correction and MINOR for backward-compatible normative additions. Choose version only after reviewing the actual diff.
+## Decision
+1. Do **not** introduce a tenth protocol, mandatory interoperability profile, mandatory evidence registry, event log, relationship manifest, dashboard metadata, or additional routine agent reads.
+2. Do **not** change the existing WORK.json schema solely for Observatory.
+3. Reuse IDs, links, and evidence references where they already exist. Infer candidate relationships conservatively with provenance; do not promote guesses to authoritative relationships.
+4. Implement version-aware, fault-tolerant adapters in Observatory, including unknown-version and incomplete-project modes.
+5. Separate parse compatibility, semantic compatibility, and conformance coverage; never turn unsupported or missing data into passing or failing verdicts.
+6. Keep optional snapshots in Observatory, not in the scanned project.
+
+## Future ADP change gate
+Only revisit ADP when repeated real-project tests show a concrete interoperability gap that also matters for agent efficiency, understanding, or continuity *without Observatory*. A candidate must:
+- Identify the existing rule it clarifies and avoid duplication.
+- Demonstrate benefit for projects without Observatory.
+- Estimate additional agent reading/writing and token overhead.
+- Be backward-compatible or include migration and versioning rationale.
+- Preserve one canonical owner per concern.
+- Pass tests on minimal, mature, old, and incomplete ADP projects.
+
+Prefer no change. If evidence warrants one, propose the smallest clarification to an existing ADP section and follow canonical ADP's versioning and validation procedures. This repository does not grant itself authority to amend ADP.
+
+## Compatibility testing
+Use fixtures for no WORK.json, missing continuity, conflicting claims, invalid JSON, broken contract links, older ADP versions, future/unknown versions, and extra project-specific files. Track false positives, unsupported coverage, and partial-scan behavior.
 
 ## Feedback loop
-Observatory findings may reveal repeated friction or ambiguous conventions. They are research candidates, not automatic protocol changes. Require multiple examples, interoperability benefit, acceptable burden, and human review.
+Observatory may identify candidate ADP improvements, but observations do not become normative rules automatically. A human-reviewed proposal must show interoperability benefit and acceptable cost to agent operation.
