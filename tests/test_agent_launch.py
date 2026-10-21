@@ -105,6 +105,19 @@ class AgentLaunchTests(unittest.TestCase):
         runner.assert_called_once()
         self.assertNotIn("scan", runner.call_args.args[0])
 
+    def test_detects_duplicate_executable_without_running_it(self):
+        other = Path(self.tmp.name) / "old-observatory"
+        other.write_text("old copy", encoding="utf8")
+        other.chmod(0o755)
+        with mock.patch.object(launch, "executable_candidates", return_value=[self.binary, other]):
+            found = launch.alternate_installations(self.project, self.binary.resolve(), None)
+        self.assertEqual(found, [str(other.resolve())])
+        with mock.patch.object(launch, "executable_candidates", return_value=[self.binary, other]):
+            self.assertEqual(
+                launch.alternate_installations(self.project, self.binary.resolve(), str(self.binary)),
+                [],
+            )
+
     def test_remote_host_does_not_claim_browser(self):
         for variable in ("CI", "SSH_CONNECTION", "SSH_TTY"):
             with mock.patch.dict(os.environ, {variable: "true"}):
