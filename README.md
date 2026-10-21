@@ -63,9 +63,9 @@ Each metric must document its formula, unit, applicability, source evidence, tim
 ## Architecture direction
 
 - **Analysis engine:** Rust, for a portable, single-binary core and deterministic repository analysis.
-- **Dashboard:** local browser UI; framework remains an open decision (TypeScript/React is a candidate).
+- **Dashboard:** initial responsive, self-contained, offline HTML overview is implemented in Rust; richer UI and history remain planned.
 - **Local persistence:** SQLite for scan snapshots and metric history; source project files remain untouched.
-- **Interface:** local HTTP API bound to loopback only, with origin/host protections and a per-run secret where appropriate.
+- **Interface:** the current offline HTML report has no HTTP server; a future live dashboard API would need loopback binding and origin/host protection.
 - **Release delivery:** signed or otherwise verifiable release metadata, checksums, platform-specific artifacts, and minimal launchers.
 - **Validation:** unit/integration fixtures, golden test repositories, security checks, and CI.
 
@@ -85,7 +85,7 @@ This is the target architecture, not a claim that all components are implemented
 
 ## One-command launch direction
 
-The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **The offline dashboard is implemented in the development CLI**, but no verified installer or official release exists yet. Today the application runs from a Rust checkout or experimental CI artifact.
+The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **The offline dashboard and headless scan are implemented in the development CLI**, and experimental binaries can be verified manually; no trusted installed launcher or official release exists yet. Today the application runs from a Rust checkout or experimental CI artifact.
 
 Install-once, verified native releases are the preferred first delivery mechanism. A safe first-run download-and-execute helper may follow, but it must verify publisher identity and artifact integrity before running. We will not use blind remote-script execution or require installation inside every ADP repository. See [the launcher and distribution design](docs/LAUNCHER.md).
 
@@ -104,7 +104,7 @@ cargo run --manifest-path /absolute/path/to/ADP-Observatory/Cargo.toml -- scan .
 
 The first command produces a **standalone offline HTML dashboard** in the user's application cache directory and attempts to open it in the default browser. The second produces headless JSON without opening a browser. Use `--no-open` to generate a dashboard without starting a browser, or `report . --output /outside/project/report.html` to choose an existing external output directory. Generated reports contain local project paths and should be treated as potentially sensitive.
 
-The evolving JSON report schema is `0.4.0` in `schema/scan-report.schema.json` (analyzer development version `0.4.0`). It now separates traversal coverage from interpretation and reports bounded contract-file reference status; a referenced file being present does not prove conformance or verification. Tests cover current, older, future, malformed, conflicting, missing-record, and safe/unsafe contract-reference fixtures. CI also runs Observatory against its own ADP work records. The browser view is offline, has no listening HTTP server and uses no external assets. Experimental unsigned Windows/macOS/Linux CI packages are being tested; they are not signed or published as official verified releases. Persistent metrics and historical snapshots are not implemented.
+The evolving JSON report schema is `0.4.0` in `schema/scan-report.schema.json` (analyzer development version `0.4.0`). It now separates traversal coverage from interpretation and reports bounded contract-file reference status; a referenced file being present does not prove conformance or verification. Tests cover current, older, future, malformed, conflicting, missing-record, and safe/unsafe contract-reference fixtures. CI also runs Observatory against its own ADP work records. The browser view is offline, has no listening HTTP server and uses no external assets. Experimental Windows/macOS/Linux GitHub Actions binaries have passed cross-platform tests and carry GitHub/Sigstore-signed build provenance, but are not operating-system code-signed or published as official releases. Manual verification instructions are in docs/LAUNCHER.md. Persistent metrics and historical snapshots are not implemented.
 
 See [the roadmap](docs/ROADMAP.md) for milestones and acceptance criteria. Features are only considered implemented when the code, tests, documentation, and validation agree.
 
