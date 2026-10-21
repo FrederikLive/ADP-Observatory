@@ -1,5 +1,7 @@
 # WORK-UI-001 — Local dashboard and prototype distribution
 
+> **Disposition (2026-10-21): DEFERRED / superseded.** This combined UI-and-packaging scope was split into [WORK-DASHBOARD-001](WORK-DASHBOARD-001.md), whose initial offline viewer is verified, and [WORK-DISTRIBUTION-001](WORK-DISTRIBUTION-001.md), which owns provenance and installation. The original contract details below are retained as history. Do not treat this umbrella contract as a separate active implementation task.
+
 ## Outcome
 A useful, read-only project visualization launched from a project directory, with headless scan output retained and a tested packaging path toward a trusted one-command installation.
 
