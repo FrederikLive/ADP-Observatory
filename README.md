@@ -83,6 +83,34 @@ This is the target architecture, not a claim that all components are implemented
 - `docs/DECISIONS.md` — durable architecture/product decisions and open questions.
 - `CHANGELOG.md` — changes to this project.
 
+## Ask your coding agent: "Show Observatory"
+
+An optional, [on-demand Observatory Agent Skill](skills/adp-observatory/SKILL.md)
+lets ADP-aware local coding agents discover how to show the project dashboard
+without adding routine instructions or new records to ADP projects. The
+[local launch helper](skills/adp-observatory/scripts/launch.py) searches for
+previously approved Observatory installations, refuses project-local
+executables, generates an offline report, and requests browser opening only
+when a local desktop appears available. It reports an HTML path when running
+headlessly.
+
+Example from an agent's **trusted local Observatory checkout**:
+
+```sh
+python3 /path/to/ADP-Observatory/skills/adp-observatory/scripts/launch.py --project /path/to/ADP-project
+```
+
+The helper is standard-library only and performs **no downloads**. A user or
+trusted environment must still approve and verify first-time installation;
+there is currently no official protected public release or fully unattended
+installer. Remote/cloud-only agents cannot guarantee opening a window on the
+user's local computer. Agents may use a previously trusted executable
+directly even when this helper is not locally available.
+
+The canonical [ADP protocol](https://github.com/FrederikLive/ADP) contains
+only a short conditional pointer to the skill. Daily agent work and ADP
+conformance do not depend on Observatory.
+
 ## One-command launch direction
 
 The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **The offline dashboard and headless scan are implemented in the development CLI**, and experimental binaries can be verified manually; no trusted installed launcher or official release exists yet. Today the application runs from a Rust checkout or experimental CI artifact.
