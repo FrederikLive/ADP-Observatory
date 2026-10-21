@@ -6,7 +6,7 @@ ADP-Observatory turns the evidence already present in an ADP-enabled repository 
 
 It is an optional companion—not part of ADP's normative core, not a replacement for project records, and not a second source of truth.
 
-> **Project status:** Early design and bootstrap. Metrics and product behavior described here are intended requirements until implemented and verified. The first releases must label unavailable data honestly and must not present illustrative data as real project results.
+> **Project status:** Early development (M1 scanner). Metrics and product behavior described here are intended requirements until implemented and verified. The first releases must label unavailable data honestly and must not present illustrative data as real project results.
 
 ## Goals
 
@@ -63,7 +63,7 @@ Each metric must document its formula, unit, applicability, source evidence, tim
 ## Architecture direction
 
 - **Analysis engine:** Rust, for a portable, single-binary core and deterministic repository analysis.
-- **Dashboard:** TypeScript and React, served locally by the application.
+- **Dashboard:** local browser UI; framework remains an open decision (TypeScript/React is a candidate).
 - **Local persistence:** SQLite for scan snapshots and metric history; source project files remain untouched.
 - **Interface:** local HTTP API bound to loopback only, with origin/host protections and a per-run secret where appropriate.
 - **Release delivery:** signed or otherwise verifiable release metadata, checksums, platform-specific artifacts, and minimal launchers.
@@ -85,7 +85,9 @@ This is the target architecture, not a claim that all components are implemented
 
 ## Current prototype
 
-A first Rust command-line discovery prototype is present. It walks the selected directory within fixed depth/file limits, skips common generated/vendor directories and symbolic links, and reports a small set of recognized ADP filenames. It does **not** parse project records or assess conformance.
+The Rust CLI now discovers selected ADP markers and safely inspects optional `.project/WORK.json` records using the supported schema-v1 structural rules. It can detect explicit protocol versions, display a limited compatibility report, examine `docs/STATUS.md` and `docs/CONTINUITY.md`, and preserve conflicting active-contract claims with source references. Missing or invalid files do not stop independent analysis.
+
+Semantic support currently means **WORK.json schema v1 for an explicitly identified ADP 2.7.1 project**, not complete understanding of the protocol. Older, newer, and unknown versions remain displayable where format parsing is safe, but are not declared fully supported. **Full ADP conformance is never assessed by this prototype.**
 
 Build and run from a Rust development environment:
 
@@ -94,7 +96,7 @@ cargo run -- /path/to/your/project
 cargo run -- /path/to/your/project --json
 ```
 
-The JSON output is an early schema and may evolve before a stable release. The prototype is not yet packaged as a downloadable binary, and no launcher or dashboard is available.
+The evolving JSON schema is `0.2.0` in `schema/scan-report.schema.json`. Tests cover current, older, future, malformed, conflicting, and missing-record fixtures. The CLI has not yet been packaged as a downloadable cross-platform release, and no launcher or dashboard is available.
 
 See [the roadmap](docs/ROADMAP.md) for milestones and acceptance criteria. Features are only considered implemented when the code, tests, documentation, and validation agree.
 
