@@ -58,11 +58,10 @@ Build a fixture matrix across supported old/current/newer/unknown versions, miss
 ## Future extensions
 Third-party plugins, automatic migrations, write-capable repair, or network services require separate security/compatibility design and explicit authorization. None is required for ADP projects.
 
-
 ## Implemented M1 scanner behavior (development 0.3.0)
 
-- Discovery is bounded by depth, entry count, and file-size policy. It reports \`COMPLETE\`, \`COMPLETE_WITH_EXCLUSIONS\`, or \`PARTIAL\`; intentional exclusions do not silently become traversal failures. The legacy \`scan_complete\` boolean means traversal finished within the declared policy, **not** that every record was understood or verified.
-- Optional schema-v1 \`contract_file\` references are checked against the selected root using portable relative paths and metadata-only inspection. Traversal (\`..\`), absolute or ambiguous paths, symlinks at any component, and non-file destinations are rejected or explicitly classified. Existence is **not** verification.
+- Discovery is bounded by depth, entry count, and file-size policy. It reports `COMPLETE`, `COMPLETE_WITH_EXCLUSIONS`, or `PARTIAL`; intentional exclusions do not silently become traversal failures. The legacy `scan_complete` boolean means traversal finished within the declared policy, **not** that every record was understood or verified.
+- Optional schema-v1 `contract_file` references are checked against the selected root using portable relative paths and metadata-only inspection. Traversal (`..`), absolute or ambiguous paths, symlinks at any component, and non-file destinations are rejected or explicitly classified. Existence is **not** verification.
 - Reference checks are limited to 2,000 per scan; reaching the limit is explicitly reported. One broken or unsafe reference does not suppress other results or invalidate a structurally well-formed work index.
 - Compatibility and conformance remain distinct: the scanner is **not** a full ADP conformance evaluator.
 - Version compatibility beyond explicitly supported semantics, file-descriptor-level race hardening, comprehensive real-repository calibration, and full JSON Schema validation are outstanding.
