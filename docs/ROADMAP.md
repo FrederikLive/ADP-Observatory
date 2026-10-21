@@ -34,12 +34,16 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** partial scan cannot appear fully healthy; history is local, optional, transparent.
 
 ## M4 — Cross-platform release and launchers
-- [ ] Confirm OS/architecture support.
-- [ ] Package versioned artifacts and publish integrity metadata.
-- [ ] Implement launchers that download official artifacts and verify before execution.
-- [ ] Test Unicode paths, spaces, offline use, corrupt downloads, interrupted updates, uninstall.
-- [ ] Publish provenance/SBOM and signing where feasible.
-**Exit:** supported platforms have repeatable release tests and safe update/uninstall.
+**Status:** Requirements documented in [docs/LAUNCHER.md](LAUNCHER.md); no installer or downloadable release exists yet.
+- [ ] Confirm and test actual Windows, macOS, and Linux OS/CPU support.
+- [ ] Package tagged executable artifacts and independently verifiable publisher/release metadata.
+- [ ] Support install-once execution from any project directory: `adp-observatory .`; keep headless CLI mode for JSON and CI.
+- [ ] Provide a trusted per-user installation path without administrator/root privileges; keep binaries outside target repositories.
+- [ ] Evaluate an optional one-shot first-run launcher only when executable verification is feasible.
+- [ ] Test Unix/Windows paths, Unicode, corrupted or malicious downloads, offline use, platform mismatch, and uninstall.
+- [ ] Provide a verified update/version pinning story; document provenance/SBOM and signing.
+- [ ] Update ADP's human-only Observatory guide with real, verified install commands only after releases exist.
+**Exit:** an end user can install without a compiler and invoke Observatory from a project directory, with verified release integrity and repeatable platform acceptance tests.
 
 ## M5 — Pilot and calibration
 - [ ] Run against ADP and representative permissioned projects.
