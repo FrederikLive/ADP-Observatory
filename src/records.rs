@@ -55,7 +55,11 @@ pub fn inspect(root: &Path, work: &WorkInspection) -> ContextInspection {
             }),
             Ok(Some(text)) => {
                 for (line, value) in parse_explicit_active_contract(&text) {
-                    claims.push(Claim { path, line: Some(line), value });
+                    claims.push(Claim {
+                        path,
+                        line: Some(line),
+                        value,
+                    });
                 }
                 records.push(ContextRecord {
                     path,
@@ -136,15 +140,18 @@ fn parse_explicit_active_contract(text: &str) -> Vec<(usize, String)> {
         let remainder = if in_section {
             Some(trimmed)
         } else {
-            trimmed
-                .split_once(':')
-                .and_then(|(label, value)| {
-                    if label.trim().trim_start_matches('-').trim().eq_ignore_ascii_case("active contract") {
-                        Some(value)
-                    } else {
-                        None
-                    }
-                })
+            trimmed.split_once(':').and_then(|(label, value)| {
+                if label
+                    .trim()
+                    .trim_start_matches('-')
+                    .trim()
+                    .eq_ignore_ascii_case("active contract")
+                {
+                    Some(value)
+                } else {
+                    None
+                }
+            })
         };
         if let Some(value) = remainder {
             if let Some(id) = extract_work_id(value) {
@@ -220,8 +227,11 @@ mod tests {
                 r#"{"schema_version":1,"project":"P","active_contract":"WORK-1","contracts":[{"id":"WORK-1","title":"First","status":"ready","depends_on":[]}]}"#,
             )
             .expect("write");
-            fs::write(root.join("docs/CONTINUITY.md"), "# Continuity\n## Active contract\nWORK-2\n")
-                .expect("write");
+            fs::write(
+                root.join("docs/CONTINUITY.md"),
+                "# Continuity\n## Active contract\nWORK-2\n",
+            )
+            .expect("write");
             let report = inspect(root, &work::inspect(root));
             assert_eq!(report.conflicts.len(), 1);
             assert_eq!(report.conflicts[0].claims.len(), 2);
@@ -231,9 +241,8 @@ mod tests {
 
     #[test]
     fn prose_without_explicit_field_is_not_invented_as_a_claim() {
-        let claims = parse_explicit_active_contract(
-            "# Status\n## Background\nWORK-99 was once active.\n",
-        );
+        let claims =
+            parse_explicit_active_contract("# Status\n## Background\nWORK-99 was once active.\n");
         assert!(claims.is_empty());
     }
 
@@ -242,8 +251,11 @@ mod tests {
         with_project(|root| {
             fs::create_dir_all(root.join("docs")).expect("mkdir");
             fs::write(root.join("docs/STATUS.md"), [0xff, 0xfe]).expect("write");
-            fs::write(root.join("docs/CONTINUITY.md"), "# Context\n## Active contract\nWORK-3\n")
-                .expect("write");
+            fs::write(
+                root.join("docs/CONTINUITY.md"),
+                "# Context\n## Active contract\nWORK-3\n",
+            )
+            .expect("write");
             let report = inspect(root, &work::inspect(root));
             assert_eq!(report.records[0].state, "UNREADABLE");
             assert_eq!(report.records[1].state, "READABLE");
@@ -270,8 +282,7 @@ mod tests {
         with_project(|root| {
             fs::create_dir_all(root.join("docs")).expect("mkdir");
             fs::write(root.join("outside.md"), "## Active contract\nWORK-7").expect("write");
-            symlink(root.join("outside.md"), root.join("docs/CONTINUITY.md"))
-                .expect("symlink");
+            symlink(root.join("outside.md"), root.join("docs/CONTINUITY.md")).expect("symlink");
             let report = inspect(root, &work::inspect(root));
             assert_eq!(report.records[1].state, "UNREADABLE");
         });
