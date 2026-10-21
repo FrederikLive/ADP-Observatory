@@ -458,7 +458,7 @@ mod tests {
         let page = render(&report);
         assert!(page.contains("recorded: verified"));
         assert!(page.contains("Declared records; statuses are not independently verified"));
-        assert!(!page.contains("<span class=\\"tag ok\\">verified</span>"));
+        assert!(!page.contains(r#"<span class="tag ok">verified</span>"#));
         assert!(page.contains("Conformance is not assessed"));
     }
 
