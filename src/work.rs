@@ -133,20 +133,20 @@ pub fn inspect(root: &Path) -> WorkInspection {
     if schema_version.is_some_and(|version| version > 1) {
         result.status = "UNSUPPORTED_SCHEMA";
         for key in [
-        "active_milestone",
-        "active_contract",
-        "next_milestone",
-        "next_contract",
-    ] {
-        if object.get(key).is_some_and(|v| !nullable_string(v)) {
-            result.findings.push(finding(
-                "work.optional_field_type",
-                "error",
-                format!("{key} must be a string or null."),
-            ));
+            "active_milestone",
+            "active_contract",
+            "next_milestone",
+            "next_contract",
+        ] {
+            if object.get(key).is_some_and(|v| !nullable_string(v)) {
+                result.findings.push(finding(
+                    "work.optional_field_type",
+                    "error",
+                    format!("{key} must be a string or null."),
+                ));
+            }
         }
-    }
-    result.project = object
+        result.project = object
             .get("project")
             .and_then(|v| v.as_str())
             .map(str::to_owned);
@@ -426,8 +426,14 @@ mod tests {
             |root| {
                 let r = inspect(root);
                 assert_eq!(r.status, "INVALID");
-                assert!(r.findings.iter().any(|f| f.code == "work.optional_field_type"));
-                assert!(r.findings.iter().any(|f| f.code == "work.contract_optional_type"));
+                assert!(r
+                    .findings
+                    .iter()
+                    .any(|f| f.code == "work.optional_field_type"));
+                assert!(r
+                    .findings
+                    .iter()
+                    .any(|f| f.code == "work.contract_optional_type"));
                 assert!(r.findings.iter().any(|f| f.code == "work.execution_field"));
             },
         );
