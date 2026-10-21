@@ -2,11 +2,11 @@
 
 **A local-first analysis and visualization companion for Agent Development Protocol (ADP) projects.**
 
-ADP-Observatory turns the evidence already present in an ADP-enabled repository into a clear, traceable view of project progress, verification, conformance, risks, continuity, and change over time.
+ADP-Observatory helps people understand the evidence already present in an ADP-enabled repository: project progress, work contracts, verification, risks, continuity, and what can or cannot be assessed. It provides a **read-only view of the project**, not a second source of truth or an alternative development workflow.
 
-It is an optional companion—not part of ADP's normative core, not a replacement for project records, and not a second source of truth.
+**Your project stays untouched.** During a normal scan or dashboard launch, Observatory reads supported project files but does not modify source code, `ADP.md`, `AGENTS.md`, work records, Git history, `.gitignore`, or any other file within the analyzed repository. It does not execute project scripts or automatically install dependencies. Generated reports and application files are kept **outside** the repository, so you do not need to add Observatory entries to your project's `.gitignore`.
 
-> **Project status:** Early development (M1 scanner). Metrics and product behavior described here are intended requirements until implemented and verified. The first releases must label unavailable data honestly and must not present illustrative data as real project results.
+> **Project status:** Early development (M1 scanner with a working offline HTML viewer). Historical metrics, snapshots, and broader analysis remain planned. Missing or unsupported evidence is reported honestly; an Observatory report is not a full ADP conformance assessment.
 
 ## Compatibility with current ADP Actions (21 October 2026)
 
@@ -16,26 +16,41 @@ The current [ADP main revision](https://github.com/FrederikLive/ADP/commit/9b5ab
 
 With a previously approved installed binary, a local agent can invoke the skill's [offline launch helper](skills/adp-observatory/scripts/launch.py). Browser opening depends on real local desktop/process access; hosted agents cannot guarantee a window on the user's desktop. First-time automatic installation remains blocked on verified official release governance; no download is executed merely because the project uses ADP.
 
-## Goals
+## Core objectives
 
-- Let a project owner launch analysis with a small platform-appropriate launcher.
-- Scan a local repository without requiring the user to install a development toolchain.
-- Understand ADP work structures, applicable requirements, verification evidence, continuity records, and external-analysis reconciliation.
-- Present evidence-linked findings, useful metrics, and an interactive local dashboard.
-- Preserve history through explicit snapshots so trends are based on observed data, not invented history.
-- Keep project data local by default, with no account or telemetry requirement.
-- Keep the analyzer version-aware and extensible without bloating ADP itself.
+1. **Observe, never interfere.** Analyze the existing ADP project **read-only by default**. Do not rewrite project files, change task statuses, update Git, edit `.gitignore`, execute project scripts, or require changes to the project's structure.
+2. **Protect ADP's original purpose.** ADP exists to help coding agents work efficiently, conserve tokens, preserve dependable project knowledge, and resume work accurately. Observatory must adapt to the information ADP already provides—**not** create new mandatory records, agent instructions, or routine bookkeeping just to power a dashboard.
+3. **Make project state understandable.** Show the available work contracts, progress, evidence, risks, conflicts and continuity in a clear human-facing view. Link findings to real sources where supported, and distinguish reported facts from interpretations.
+4. **Be transparent about uncertainty.** A missing optional file is not automatically a defect; a discovered file is not proof that work was verified. Clearly label unknown, incomplete, incompatible and unassessed information. Never invent historical trends or an ADP conformance verdict.
+5. **Keep data local and private.** Generate reports locally without a required cloud account, telemetry, or automatic project-data uploads. Reports may reveal internal file paths and project details, so users control their storage and sharing.
+6. **Be easy to use without changing the project.** Aim for an install-once application that a user or authorized coding agent can launch from any ADP project. Keep the executable, generated reports, caches and future optional snapshots in user-controlled locations **outside the analyzed repository**.
+7. **Remain compatible and independent.** Tolerate older, newer, partial and inconsistent ADP projects where safe; remain an optional companion rather than another ADP protocol or a prerequisite for agent development.
 
-## Intended user flow
+### What Observatory changes — and what it does not
 
-1. The user creates or maintains a project using ADP.
-2. They obtain the official launcher for their operating system.
-3. The launcher detects the platform, downloads the matching published release, verifies its integrity, and starts the application.
-4. The application asks for or receives the target project directory, scans it read-only, and runs applicable checks.
-5. A browser opens to a loopback-only dashboard with evidence-linked results.
-6. On later runs, optional local snapshots provide honest trends and regression comparisons.
+| Area | Behavior during normal scanning and dashboard use |
+| --- | --- |
+| **Project source code, documentation and ADP records** | Read for analysis; **not edited, replaced, generated or deleted** |
+| **`.gitignore`, Git commits and branches** | **Not modified**; no Git commit, checkout, reset or push is performed |
+| **Project dependencies, scripts, tests and hooks** | **Not installed or executed** by the analyzer |
+| **Observatory executable and application cache** | Stored separately from the analyzed project, in approved user-level locations |
+| **HTML dashboards and derived results** | Created **outside** the analyzed repository; default HTML output uses a local application cache |
+| **Network access and project data** | Local analysis works offline; **no automatic upload or telemetry** |
+| **Optional future snapshots** | Planned as separate, user-controlled Observatory data—not canonical ADP project records |
 
-The first-run experience should not require Rust, Node.js, Python, administrator/root privileges, a cloud account, or an internet connection after a verified release has been downloaded—except where a feature explicitly needs network access.
+**No `.gitignore` changes are necessary.** The current report writer rejects output paths inside the analyzed project. Installing or updating Observatory is a separate, authorized operation: the app can create its **own** files outside the project, but that is not permission to modify the project itself. If a user explicitly wants an in-project export or integration in the future, it must be separately designed and authorized; it is not the default behavior.
+
+See [Security and Privacy](docs/SECURITY.md) and [ADP Integration](docs/ADP-INTEGRATION.md) for the technical boundaries.
+
+## How it works
+
+1. **Choose a project.** Open a terminal in an ADP project or ask a local coding agent to **"Show Observatory."** Observatory receives the selected project directory; it does not need to be copied into that project.
+2. **Scan without changing it.** The analyzer reads supported records, safely handles absent or inconsistent data, and reports findings and limitations without running the project's code or rewriting its files.
+3. **Generate the dashboard elsewhere.** The current development executable creates a self-contained offline HTML report in a user-level application cache **outside the project**. No HTTP server or external page resources are required.
+4. **View the result.** On a supported local desktop, the executable attempts to open that report in the default browser. In CI or a remote/headless environment, it returns the report path instead of claiming to open the user's browser.
+5. **Close or remove reports independently.** Generated reports belong to Observatory's local output location, not to the project's source of truth or Git history.
+
+**Installation status:** The working development CLI and verified experimental platform packages are available, but a protected official release and no-prerequisite automatic first-time installer have not yet shipped. Approved first-time installation is handled separately and must verify executable provenance. The long-term goal is an install-once experience without requiring a compiler or additional development toolchain.
 
 ## Product boundaries
 
