@@ -64,6 +64,15 @@ fn malformed_json_does_not_hide_valid_continuity_data() {
 }
 
 #[test]
+fn older_version_is_not_assumed_semantically_compatible() {
+    let report = scan("older");
+    assert_eq!(report["compatibility"]["protocol"]["value"], "2.6.0");
+    assert_eq!(report["compatibility"]["format"], "READABLE");
+    assert_eq!(report["compatibility"]["semantics"], "UNSUPPORTED");
+    assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
+}
+
+#[test]
 fn future_schema_remains_readable_without_unverified_semantics() {
     let report = scan("future");
     assert_eq!(report["compatibility"]["protocol"]["value"], "3.0.0");
