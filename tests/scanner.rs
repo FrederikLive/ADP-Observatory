@@ -31,7 +31,10 @@ fn current_version_reads_structured_work_without_claiming_conformance() {
     assert_eq!(report["compatibility"]["format"], "READABLE");
     assert_eq!(report["compatibility"]["semantics"], "SUPPORTED");
     assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
-    assert!(report["context"]["conflicts"].as_array().expect("conflicts").is_empty());
+    assert!(report["context"]["conflicts"]
+        .as_array()
+        .expect("conflicts")
+        .is_empty());
 }
 
 #[test]
@@ -42,7 +45,10 @@ fn absent_optional_work_index_does_not_fail_independent_context() {
     assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
     assert_eq!(report["context"]["records"][0]["state"], "MISSING");
     assert_eq!(report["context"]["records"][1]["state"], "READABLE");
-    assert_eq!(report["context"]["active_contract_claims"][0]["value"], "WORK-PARTIAL");
+    assert_eq!(
+        report["context"]["active_contract_claims"][0]["value"],
+        "WORK-PARTIAL"
+    );
 }
 
 #[test]
@@ -51,7 +57,10 @@ fn malformed_json_does_not_hide_valid_continuity_data() {
     assert_eq!(report["work_index"]["status"], "INVALID");
     assert_eq!(report["compatibility"]["format"], "INVALID");
     assert_eq!(report["context"]["records"][1]["state"], "READABLE");
-    assert_eq!(report["context"]["active_contract_claims"][0]["value"], "WORK-SURVIVES");
+    assert_eq!(
+        report["context"]["active_contract_claims"][0]["value"],
+        "WORK-SURVIVES"
+    );
 }
 
 #[test]
