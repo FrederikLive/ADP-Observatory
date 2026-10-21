@@ -59,7 +59,8 @@
         "contract_count",
         "findings",
         "contract_files",
-        "reference_inspection_limited"
+        "reference_inspection_limited",
+        "contracts"
       ],
       "properties": {
         "status": {
@@ -165,6 +166,50 @@
         },
         "reference_inspection_limited": {
           "type": "boolean"
+        },
+        "contracts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "status",
+              "workstream",
+              "depends_on",
+              "contract_file"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "workstream": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "depends_on": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "contract_file": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
