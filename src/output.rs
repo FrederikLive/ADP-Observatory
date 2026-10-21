@@ -49,7 +49,7 @@ fn ensure_directory(directory: &Path, project: &Path, create: bool) -> Result<Pa
         }
         let existing = fs::canonicalize(ancestor)
             .map_err(|e| format!("Cannot resolve report-directory ancestor: {e}"))?;
-        if existing.starts_with(project) {
+        if existing.starts_with(&project) {
             return Err("Reports must be stored outside the analyzed project".into());
         }
         fs::create_dir_all(directory)
@@ -62,7 +62,7 @@ fn ensure_directory(directory: &Path, project: &Path, create: bool) -> Result<Pa
     }
     let canonical =
         fs::canonicalize(directory).map_err(|e| format!("Cannot resolve report directory: {e}"))?;
-    if canonical.starts_with(project) {
+    if canonical.starts_with(&project) {
         return Err("Reports must be saved outside the analyzed project".into());
     }
     Ok(canonical)
