@@ -59,3 +59,17 @@ Measure finding precision/recall on curated fixtures, percentage of evidence-lin
 
 ## Release gate
 Do not call a release production-ready until platform support, artifact integrity, threat model, fixture coverage, false-positive review, accessibility basics, version compatibility, update/uninstall behavior, and machine-readable schema are documented and tested.
+
+## ADP-first compatibility requirements (approved design direction)
+
+Observatory MUST NOT require extra ADP records, metadata, events, agent prompts, or protocol changes. Its primary audience is humans visualizing the project; machine output is an optional secondary interface.
+
+- **FR-16 Zero overhead:** scanning a project requires no modification or new recurring agent work. Existing optional ADP records remain optional.
+- **FR-17 Version-aware interpretation:** independently disclose format readability, semantic support, and conformance coverage. Support tested historical adapters; unknown/newer versions use safe common-field display without unverified conformance claims.
+- **FR-18 Graceful degradation:** missing, malformed, unsupported, or inconsistent records do not prevent independent findings from appearing. A single bad file cannot invalidate the entire scan.
+- **FR-19 Conflict visibility:** show contradictory claims and their source locations; never silently prefer the latest file.
+- **FR-20 Honest applicability:** missing optional WORK.json is not itself a violation; only assess requirements applicable to the project's protocol version and scope.
+- **FR-21 No silent migration:** do not rewrite old records, repair links, or introduce analyzer-specific files during scans.
+- **FR-22 Adapter fixtures:** test old/current/unknown versions, absent optional records, malformed input, broken links, and contradictory states; measure false positives and partial-result usability.
+
+**Compatibility acceptance:** an unsupported version or incomplete project must still produce useful safe discovery where possible, with explicit limitations and without crashes, target writes, or invented green conformance.
