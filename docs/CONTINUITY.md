@@ -11,7 +11,7 @@ M1 — analysis engine — WORK-SCANNER-001 (in_progress). Parallel experimental
 - Analyzer reports declared work contracts, referenced files, context/conflicts, source-backed limits and three distinct compatibility dimensions. No full ADP conformance verdict.
 - Output is generated outside the analyzed project; HTML is escaped and has no external page resources/listening server.
 - Rust formatting, lint, tests and build: VERIFIED in CI run 39596170547.
-- Experimental Windows x64/Linux x64/macOS binaries with GitHub/Sigstore-signed build provenance: VERIFIED at CI job level, run 39596794393. No official tagged release or OS code signature.
+- Experimental Windows x64/Linux x64/macOS binaries with GitHub/Sigstore-signed build provenance: VERIFIED at CI job level, run 39597842680, including independent verification against the expected signer workflow before artifact upload. No official tagged release or OS code signature.
 
 ## Unfinished work
 - M1: representative real-ADP-project pilots; version/layout coverage; false positives; hostile-input and scale tests; deeper source linking.
