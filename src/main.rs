@@ -84,15 +84,21 @@ fn run() -> Result<(), String> {
                 .map_err(|error| format!("Could not serialize dashboard inputs: {error}"))?;
             let html = dashboard::render(&data);
             let destination = output::save(&root, request.output.as_deref(), &html)?;
-            println!("Local ADP report: {}", destination.display());
+            println!("Local ADP report: {}", output::report_location(&destination));
             println!("Analysis is read-only. ADP conformance has not been assessed.");
             if auto_open {
-                if let Err(error) = output::open_browser(&destination) {
-                    eprintln!("Browser could not be opened automatically: {error}");
-                    eprintln!(
-                        "Open the report file above manually. The report was saved successfully."
-                    );
+                match output::open_browser(&destination) {
+                    Ok(()) => println!("Browser launch: REQUESTED (visibility not confirmed)"),
+                    Err(error) => {
+                        println!("Browser launch: FAILED");
+                        eprintln!("Browser could not be opened automatically: {error}");
+                        eprintln!(
+                            "Open the report file above manually. The report was saved successfully."
+                        );
+                    }
                 }
+            } else {
+                println!("Browser launch: NOT_REQUESTED");
             }
         }
         cli::Mode::Help | cli::Mode::Version => unreachable!("Handled before analyzing project"),
