@@ -34,11 +34,23 @@ jobs:
             platform: windows-x64
             binary: adp-observatory.exe
           - runner: macos-latest
-            platform: macos-runner
+            platform: macos-arm64
             binary: adp-observatory
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Confirm package architecture
+        shell: bash
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          case "$PLATFORM" in
+            linux-x64) test "$(uname -m)" = x86_64 ;;
+            windows-x64) test "$PROCESSOR_ARCHITECTURE" = AMD64 ;;
+            macos-arm64) test "$(uname -m)" = arm64 ;;
+            *) echo "Unsupported package platform: $PLATFORM" >&2; exit 1 ;;
+          esac
       - name: Test all targets
         run: cargo test --all-targets --all-features
       - name: Build standalone CLI and local report generator
