@@ -25,7 +25,7 @@ Dashboard, SQLite history, release launchers, and autonomous project modificatio
 WORK-BOOTSTRAP-001.
 
 ## Current state
-Candidate; not active until bootstrap is verified.
+In progress (active M1 contract). First WORK schema-v1 and contextual compatibility vertical slice VERIFIED in GitHub Actions run 39573431375. Full M1 scope remains incomplete.
 
 ## Plan / atomic units
 - AU-01: choose fixtures and normalized evidence model.
@@ -41,7 +41,7 @@ GitHub Actions and reproducible fixture test outputs; explicit scope and limitat
 Canonical ADP does not guarantee all projects use identical layouts. Use version-aware applicability and avoid filename-only conformance claims.
 
 ## Handoff / next recommended phase / exact next action
-After bootstrap completion, inspect existing src/main.rs and implement the smallest parsing vertical slice with fixtures.
+Continue from the verified compatibility slice: define rigorous scan-completeness reporting, add safe work contract-file reference checks, expand hostile/missing-file fixtures, and inspect CI before claiming further completion.
 
 ## Compatibility-first scope refinement (2026-10-21)
 
@@ -62,4 +62,21 @@ The current parser is a structural prototype, not a version-aware conformance en
 - Unknown conformance is never represented as a passing verdict.
 
 ### Current verification
-Prior M1 scanner CI succeeded in run 39568724881. The new compatibility behavior is planned, not implemented or tested.
+Limited compatibility behavior is implemented in src/compatibility.rs, src/records.rs, and src/work.rs, with CLI report schema v0.2.0. GitHub Actions run 39573431375 passed formatting, Clippy, unit and integration tests, and release build. This verifies the implemented subset only; adapter coverage beyond ADP 2.7.1/WORK schema v1 and complete protocol conformance remain unavailable.
+
+## Evidence checkpoint (2026-10-21)
+
+- AU-01: fixtures for current/older/newer/unknown, malformed, missing, and conflicting records — verified.
+- AU-02: safe work-index and context reads with symlink refusal — implemented; full scan-completeness semantics remain open.
+- AU-03: WORK schema-v1 field checks, compatibility dimensions, JSON report schema — verified as a subset.
+- AU-04: unit and CLI integration tests, including repeatability and unchanged target records — verified.
+- AU-05: representative real-project coverage and false-positive calibration — outstanding.
+- AU-06: three compatibility dimensions and explicit WORK_JSON_SCHEMA_V1_ONLY scope — verified.
+- AU-07: missing/malformed context isolation and sourced claim conflicts — verified for tested cases.
+- AU-08: version/missing/conflict fixtures — initial matrix verified; broken-link and larger hostile fixtures remain outstanding.
+- AU-09: basic read-only tests — verified; independent security review and stress tests remain outstanding.
+- AU-10: explicit conflict reporting — verified; broader conservative relationship extraction remains outstanding.
+
+Validation: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39573431375
+
+**Next exact action:** inspect active branch/CI, implement bounded file-reference checks (missing/symlinked/outside-root contract references), and improve scan completeness without turning missing optional ADP records into errors.
