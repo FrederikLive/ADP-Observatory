@@ -83,6 +83,12 @@ This is the target architecture, not a claim that all components are implemented
 - `docs/DECISIONS.md` — durable architecture/product decisions and open questions.
 - `CHANGELOG.md` — changes to this project.
 
+## One-command launch direction
+
+The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **Neither the installed launcher nor the dashboard exists yet**; today the scanner runs from a Rust checkout as described below.
+
+Install-once, verified native releases are the preferred first delivery mechanism. A safe first-run download-and-execute helper may follow, but it must verify publisher identity and artifact integrity before running. We will not use blind remote-script execution or require installation inside every ADP repository. See [the launcher and distribution design](docs/LAUNCHER.md).
+
 ## Current prototype
 
 The Rust CLI now discovers selected ADP markers and safely inspects optional `.project/WORK.json` records using the supported schema-v1 structural rules. It can detect explicit protocol versions, display a limited compatibility report, examine `docs/STATUS.md` and `docs/CONTINUITY.md`, and preserve conflicting active-contract claims with source references. Missing or invalid files do not stop independent analysis.
