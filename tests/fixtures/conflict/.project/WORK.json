@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "project": "Conflict fixture",
+  "active_contract": "WORK-A",
+  "contracts": [
+    {
+      "id": "WORK-A",
+      "title": "First",
+      "status": "in_progress",
+      "depends_on": []
+    }
+  ]
+}
