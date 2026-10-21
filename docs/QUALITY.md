@@ -49,3 +49,10 @@ Fixtures and unit/integration tests now exist, with bounded contract-file refere
 - The preview binary workflow signs GitHub build provenance and verifies the signer workflow before upload. Windows/Linux/macOS preview installers now pass end-to-end download, attestation verification, install and JSON scan CI tests: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39601029440.
 - Still missing: real-browser accessibility review, official protected release and OS code signing, independent end-user install tests, and complete conformance engine.
 
+## Versioned release-candidate checkpoint — 2026-10-21
+
+- `scripts/check_release_candidate.py` validates immutable full SHA, `refs/heads/main`, VERSION, Cargo.toml and JSON report schema version. Positive and negative tests in `tests/test_release_validation.py`.
+- The [release candidate workflow 39624399120](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120) passed its source gate, Rust formatting, Clippy, unit/integration tests, release build, and independently verified GitHub/Sigstore binary attestations on Windows x64, Linux x64 and macOS ARM64.
+- CI artifacts are explicitly marked `release_state: candidate_only`, are stored for only 14 days, and do not constitute an official released or operating-system-signed application.
+- The additional Unicode/spaces and offline installer scan checks were committed in workflow `.github/workflows/installer-smoke.yml`, but their downstream workflow was still queued when this checkpoint was written. **Verification status: NOT RUN / pending CI.** Do not mark those new cases passed without checking the specific run.
+- GitHub repository tag rulesets were absent at check time. Publishing remains held on [owner release-governance issue #1](https://github.com/FrederikLive/ADP-Observatory/issues/1), independent clean-machine review, and release approval.
