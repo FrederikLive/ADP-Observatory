@@ -27,6 +27,57 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_agent_launch.py -v
       - name: Build
         run: cargo build --release
+      - name: Check out pinned current ADP Actions distribution (no project modification)
+        uses: actions/checkout@v4
+        with:
+          repository: FrederikLive/ADP
+          ref: 9b5ab4694321735e83b93962e1b9975cced130bf
+          path: upstream-adp-fixture
+          persist-credentials: false
+      - name: Test scanner against current real ADP and optional Actions guidance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream-adp-fixture rev-parse HEAD)" = "9b5ab4694321735e83b93962e1b9975cced130bf"
+          test -f upstream-adp-fixture/docs/COMMANDS.md
+          test -f upstream-adp-fixture/docs/UPDATING_ADP.md
+          test -f upstream-adp-fixture/templates/AGENTS.md.template
+          test -f upstream-adp-fixture/ADP.min.md
+          test -f upstream-adp-fixture/ADP.md
+          grep -q 'Show ADP Actions' upstream-adp-fixture/templates/AGENTS.md.template
+          grep -q 'skills/adp-observatory/SKILL.md' upstream-adp-fixture/templates/AGENTS.md.template
+          test "$(sha256sum upstream-adp-fixture/ADP.md | cut -d' ' -f1)" != ""
+          cargo run --quiet -- scan upstream-adp-fixture --json > "$RUNNER_TEMP/current-adp.json"
+          cargo run --quiet -- report upstream-adp-fixture --output "$RUNNER_TEMP/current-adp-report.html"
+          python3 - "$RUNNER_TEMP/current-adp.json" "$RUNNER_TEMP/current-adp-report.html" <<'PY'
+          import json, pathlib, sys
+          report=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          html=pathlib.Path(sys.argv[2]).read_text()
+          assert report["compatibility"]["protocol"]["status"]=="KNOWN",report
+          assert report["compatibility"]["protocol"]["value"]=="2.7.1",report
+          assert report["compatibility"]["format"]=="NOT_PRESENT",report
+          assert report["work_index"]["status"]=="UNKNOWN",report
+          assert report["compatibility"]["semantics"]=="NOT_ASSESSED",report
+          assert report["compatibility"]["conformance"]=="NOT_ASSESSED",report
+          assert "ADP.md" in report["adp_markers"],report
+          assert "ADP.min.md" in report["adp_markers"],report
+          assert all(item["severity"]!="error" for item in report["work_index"]["findings"]),report
+          assert "ADP Actions" in html and "Check ADP for updates" in html,html[:500]
+          assert "Conformance is not assessed" in html
+          PY
+      - name: Test current Observatory project records remain parseable
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --quiet -- scan . --json > "$RUNNER_TEMP/observatory-self.json"
+          python3 - "$RUNNER_TEMP/observatory-self.json" <<'PY'
+          import json,pathlib,sys
+          report=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert report["work_index"]["status"]=="STRUCTURALLY_VALID",report
+          assert report["work_index"]["contract_count"] >= 6,report
+          assert report["compatibility"]["conformance"]=="NOT_ASSESSED",report
+          assert report["compatibility"]["protocol"]["status"]=="UNKNOWN",report
+          PY
       - name: End-to-end on-demand local report launch
         shell: bash
         run: |
