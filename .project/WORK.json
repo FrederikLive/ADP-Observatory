@@ -78,6 +78,21 @@
         "mutation": "mutating",
         "branch": "main"
       }
+    },
+    {
+      "id": "WORK-AGENT-LAUNCH-001",
+      "title": "Optional user-requested Observatory Agent Skill and local dashboard launch",
+      "workstream": "agent-ux",
+      "status": "verified",
+      "depends_on": [
+        "WORK-DASHBOARD-001"
+      ],
+      "contract_file": "docs/work/WORK-AGENT-LAUNCH-001.md",
+      "execution": {
+        "mode": "direct",
+        "mutation": "mutating",
+        "branch": "main"
+      }
     }
   ]
 }
