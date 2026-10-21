@@ -11,10 +11,10 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** fresh contributor can understand scope, run validation, and identify next task.
 
 ## M1 — Discovery and deterministic scanner
-**Status:** Read-only discovery, optional WORK.json v1 parsing, limited protocol-version discovery, contextual conflict reporting, and fixture tests committed; CI passed in run 39573431375.
+**Status:** Read-only discovery, optional WORK.json v1 parsing, limited protocol-version discovery, contextual conflict reporting, and fixture tests committed; schema 0.3.0 with bounded contract-file checks and scan scope; CI passed in run 39575987006.
 - [x] Add a bounded, read-only filesystem discovery prototype.
 - [x] Add initial JSON output mode and schema.
-- [ ] Define and test precise scan-completeness semantics for ignored, oversized, unreadable, and symlinked paths.
+- [x] Define and test explicit traversal coverage states and counters for ignored, oversized, symlinked, unreadable, depth-limited, and entry-limited cases (further stress tests remain).
 - [x] Parse core and optional ADP WORK.json schema-v1 fields; full cross-document evidence linking remains open.
 - [ ] Add valid, incomplete, contradictory, malformed, and hostile-input fixtures.
 **Exit:** deterministic results; no target code execution or target-file modification; tests cover scope and failure behavior.
@@ -61,9 +61,9 @@ All milestones must preserve ADP's low-token, fast-agent, continuity-first desig
 ### M1 additional acceptance work
 - [x] Separate format, semantic, and conformance compatibility states for the WORK schema-v1 adapter.
 - [x] Preserve independently readable context when WORK.json or a Markdown record is missing, malformed, or conflicting.
-- [ ] Add fixture matrix for optional WORK.json, old/current/newer/unknown versions, broken links, and hostile input.
+- [x] Establish initial fixture matrix for optional work records, historical/newer versions, broken contract-file links, traversal attempts and symlinks; extend adversarial and real-project coverage before M1 closure.
 - [x] Confirm basic read-only behavior in unit and CLI integration tests.
-- [ ] Show source provenance and scan completeness; no inferred passing verdicts.
+- [x] Report source-backed contract links and explicit traversal coverage without inferred conformance; fuller source evidence traceability remains in M2.
 
 ### M2 additional acceptance work
 - [ ] Apply rules only where ADP version and evidence make applicability defensible.
