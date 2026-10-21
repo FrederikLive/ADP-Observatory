@@ -3,6 +3,27 @@
 Read this file **only when the user's explicit request to show Observatory
 cannot be satisfied by a previously approved local installation**.
 
+## Minimize setup and never change the analyzed project
+
+- First check the installed user-level executable and its path. If it already
+  works, **stop**; do not clone Observatory, install an agent skill globally,
+  rebuild from source or copy another executable solely to satisfy the request.
+- Never copy the executable into the ADP project. Choose **one** approved
+  per-user installation location. On Windows the preferred preview location
+  is `%LOCALAPPDATA%\\Programs\\ADP-Observatory\\adp-observatory.exe`.
+  Do not also copy it into `.cargo\\bin` or alter user PATH unless explicitly
+  requested and authorized. Duplicate installations can cause version drift.
+- If the user explicitly authorizes a source build, it remains a developer
+  fallback rather than an official verified binary release. Identify the exact
+  reviewed source commit and validate build results, then install **once** in
+  the approved user location. Building code is not part of ordinary viewing.
+- The setup request does **not** authorize writing `.project/WORK.json` or
+  any other metadata to the analyzed project, running the target's `npm`
+  or `php` tests, changing `.gitignore`, or committing/pushing changes.
+- Generate **one** report when setup is complete. Use the returned report
+  path and browser status. A missing optional work index is an honest
+  limitation, not a reason to create one.
+
 ## Current distribution status
 
 As of 2026-10-21, Observatory 0.4.0 is a development executable; an official
