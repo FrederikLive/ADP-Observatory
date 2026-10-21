@@ -4,6 +4,12 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Experimental per-user install workflow
+- Added pinned GitHub Actions preview installers for Linux x64/macOS ARM64 (Bash) and Windows x64 (PowerShell). Download only the requested run/commit, verify SHA-256 plus signed provenance and workflow identity, and install outside the target project without overwriting existing executables.
+- Added follow-on GitHub Actions smoke tests for SHA-mismatch refusal, download, verification, per-user installation, and headless scanning on all three supported CI platforms (run 39601029440).
+- Explicitly documented that no official protected/tagged, OS-signed public installer has shipped.
+
+
 ### Added in development baseline 0.4.0
 - Standalone offline light-themed HTML project viewer, with no listening server or remote page resources.
 - Dashboard/report/scan CLI modes, local contract search, and display of structured contracts even when no contract_file path is provided.
