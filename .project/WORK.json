@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "project": "ADP-Observatory",
-  "active_milestone": "M0",
-  "active_contract": "WORK-BOOTSTRAP-001",
-  "next_milestone": "M1",
-  "next_contract": "WORK-SCANNER-001",
+  "active_milestone": "M1",
+  "active_contract": "WORK-SCANNER-001",
+  "next_milestone": "M2",
+  "next_contract": null,
   "contracts": [
     {
       "id": "WORK-BOOTSTRAP-001",
       "title": "Adapt existing repository to canonical ADP control plane",
       "workstream": "project-foundation",
-      "status": "in_progress",
+      "status": "verified",
       "depends_on": [],
       "contract_file": "docs/work/WORK-BOOTSTRAP-001.md",
       "execution": {
@@ -23,7 +23,7 @@
       "id": "WORK-SCANNER-001",
       "title": "Implement deterministic ADP project discovery and record parsing",
       "workstream": "analysis-engine",
-      "status": "candidate",
+      "status": "in_progress",
       "depends_on": [
         "WORK-BOOTSTRAP-001"
       ],
