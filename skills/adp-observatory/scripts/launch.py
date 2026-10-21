@@ -147,17 +147,33 @@ def launch(project: Path, explicit: Optional[str], no_open: bool, timeout: int) 
                       detail="No generated HTML report file could be confirmed",
                       executable=str(binary), report_path=path), EXIT_FAILED
 
-    if can_open and "Browser could not be opened automatically:" not in run.stderr:
+    # Require a *positive* launch outcome from the executable. Earlier
+    # versions returned exit 0 whenever a report was saved, even when no
+    # browser could be opened, so absence of an error is not proof of launch.
+    marker = next(
+        (line.removeprefix("Browser launch: ").split(" ", 1)[0]
+         for line in run.stdout.splitlines()
+         if line.startswith("Browser launch: ")),
+        "UNKNOWN",
+    )
+    if not can_open:
+        marker = "NOT_REQUESTED"
+    if marker == "REQUESTED" and can_open:
         status = "BROWSER_OPEN_REQUESTED"
-        detail = "The system browser opener returned without error; visibility to the user cannot be confirmed."
+        detail = "The OS accepted an open request; the user's browser visibility is NOT confirmed."
     else:
         status = "REPORT_SAVED"
-        detail = (
-            "No local desktop browser is available or opening was disabled."
-            if not can_open else "The system browser opener failed; open the HTML report manually."
-        )
-    return result(status, project_str, executable=str(binary),
-                  report_path=path, browser_open_attempted=can_open, detail=detail), 0
+        if marker == "FAILED":
+            detail = "Opening the default browser failed. Open the local HTML report manually."
+        elif not can_open:
+            detail = "Browser opening is disabled or this is not a usable local desktop session."
+        else:
+            detail = "The executable did not confirm a browser-open request. Open the report manually; do not claim it appeared."
+    return result(
+        status, project_str, executable=str(binary), report_path=path,
+        browser_open_attempted=can_open, browser_launch_status=marker,
+        detail=detail,
+    ), 0
 
 
 def main(argv: Optional[list[str]] = None) -> int:
