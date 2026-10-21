@@ -89,7 +89,9 @@ fn run() -> Result<(), String> {
             if auto_open {
                 if let Err(error) = output::open_browser(&destination) {
                     eprintln!("Browser could not be opened automatically: {error}");
-                    eprintln!("Open the report file above manually. The report was saved successfully.");
+                    eprintln!(
+                        "Open the report file above manually. The report was saved successfully."
+                    );
                 }
             }
         }
