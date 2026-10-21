@@ -35,6 +35,11 @@ unless the user explicitly requests Observatory or a project visualization.
    *inside the project being scanned*. A previously verified explicit
    executable can be supplied with `--binary /absolute/path/to/adp-observatory`.
    The helper requires no third-party Python packages and makes no network calls.
+   If the skill's helper isn't locally installed but a previously trusted
+   Observatory executable is already available, the agent may instead invoke
+   that executable directly, using `adp-observatory dashboard /absolute/project`,
+   and check its reported HTML path. Never require cloning or updating source
+   merely to open a previously installed executable.
 4. **If Observatory is absent**, do not execute a random downloaded script,
    an unpinned GitHub Actions artifact, a mutable "latest" release, or a project
    file as a program. Consult [installation and trust guidance](references/installation.md)
