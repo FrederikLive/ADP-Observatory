@@ -11,7 +11,9 @@ fn cache_directory() -> PathBuf {
     #[cfg(target_os = "windows")]
     {
         if let Some(folder) = env::var_os("LOCALAPPDATA") {
-            return PathBuf::from(folder).join("ADP-Observatory").join("reports");
+            return PathBuf::from(folder)
+                .join("ADP-Observatory")
+                .join("reports");
         }
     }
     #[cfg(target_os = "macos")]
@@ -34,11 +36,13 @@ fn cache_directory() -> PathBuf {
 
 fn ensure_directory(directory: &Path, project: &Path) -> Result<PathBuf, String> {
     fs::create_dir_all(directory).map_err(|e| format!("Cannot create report directory: {e}"))?;
-    let metadata = fs::symlink_metadata(directory).map_err(|e| format!("Cannot inspect report directory: {e}"))?;
+    let metadata = fs::symlink_metadata(directory)
+        .map_err(|e| format!("Cannot inspect report directory: {e}"))?;
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
         return Err("Report directory must be an actual directory, not a symbolic link".into());
     }
-    let canonical = fs::canonicalize(directory).map_err(|e| format!("Cannot resolve report directory: {e}"))?;
+    let canonical =
+        fs::canonicalize(directory).map_err(|e| format!("Cannot resolve report directory: {e}"))?;
     if canonical.starts_with(project) {
         return Err("Reports must be saved outside the analyzed project".into());
     }
@@ -53,7 +57,9 @@ fn write_new(path: &Path, html: &str) -> Result<(), String> {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
     }
-    let mut file = options.open(path).map_err(|e| format!("Cannot create report file: {e}"))?;
+    let mut file = options
+        .open(path)
+        .map_err(|e| format!("Cannot create report file: {e}"))?;
     if let Err(error) = file.write_all(html.as_bytes()) {
         drop(file);
         let _ = fs::remove_file(path);
@@ -69,7 +75,10 @@ pub fn save(project: &Path, requested: Option<&Path>, html: &str) -> Result<Path
         if !path.to_string_lossy().to_lowercase().ends_with(".html") {
             return Err("HTML report output must use a .html extension".into());
         }
-        let directory = path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+        let directory = path
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .unwrap_or(Path::new("."));
         let parent = ensure_directory(directory, project)?;
         let destination = parent.join(file_name);
         write_new(&destination, html)?;
@@ -88,7 +97,9 @@ pub fn save(project: &Path, requested: Option<&Path>, html: &str) -> Result<Path
             Ok(()) => return Ok(destination),
             Err(e) => {
                 let exists = fs::symlink_metadata(&destination).is_ok();
-                if !exists { return Err(e); }
+                if !exists {
+                    return Err(e);
+                }
             }
         }
     }
@@ -103,7 +114,10 @@ pub fn open_browser(path: &Path) -> Result<(), String> {
     #[cfg(not(any(target_os = "windows", target_os = "macos")))]
     let mut command = Command::new("xdg-open");
 
-    let status = command.arg(path).status().map_err(|e| format!("Could not start the system browser opener: {e}"))?;
+    let status = command
+        .arg(path)
+        .status()
+        .map_err(|e| format!("Could not start the system browser opener: {e}"))?;
     if status.success() {
         Ok(())
     } else {
@@ -117,8 +131,14 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn roots() -> (PathBuf, PathBuf) {
-        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).expect("clock").as_nanos();
-        let base = env::temp_dir().join(format!("adp-observatory-output-{}-{nonce}", std::process::id()));
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let base = env::temp_dir().join(format!(
+            "adp-observatory-output-{}-{nonce}",
+            std::process::id()
+        ));
         let project = base.join("project");
         let destination = base.join("report");
         fs::create_dir_all(&project).expect("project");
