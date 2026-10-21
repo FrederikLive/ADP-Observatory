@@ -35,10 +35,10 @@ fn count(value: &Value) -> String {
 
 fn safe_tag(status: &str) -> &'static str {
     match status {
-        "PRESENT" | "READABLE" | "STRUCTURALLY_VALID" | "COMPLETE" => "ok",
+        "PRESENT" | "READABLE" | "STRUCTURALLY_VALID" | "COMPLETE" | "verified" => "ok",
         "INVALID" | "INVALID_PATH" | "OUTSIDE_ROOT" | "CONFLICT" | "error" => "error",
         "MISSING" | "UNREADABLE" | "UNSUPPORTED" | "UNSUPPORTED_SCHEMA" | "PARTIAL" | "SYMLINK"
-        | "NOT_FILE" | "NOT_DIRECTORY" | "warning" => "warn",
+        | "NOT_FILE" | "NOT_DIRECTORY" | "warning" | "blocked" => "warn",
         _ => "neutral",
     }
 }
@@ -84,27 +84,48 @@ fn row(title: &str, detail: &str, status: &str, filterable: bool) -> String {
 
 fn show_contracts(report: &Value) -> String {
     let mut html = String::new();
-    if let Some(items) = report
+    let references = report
         .pointer("/work_index/contract_files")
+        .and_then(Value::as_array);
+    if let Some(items) = report
+        .pointer("/work_index/contracts")
         .and_then(Value::as_array)
     {
         for item in items {
-            let title = at(item, "/contract_id", "Unnamed contract");
-            let path = at(item, "/path", "Unknown file");
+            let id = at(item, "/id", "Unnamed contract");
+            let title = at(item, "/title", "Title unavailable");
             let status = at(item, "/status", "UNKNOWN");
-            let reference = at(item, "/source", "Unknown source");
-            let detail = item.get("detail").and_then(Value::as_str).unwrap_or("");
-            let source = format!("{path} · {reference}");
-            let description = if detail.is_empty() {
-                source
-            } else {
-                format!("{source} · {detail}")
-            };
-            html.push_str(&row(title, &description, status, true));
+            let workstream = at(item, "/workstream", "No declared workstream");
+            let dependencies = item
+                .get("depends_on")
+                .and_then(Value::as_array)
+                .map(|items| {
+                    items
+                        .iter()
+                        .filter_map(Value::as_str)
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                })
+                .filter(|s| !s.is_empty())
+                .unwrap_or_else(|| "None declared".into());
+            let mut description = format!("Workstream: {workstream} · Dependencies: {dependencies}");
+            if let Some(path) = item.get("contract_file").and_then(Value::as_str) {
+                let state = references
+                    .and_then(|links| {
+                        links.iter().find(|reference| {
+                            at(reference, "/contract_id", "") == id
+                                && at(reference, "/path", "") == path
+                        })
+                    })
+                    .map(|reference| at(reference, "/status", "UNKNOWN"))
+                    .unwrap_or("NOT_ASSESSED");
+                description.push_str(&format!(" · File: {path} ({state})"));
+            }
+            html.push_str(&row(&format!("{id} · {title}"), &description, status, true));
         }
     }
     if html.is_empty() {
-        "<div class=\"empty\">No explicit contract-file references were available. This can be normal for an ADP project.</div>".into()
+        "<div class=\"empty\">No structured work contracts are available. This may be normal when WORK.json is absent or unsupported.</div>".into()
     } else {
         html
     }
@@ -424,6 +445,6 @@ mod tests {
         assert!(!page.contains("https://"));
         assert!(!page.contains("<!--__"));
         assert!(page.contains("id=\"contract-search\""));
-        assert!(page.contains("No explicit contract-file references"));
+        assert!(page.contains("No structured work contracts are available"));
     }
 }
