@@ -1,29 +1,29 @@
 # Project Status
 
 ## Current milestone / phase
-M1 — scanner calibration (WORK-SCANNER-001 active), with a separately tracked M4 preview-distribution slice (WORK-DISTRIBUTION-001 in_progress). WORK-DASHBOARD-001 is verified; WORK-UI-001 superseded as historical work.
+M1 — scanner calibration, active contract WORK-SCANNER-001 (in_progress). Parallel M4 — authenticated release/distribution, contract WORK-DISTRIBUTION-001 (in_progress). WORK-DASHBOARD-001 verified. WORK-UI-001 is superseded and preserved for history.
 
 ## Verified outcomes
-- ADP bootstrap, read-only scanner, compatibility/missing-data semantics and offline HTML dashboard: code-level CI verified (e.g. run 39596170547).
-- `adp-observatory .`, `adp-observatory scan . --json`, `report . --output ...` work in development executable version 0.4.0.
-- Windows x64, Linux x64 and macOS ARM64 package matrix builds/tests, signs provenance and validates workflow/source: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39600862632 — success.
-- Experimental per-user installers `scripts/install-preview.ps1` and `scripts/install-preview.sh` tested on the three operating systems: incorrect SHA rejected, pinned artifact downloaded, SHA-256 and signed provenance verified, binary installed outside target project, and headless scan passed. https://github.com/FrederikLive/ADP-Observatory/actions/runs/39601029440 — success.
-- No normative changes to canonical ADP, no required project metadata, agent instructions, or telemetry.
+- Offline HTML dashboard and headless scan, development version 0.4.0: formatting/lint/unit/CLI/build CI passed (including 39624399120).
+- Three-platform preview installer pipeline: full pinned download, signature/checksum verification, install and headless scan passed earlier on Windows x64, Linux x64 and macOS ARM64 ([39601029440](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39601029440)).
+- **Version-pinned release candidate v0.4.0**: source/version gate and Windows/Linux/macOS release-candidate builds passed; signed executable provenance verified against repository/workflow/ref/full SHA. [Candidate 39624399120](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120), source cfe14a008aea130427506f03a65a01bc6d7e9f4d.
+- Upload-only release-candidate workflow uses pinned action SHAs, creates temporary manifest/checksum artifacts, and has **no release publication step**.
+- Only optional, human-facing ADP integration guidance was changed. No normative ADP protocol modification, agent token overhead, telemetry or target-project writes.
 
-## Not yet released / known limitations
-- No official tag-protected GitHub release, OS code-signed installer, no-prerequisite automatic first-run downloader, or automatic PATH setup.
-- Per-user installation currently requires a locally reviewed script and independently installed GitHub CLI, with explicit run ID and full source SHA. See docs/RELEASING.md.
-- No complete conformance engine, real-project version calibration, live analysis dashboard or historical snapshots.
-- GitHub repository rulesets were empty at last check; branch protection details could not be read via the integration. Owner must configure and verify required governance before official release.
+## Current limitations and release blocker
+- **No official GitHub release or trusted zero-prerequisite installer.** Experimental and candidate assets expire after 14 days and are not Windows/macOS OS-code-signed/notarized.
+- GitHub repository rulesets API returned an empty array; branch protection could not be inspected with current connector permissions. Release requires enforceable protected tags/main, human approval and independent end-user testing.
+- Owner action tracked in [release-governance issue #1](https://github.com/FrederikLive/ADP-Observatory/issues/1). See docs/RELEASING.md for exact GitHub UI steps.
+- Unicode/spaced-path and offline installer tests were added to workflow and are still **NOT VERIFIED** while the follow-on workflow is queued. Do not mark these passed until specific CI confirms.
+- Full conformance engine, historical snapshots, version adapter matrix and broad real-project scanner calibration remain outstanding.
 
-## Active work and next recommended phase
-- M1: test scanner against real ADP projects with missing/older/contradictory records and quantify false positives.
-- M4: secure official release design, end-user installation/Unicode/offline tests and update/uninstall semantics.
-- Outcome sought: a protected signed-provenance release users can install once and invoke by `adp-observatory .`.
-- Exact first action: inspect current HEAD/CI, then test clean-machine installer behavior and configure verified tag/branch protection and release approval gates before publishing any official release.
+## Next action
+1. Repo owner configures active main and v* tag rulesets and a protected release-production approval environment; verify effectiveness.
+2. Inspect the queued Unicode/offline installer follow-on CI and repair failures if needed.
+3. Perform real end-user platform/OS security testing and signing policy review, then generate a fresh candidate pinned to the intended protected release tag SHA.
+4. Publish only after owner release approval, with accurate pre-release scope and verification metadata; update ADP's optional human guide after that.
 
-## Latest verification / Git state
-- Installer smoke: 39601029440 — VERIFIED at CI runner level.
-- Package matrix: 39600862632 — VERIFIED.
-- Documentation-only commits after these runs should not be confused with a new binary test.
-- Branch: main via authorized GitHub connector. Remote API does not reveal local dirty/untracked changes. No destructive Git operation or release publication performed.
+## Verification / Git
+- Last fully verified candidate: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120.
+- Latest documentation edits are committed via GitHub connector on main; inspect HEAD and Actions for exact latest SHA.
+- Remote API cannot establish local staged/unstaged state. No tag, release, or destructive rewrite created.
