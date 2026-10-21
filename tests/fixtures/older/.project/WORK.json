@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "project": "Older fixture",
+  "active_contract": "WORK-OLD",
+  "contracts": [
+    {
+      "id": "WORK-OLD",
+      "title": "Older work",
+      "status": "ready",
+      "depends_on": []
+    }
+  ]
+}
