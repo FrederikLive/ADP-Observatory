@@ -1,7 +1,7 @@
 # Continuity
 
 ## Active objective
-Build the first reliable ADP-aware analysis vertical slice without overstating conformance.
+Build a tolerant, version-aware, read-only Observatory that visualizes existing ADP project information without adding agent token or maintenance overhead.
 
 ## Active milestone
 M1 — Discovery and deterministic scanner.
@@ -10,49 +10,51 @@ M1 — Discovery and deterministic scanner.
 Analysis engine.
 
 ## Active contract
-WORK-SCANNER-001, docs/work/WORK-SCANNER-001.md.
+WORK-SCANNER-001 — docs/work/WORK-SCANNER-001.md.
 
 ## Current position
-M0 control plane is established and its CI run passed. M1 now includes src/work.rs: bounded read-only parsing of .project/WORK.json with structural findings and tests. src/main.rs exposes inspection in text and JSON; scan-report schema includes work_index.
+The M0 ADP bootstrap and initial M1 WORK.json structural parser have passing CI runs. A compatibility-first design reassessment has been incorporated into docs/ARCHITECTURE.md, docs/PRODUCT.md, docs/DECISIONS.md, docs/ADP-INTEGRATION.md, docs/ROADMAP.md, and the M1 contract. ADP issue #8 now defers protocol changes.
 
 ## Last known good state
-M0 bootstrap: GitHub Actions run 39567705133 succeeded. M1 scanner code was committed but latest CI had not completed at this checkpoint.
+GitHub Actions run 39568724881 passed for the initial structural parser. The newer design documentation is not evidence of implemented adapter behavior.
 
 ## Current verification
-- M0 Rust formatting/lint/tests/build: VERIFIED (GitHub Actions run 39567705133).
-- M1 scanner tests, lint, formatting, build: NOT RUN locally; GitHub Actions pending.
-- Structural parser does not constitute full ADP conformance.
+- M0 bootstrap: VERIFIED — run 39567705133.
+- M1 structural parser: VERIFIED — run 39568724881.
+- Compatibility adapters, independent failure isolation, and full version support: NOT IMPLEMENTED / NOT RUN.
+- Documentation updates: committed through GitHub API; inspect current HEAD and CI on resume.
 
 ## Work in progress
-Inspect M1 CI, repair any failures, add fixtures for missing, duplicate, malformed, symlinked, and contradictory records. Improve scan completeness semantics.
+Implement format compatibility, semantic compatibility, and conformance coverage separately. Support unknown versions and incomplete records without false failures/passes.
 
 ## Blocker / investigation
-Canonical ADP uses optional WORK.json. Missing records must remain UNKNOWN, not FAIL or PASS.
+Historical ADP versions and representative project fixtures must be selected based on real formats, not guessed semantics.
 
 ## Next recommended phase
-Finish M1 evidence-aware parser and high-confidence fixtures before M2 metrics.
+Complete M1 compatibility foundations and regression fixtures before M2 rules and metrics.
 
 ## Exact next action
-Check latest GitHub Actions workflow run for the current HEAD; inspect logs if failed; fix and rerun. Then add additional parser fixtures.
+Inspect current GitHub HEAD/CI, read docs/ARCHITECTURE.md and the active contract, define compatibility result types, add fixtures for missing WORK.json, malformed input, contradictory state, and unknown/newer versions, then run formatting/lint/tests/build.
 
 ## Decisions made since last checkpoint
-- Preserve canonical ADP 2.7.1 as normative external reference.
-- Mark parsed WORK.json as STRUCTURALLY_VALID, INVALID, or UNKNOWN; never equate structural validity with protocol conformance.
-- Never execute target repository scripts.
-- Keep work-index findings in a versioned JSON schema.
+- ADP remains unchanged unless evidence independently supports agent-beneficial clarification.
+- Observatory imposes zero mandatory extra records or agent reads/writes.
+- Optional WORK.json remains optional.
+- Separate format parsing, semantic interpretation, and conformance coverage.
+- Preserve conflicting source claims and partial scan results.
+- No silent migration or project mutation.
 
 ## Workspace / Git state
-GitHub main updated through API; inspect local working-tree state before any local operations.
+GitHub main updated through API. Local staged/unstaged/untracked state is unknown and must be inspected before local work.
 
 ## Last checkpoint
-2026-10-21 — M0 verified, M1 scanner vertical slice committed, CI pending.
+2026-10-21 — compatibility-first design decision recorded; executable changes pending.
 
 ## Git authorization and recovery
-- Initialized: yes.
+- Initialized: existing GitHub repository.
 - Branch: main.
-- HEAD: inspect GitHub for latest commit before resuming.
-- Staged/unstaged/untracked: unavailable remotely.
-- Commit authorization: user requested continued project development.
-- Automatic checkpoint commits: not self-authorized by this file.
-- Push authorization: no standing permission inferred from generated policy.
-- Next safe action: inspect CI and update verification evidence.
+- HEAD: inspect GitHub before resuming; do not rely on stale SHA.
+- Staged/unstaged/untracked: not available from remote API.
+- Authorization: user requested compatibility-first Observatory updates; no normative ADP amendment.
+- Automatic checkpoint commits/push: not granted by generated documents.
+- Next safe action: implement M1 adapter/fixture vertical slice with evidence.
