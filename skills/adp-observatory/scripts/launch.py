@@ -93,6 +93,33 @@ def find_executable(project: Path, explicit: Optional[str]) -> tuple[Optional[Pa
     return None, "No approved, locally installed adp-observatory executable was found"
 
 
+def alternate_installations(project: Path, selected: Path, explicit: Optional[str]) -> list[str]:
+    """Surface duplicates without executing, updating or deleting them.
+
+    Only considers already-discovered, executable files outside the target
+    project. The caller can inspect them separately if version drift matters.
+    """
+    if explicit:
+        return []
+    alternatives: list[str] = []
+    seen: set[Path] = {selected}
+    for candidate in executable_candidates(None):
+        if not candidate.is_absolute():
+            continue
+        try:
+            resolved = candidate.resolve(strict=True)
+        except (OSError, RuntimeError):
+            continue
+        if resolved in seen or is_within(resolved, project):
+            continue
+        seen.add(resolved)
+        if resolved.is_file() and os.access(resolved, os.X_OK):
+            alternatives.append(str(resolved))
+        if len(alternatives) >= 8:
+            break
+    return alternatives
+
+
 def browser_capable() -> bool:
     if os.environ.get("CI") or os.environ.get("SSH_CONNECTION") or os.environ.get("SSH_TTY"):
         return False
@@ -120,6 +147,7 @@ def launch(project: Path, explicit: Optional[str], no_open: bool, timeout: int) 
             EXIT_UNSAFE if status == "UNSAFE_EXECUTABLE" else EXIT_NOT_INSTALLED
         )
 
+    alternatives = alternate_installations(project, binary, explicit)
     can_open = browser_capable() and not no_open
     argv = [str(binary), "dashboard", project_str]
     if not can_open:
@@ -172,6 +200,7 @@ def launch(project: Path, explicit: Optional[str], no_open: bool, timeout: int) 
     return result(
         status, project_str, executable=str(binary), report_path=path,
         browser_open_attempted=can_open, browser_launch_status=marker,
+        alternate_installations=alternatives,
         detail=detail,
     ), 0
 
