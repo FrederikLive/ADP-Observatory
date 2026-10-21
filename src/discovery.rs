@@ -70,7 +70,15 @@ impl Discovery {
             markers: Vec::new(),
             scope: ScanScope::new(),
         };
-        scan_directory(root, root, 0, &mut result, MAX_DEPTH, MAX_ENTRIES, MAX_FILE_BYTES);
+        scan_directory(
+            root,
+            root,
+            0,
+            &mut result,
+            MAX_DEPTH,
+            MAX_ENTRIES,
+            MAX_FILE_BYTES,
+        );
         result.markers.sort();
         result.scope.finish();
         result
