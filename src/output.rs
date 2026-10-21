@@ -39,7 +39,9 @@ fn ensure_directory(directory: &Path, project: &Path, create: bool) -> Result<Pa
         // Refuse an in-project cache root before creating any directories.
         let mut ancestor = directory;
         while !ancestor.exists() {
-            ancestor = ancestor.parent().ok_or("No existing report-directory ancestor")?;
+            ancestor = ancestor
+                .parent()
+                .ok_or("No existing report-directory ancestor")?;
         }
         let existing = fs::canonicalize(ancestor)
             .map_err(|e| format!("Cannot resolve report-directory ancestor: {e}"))?;
