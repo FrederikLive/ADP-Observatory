@@ -3,9 +3,10 @@ use std::{
     fs::OpenOptions,
     io::Write,
     path::{Path, PathBuf},
-    process::Command,
     time::{SystemTime, UNIX_EPOCH},
 };
+#[cfg(not(target_os = "windows"))]
+use std::process::Command;
 
 fn cache_directory() -> PathBuf {
     #[cfg(target_os = "windows")]
@@ -125,12 +126,95 @@ pub fn save(project: &Path, requested: Option<&Path>, html: &str) -> Result<Path
     Err("Could not allocate a unique local report filename".into())
 }
 
-pub fn open_browser(path: &Path) -> Result<(), String> {
+/// Return a filename suitable for user-facing messages and for Windows Shell APIs.
+/// Rust's canonicalize() adds an extended-path prefix on Windows; Explorer and
+/// some associated document applications cannot open that syntax directly.
+#[cfg(target_os = "windows")]
+fn windows_shell_path(path: &Path) -> Result<PathBuf, String> {
+    let text = path.to_string_lossy();
+    if let Some(unc) = text.strip_prefix(r"\\?\UNC\") {
+        return Ok(PathBuf::from(format!(r"\\{unc}")));
+    }
+    if let Some(drive) = text.strip_prefix(r"\\?\") {
+        let chars = drive.as_bytes();
+        if chars.len() >= 3
+            && chars[0].is_ascii_alphabetic()
+            && chars[1] == b':'
+            && chars[2] == b'\'
+        {
+            return Ok(PathBuf::from(drive));
+        }
+        return Err("This Windows report path has no drive or UNC equivalent for the default browser. Open the report from a normal local directory.".into());
+    }
+    Ok(path.to_path_buf())
+}
+
+/// The printed path is for humans and host tools; we retain the canonical
+/// path separately for filesystem containment and report creation.
+pub fn report_location(path: &Path) -> String {
     #[cfg(target_os = "windows")]
-    let mut command = Command::new("explorer.exe");
+    {
+        return windows_shell_path(path)
+            .unwrap_or_else(|_| path.to_path_buf())
+            .display()
+            .to_string();
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        path.display().to_string()
+    }
+}
+
+/// Request that the operating system open the HTML document using the
+/// user's default association. Success is NOT proof that a browser window
+/// became visible in the user's interactive desktop.
+#[cfg(target_os = "windows")]
+pub fn open_browser(path: &Path) -> Result<(), String> {
+    use std::{ffi::c_void, os::windows::ffi::OsStrExt, ptr};
+    #[link(name = "shell32")]
+    extern "system" {
+        fn ShellExecuteW(
+            hwnd: *mut c_void,
+            operation: *const u16,
+            file: *const u16,
+            parameters: *const u16,
+            directory: *const u16,
+            show: i32,
+        ) -> *mut c_void;
+    }
+    let path = windows_shell_path(path)?;
+    let document: Vec<u16> = path
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
+    let operation: Vec<u16> = "open".encode_utf16().chain(std::iter::once(0)).collect();
+    // SAFETY: Strings are NUL-terminated and live for the entire call; all
+    // optional pointers are NULL, and ShellExecuteW only reads these inputs.
+    let code = unsafe {
+        ShellExecuteW(
+            ptr::null_mut(),
+            operation.as_ptr(),
+            document.as_ptr(),
+            ptr::null(),
+            ptr::null(),
+            1,
+        )
+    } as isize;
+    if code > 32 {
+        Ok(())
+    } else {
+        Err(format!(
+            "Windows ShellExecuteW could not request opening the report (code {code}). Check your default .html association or open the printed report path manually."
+        ))
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn open_browser(path: &Path) -> Result<(), String> {
     #[cfg(target_os = "macos")]
     let mut command = Command::new("open");
-    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    #[cfg(not(target_os = "macos"))]
     let mut command = Command::new("xdg-open");
 
     let status = command
@@ -163,6 +247,29 @@ mod tests {
         fs::create_dir_all(&project).expect("project");
         fs::create_dir_all(&destination).expect("report");
         (project, destination)
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn windows_extended_drive_report_path_is_shell_compatible() {
+        let path = Path::new(r"\\?\C:\Users\user\ADP Observatory\report ø.html");
+        let normal = windows_shell_path(path).expect("supported drive path");
+        assert_eq!(normal, PathBuf::from(r"C:\Users\user\ADP Observatory\report ø.html"));
+        assert_eq!(report_location(path), r"C:\Users\user\ADP Observatory\report ø.html");
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn windows_extended_unc_report_path_is_shell_compatible() {
+        let path = Path::new(r"\\?\UNC\server\share\report.html");
+        let normal = windows_shell_path(path).expect("supported UNC path");
+        assert_eq!(normal, PathBuf::from(r"\\server\share\report.html"));
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn windows_unsupported_shell_namespace_fails_closed() {
+        assert!(windows_shell_path(Path::new(r"\\?\Volume{1234}\report.html")).is_err());
     }
 
     #[test]
