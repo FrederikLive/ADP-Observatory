@@ -74,8 +74,12 @@ jobs:
           RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           Set-Location "$env:GITHUB_WORKSPACE/tests/fixtures/current"
-          & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/scripts/install-preview.ps1" -RunId "$env:RUN_ID" -ExpectedSha "0000000000000000000000000000000000000000" -InstallDir "$env:RUNNER_TEMP/obs-negative"
-          if ($LASTEXITCODE -eq 0) { throw "Installer accepted incorrect SHA" }
+          $PSNativeCommandUseErrorActionPreference = $false
+          $ErrorActionPreference = "Continue"
+          & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/scripts/install-preview.ps1" -RunId "$env:RUN_ID" -ExpectedSha "0000000000000000000000000000000000000000" -InstallDir "$env:RUNNER_TEMP/obs-negative" 2>$null
+          $negativeExit = $LASTEXITCODE
+          $ErrorActionPreference = "Stop"
+          if ($negativeExit -eq 0) { throw "Installer accepted incorrect SHA" }
           if (Test-Path "$env:RUNNER_TEMP/obs-negative") { throw "Installer touched destination on failed validation" }
       - name: Download, verify, install and scan
         shell: pwsh
