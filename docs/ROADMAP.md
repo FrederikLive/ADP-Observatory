@@ -11,12 +11,12 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** fresh contributor can understand scope, run validation, and identify next task.
 
 ## M1 — Discovery and deterministic scanner
-**Status:** Read-only discovery, optional WORK.json v1 parsing, limited protocol-version discovery, contextual conflict reporting, and fixture tests committed; schema 0.3.0 with bounded contract-file checks and scan scope; CI passed in run 39575987006.
+**Status:** Read-only discovery, optional WORK.json v1 parsing, bounded references, compatibility/conflict reporting and fixture tests implemented (JSON report schema 0.4.0). Pinned current-ADP main revision and Observatory self-scan passed in CI 39659907217. Full M1 evidence and historical adapter coverage remain open.
 - [x] Add a bounded, read-only filesystem discovery prototype.
 - [x] Add initial JSON output mode and schema.
 - [x] Define and test explicit traversal coverage states and counters for ignored, oversized, symlinked, unreadable, depth-limited, and entry-limited cases (further stress tests remain).
 - [x] Parse core and optional ADP WORK.json schema-v1 fields; full cross-document evidence linking remains open.
-- [ ] Add valid, incomplete, contradictory, malformed, and hostile-input fixtures.
+- [x] Add initial valid, incomplete, contradictory, malformed and hostile-path fixtures; [ ] extend adversarial/race stress and independently calibrated real-project fixtures.
 **Exit:** deterministic results; no target code execution or target-file modification; tests cover scope and failure behavior.
 
 ## M2 — Rules and metrics
@@ -33,7 +33,7 @@ Milestones are proposed work packages, not claims of completion.
 - [ ] Add complete evidence navigation, optional local snapshots and compatible historical comparisons.
 - [ ] Test real-browser accessibility, keyboard behavior and representative project usability.
 - [ ] A future live HTTP API, if justified, requires independent Host/Origin/rebinding and filesystem API security review; not required for the offline viewer.
-- [x] Show scan scope, completeness, and unknown/not-assessed values in the offline report.
+- [x] Show scan scope, completeness, unknown/not-assessed values and optional static ADP Actions prompts in the offline report. No added agent runtime work or required project records.
 **Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
 ## Optional Agent Launch (M3/M4 integration slice)
@@ -105,7 +105,7 @@ All milestones must preserve ADP's low-token, fast-agent, continuity-first desig
 - [x] Implement a first **offline static HTML dashboard** with contracts, source references, compatibility, limitations, and local client-side filtering; not yet a full evidence or history dashboard.
 - [x] Implement dashboard/report/headless scan CLI modes; a Rust checkout is still required absent an installed binary.
 - [x] Test experimental unsigned Windows/macOS/Linux build artifacts and CLI smoke tests (run 39596011855).
-- [ ] Independently authenticated release signing/provenance, verified first-run installer, stable package distribution and update/uninstall.
+- [x] Verify signed GitHub build provenance and pinned preview installation in CI, including Unicode/offline scans (39660008091); [ ] protected official release, OS signing, trusted general-user installation and update/uninstall.
 - [ ] Real browser accessibility/usability testing and full historical metrics/snapshots.
 - [ ] Calibrate against real projects with missing and incompatible ADP artifacts.
 
