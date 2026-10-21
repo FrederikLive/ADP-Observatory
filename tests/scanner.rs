@@ -221,9 +221,11 @@ fn no_open_dashboard_mode_writes_report_without_browser() {
     let root = std::env::temp_dir().join(format!("observatory-offline-test-{nonce}"));
     fs::create_dir_all(&root).expect("report directory");
     let output_path = root.join("offline.html");
+    let target = fixture("partial");
+    assert!(!target.join(".project/WORK.json").exists());
     let output = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
         .arg("dashboard")
-        .arg(fixture("partial"))
+        .arg(&target)
         .arg("--no-open")
         .arg("--output")
         .arg(&output_path)
@@ -235,9 +237,13 @@ fn no_open_dashboard_mode_writes_report_without_browser() {
         String::from_utf8_lossy(&output.stderr)
     );
     assert!(output_path.is_file());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Browser launch: NOT_REQUESTED"));
+    assert!(stdout.contains("Local ADP report: "));
     assert!(fs::read_to_string(&output_path)
         .unwrap()
         .contains("No structured work contracts are available"));
+    assert!(!target.join(".project/WORK.json").exists());
     fs::remove_dir_all(root).expect("cleanup");
 }
 
