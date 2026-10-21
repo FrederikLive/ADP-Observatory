@@ -1,58 +1,58 @@
 # Continuity
 
 ## Active objective
-Adapt ADP-Observatory into a fully ADP-governed project without replacing its existing work.
+Build the first reliable ADP-aware analysis vertical slice without overstating conformance.
 
 ## Active milestone
-M0 — Repository foundation and ADP bootstrap.
+M1 — Discovery and deterministic scanner.
 
 ## Active workstream
-Project control plane / verification foundations.
+Analysis engine.
 
 ## Active contract
-WORK-BOOTSTRAP-001 (see docs/work/WORK-BOOTSTRAP-001.md).
+WORK-SCANNER-001, docs/work/WORK-SCANNER-001.md.
 
 ## Current position
-Existing product documents, Rust discovery CLI, schema, and CI are present. ADP control-plane files are being established. The project is a companion to, not an amendment of, canonical ADP.
+M0 control plane is established and its CI run passed. M1 now includes src/work.rs: bounded read-only parsing of .project/WORK.json with structural findings and tests. src/main.rs exposes inspection in text and JSON; scan-report schema includes work_index.
 
 ## Last known good state
-GitHub content API confirmed initial repository commits. Previous CI runs had formatting failures; code formatting was corrected but a green CI result has not yet been established in this continuity record.
+M0 bootstrap: GitHub Actions run 39567705133 succeeded. M1 scanner code was committed but latest CI had not completed at this checkpoint.
 
 ## Current verification
-- Source files committed through GitHub API: VERIFIED (write responses).
-- Rust formatting, lint, test, build for latest commit: NOT RUN / CI PENDING until GitHub Actions completes.
-- ADP bootstrap self-review: IN PROGRESS; do not claim full conformance before reviewing applicable ADP requirements and evidence.
+- M0 Rust formatting/lint/tests/build: VERIFIED (GitHub Actions run 39567705133).
+- M1 scanner tests, lint, formatting, build: NOT RUN locally; GitHub Actions pending.
+- Structural parser does not constitute full ADP conformance.
 
 ## Work in progress
-Create STATUS, CONTINUITY, WORK.json, work contract, QUALITY, and an operational AGENTS router. Confirm repository consistency.
+Inspect M1 CI, repair any failures, add fixtures for missing, duplicate, malformed, symlinked, and contradictory records. Improve scan completeness semantics.
 
 ## Blocker / investigation
-Check whether the project should embed a pinned ADP submodule, or use a remote canonical reference. Current integration uses the latter to avoid vendoring normative text and modifying Git submodule state through file-only API.
+Canonical ADP uses optional WORK.json. Missing records must remain UNKNOWN, not FAIL or PASS.
 
 ## Next recommended phase
-Finish M0 verification, then move to M1 deterministic parser and fixture testing.
+Finish M1 evidence-aware parser and high-confidence fixtures before M2 metrics.
 
 ## Exact next action
-Read root AGENTS.md, docs/STATUS.md, .project/WORK.json, and docs/work/WORK-BOOTSTRAP-001.md; inspect latest CI; run or inspect quality gates and update evidence/status.
+Check latest GitHub Actions workflow run for the current HEAD; inspect logs if failed; fix and rerun. Then add additional parser fixtures.
 
 ## Decisions made since last checkpoint
-- Canonical ADP is FrederikLive/ADP, version 2.7.1 at bootstrap.
-- Root AGENTS.md is the router, not a substitute for the normative ADP specification.
-- Existing project documentation remains canonical for its individual concern; avoid duplication.
-- Do not assert verification without actual test results.
+- Preserve canonical ADP 2.7.1 as normative external reference.
+- Mark parsed WORK.json as STRUCTURALLY_VALID, INVALID, or UNKNOWN; never equate structural validity with protocol conformance.
+- Never execute target repository scripts.
+- Keep work-index findings in a versioned JSON schema.
 
 ## Workspace / Git state
-GitHub main branch, updated via authenticated API. Working-tree cleanliness cannot be inferred from the API; inspect before local work.
+GitHub main updated through API; inspect local working-tree state before any local operations.
 
 ## Last checkpoint
-2026-10-21 — ADP bootstrap adaptation.
+2026-10-21 — M0 verified, M1 scanner vertical slice committed, CI pending.
 
 ## Git authorization and recovery
-- Initialized: yes, existing GitHub repository.
+- Initialized: yes.
 - Branch: main.
-- HEAD: inspect GitHub before resuming; do not rely on a stale SHA.
-- Staged / unstaged / untracked: unavailable from remote API.
-- Commit authorization: user requested repository bootstrap in this conversation.
-- Automatic checkpoint commits: not separately authorized by generated policy.
-- Push authorization: no standing permission inferred from this file.
-- Next safe action: inspect CI and reconcile status/contract with evidence.
+- HEAD: inspect GitHub for latest commit before resuming.
+- Staged/unstaged/untracked: unavailable remotely.
+- Commit authorization: user requested continued project development.
+- Automatic checkpoint commits: not self-authorized by this file.
+- Push authorization: no standing permission inferred from generated policy.
+- Next safe action: inspect CI and update verification evidence.
