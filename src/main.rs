@@ -60,8 +60,7 @@ fn main() {
         limitations: vec![
             "Initial discovery prototype only; this is not a conformance assessment.".into(),
             "No project scripts or commands are executed.".into(),
-            "Dashboard, metric calculations, and historical snapshots are not implemented."
-                .into(),
+            "Dashboard, metric calculations, and historical snapshots are not implemented.".into(),
         ],
     };
 
@@ -151,15 +150,7 @@ fn scan(
             continue;
         }
         if meta.is_dir() {
-            scan(
-                root,
-                &path,
-                depth + 1,
-                examined,
-                skipped,
-                markers,
-                complete,
-            );
+            scan(root, &path, depth + 1, examined, skipped, markers, complete);
             continue;
         }
         if !meta.is_file() || meta.len() > 2_097_152 {
