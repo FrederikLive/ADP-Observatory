@@ -4,6 +4,12 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Current ADP 2.7.1 / ADP Actions compatibility
+- Tested the *actual pinned* latest ADP repository at commit `9b5ab4694321735e83b93962e1b9975cced130bf` (protocol 2.7.1) in Observatory CI, asserting accurate version/optional-WORK/conformance results and HTML generation (run 39659907217).
+- Added a small, static ADP Actions reference in the offline report; these are suggested coding-agent prompts, not commands executed by the dashboard, and never require extra project metadata.
+- Clarified Agent Skill routing: "Show Observatory" invokes the optional visualization skill; "Show ADP Actions" and "Update ADP" remain separate ADP agent tasks.
+- Reconciled offline-viewer security guidance and confirmed cross-platform Unicode/offline installer smoke tests (run 39660008091).
+
 ### Optional agent-activated dashboard
 - Added a progressively disclosed `adp-observatory` Agent Skill for explicit
   user requests such as "show Observatory", with conditional trust/install
