@@ -12,7 +12,9 @@
     "files_skipped",
     "adp_markers",
     "limitations",
-    "work_index"
+    "work_index",
+    "compatibility",
+    "context"
   ],
   "properties": {
     "schema_version": {
@@ -61,7 +63,8 @@
           "enum": [
             "UNKNOWN",
             "INVALID",
-            "STRUCTURALLY_VALID"
+            "STRUCTURALLY_VALID",
+            "UNSUPPORTED_SCHEMA"
           ]
         },
         "project": {
@@ -109,6 +112,208 @@
               },
               "source": {
                 "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "required": [
+        "format",
+        "semantics",
+        "conformance",
+        "protocol"
+      ],
+      "properties": {
+        "format": {
+          "enum": [
+            "READABLE",
+            "INVALID",
+            "NOT_PRESENT",
+            "UNREADABLE"
+          ]
+        },
+        "semantics": {
+          "enum": [
+            "SUPPORTED",
+            "UNSUPPORTED",
+            "CONFLICT",
+            "UNKNOWN",
+            "NOT_ASSESSED"
+          ]
+        },
+        "conformance": {
+          "const": "NOT_ASSESSED"
+        },
+        "protocol": {
+          "type": "object",
+          "required": [
+            "status",
+            "value",
+            "sources",
+            "limitations"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "KNOWN",
+                "UNKNOWN",
+                "CONFLICT"
+              ]
+            },
+            "value": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "path",
+                  "version"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "version": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "records",
+        "active_contract_claims",
+        "conflicts"
+      ],
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "state",
+              "limitation"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "state": {
+                "enum": [
+                  "MISSING",
+                  "READABLE",
+                  "UNREADABLE"
+                ]
+              },
+              "limitation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "active_contract_claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "line",
+              "value"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "line": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "field",
+              "claims"
+            ],
+            "properties": {
+              "field": {
+                "type": "string",
+                "minLength": 1
+              },
+              "claims": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "path",
+                    "line",
+                    "value"
+                  ],
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "line": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "minItems": 2
               }
             },
             "additionalProperties": false
