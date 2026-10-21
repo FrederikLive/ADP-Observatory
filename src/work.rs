@@ -132,20 +132,6 @@ pub fn inspect(root: &Path) -> WorkInspection {
     let schema_version = object.get("schema_version").and_then(|v| v.as_u64());
     if schema_version.is_some_and(|version| version > 1) {
         result.status = "UNSUPPORTED_SCHEMA";
-        for key in [
-            "active_milestone",
-            "active_contract",
-            "next_milestone",
-            "next_contract",
-        ] {
-            if object.get(key).is_some_and(|v| !nullable_string(v)) {
-                result.findings.push(finding(
-                    "work.optional_field_type",
-                    "error",
-                    format!("{key} must be a string or null."),
-                ));
-            }
-        }
         result.project = object
             .get("project")
             .and_then(|v| v.as_str())
@@ -174,6 +160,20 @@ pub fn inspect(root: &Path) -> WorkInspection {
             "error",
             "Missing or invalid schema_version; expected schema version 1.",
         ));
+    }
+    for key in [
+        "active_milestone",
+        "active_contract",
+        "next_milestone",
+        "next_contract",
+    ] {
+        if object.get(key).is_some_and(|v| !nullable_string(v)) {
+            result.findings.push(finding(
+                "work.optional_field_type",
+                "error",
+                format!("{key} must be a string or null."),
+            ));
+        }
     }
     result.project = object
         .get("project")
