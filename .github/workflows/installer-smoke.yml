@@ -13,8 +13,8 @@ permissions:
 jobs:
   unix:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
-    name: ${{ matrix.os } verified install
-    runs-on: ${{ matrix.os }
+    name: ${{ matrix.os }} verified install
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -22,13 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }
+          ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
       - name: Reject wrong source SHA without modifying project
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }
-          RUN_ID: ${{ github.event.workflow_run.id }
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
           cd tests/fixtures/current
@@ -43,9 +43,9 @@ jobs:
       - name: Download, verify, install, and scan
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }
-          RUN_ID: ${{ github.event.workflow_run.id }
-          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
           cd tests/fixtures/current
@@ -65,13 +65,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }
+          ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
       - name: Reject wrong source SHA without modifying project
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }
-          RUN_ID: ${{ github.event.workflow_run.id }
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           Set-Location "$env:GITHUB_WORKSPACE/tests/fixtures/current"
           & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/scripts/install-preview.ps1" -RunId "$env:RUN_ID" -ExpectedSha "0000000000000000000000000000000000000000" -InstallDir "$env:RUNNER_TEMP/obs-negative"
@@ -80,9 +80,9 @@ jobs:
       - name: Download, verify, install and scan
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }
-          RUN_ID: ${{ github.event.workflow_run.id }
-          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           Set-Location "$env:GITHUB_WORKSPACE/tests/fixtures/current"
           & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/scripts/install-preview.ps1" -RunId "$env:RUN_ID" -ExpectedSha "$env:EXPECTED_SHA" -InstallDir "$env:RUNNER_TEMP/obs-bin"
