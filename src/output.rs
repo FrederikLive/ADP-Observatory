@@ -1,3 +1,5 @@
+#[cfg(not(target_os = "windows"))]
+use std::process::Command;
 use std::{
     env, fs,
     fs::OpenOptions,
@@ -5,8 +7,6 @@ use std::{
     path::{Path, PathBuf},
     time::{SystemTime, UNIX_EPOCH},
 };
-#[cfg(not(target_os = "windows"))]
-use std::process::Command;
 
 fn cache_directory() -> PathBuf {
     #[cfg(target_os = "windows")]
@@ -254,8 +254,14 @@ mod tests {
     fn windows_extended_drive_report_path_is_shell_compatible() {
         let path = Path::new(r"\\?\C:\Users\user\ADP Observatory\report ø.html");
         let normal = windows_shell_path(path).expect("supported drive path");
-        assert_eq!(normal, PathBuf::from(r"C:\Users\user\ADP Observatory\report ø.html"));
-        assert_eq!(report_location(path), r"C:\Users\user\ADP Observatory\report ø.html");
+        assert_eq!(
+            normal,
+            PathBuf::from(r"C:\Users\user\ADP Observatory\report ø.html")
+        );
+        assert_eq!(
+            report_location(path),
+            r"C:\Users\user\ADP Observatory\report ø.html"
+        );
     }
 
     #[cfg(target_os = "windows")]
