@@ -3,20 +3,21 @@
 Milestones are proposed work packages, not claims of completion.
 
 ## M0 — Repository foundation
-**Status:** Documentation bootstrap started.
-- [ ] Confirm metadata and license.
-- [ ] Define scope, threat model, metric semantics, architecture, and roadmap.
-- [ ] Set up validation, formatting, tests, CI, and dependency policy.
-- [ ] Review for contradictions and label proposals versus implementation.
+**Status:** Baseline documentation, Rust package scaffold, and CI workflow committed; first CI result still pending.
+- [x] Define initial scope, threat model, metric semantics, architecture, and roadmap.
+- [x] Add operating instructions, license, changelog, and contributor guidance.
+- [x] Add Rust package scaffold and formatting/lint/test/build workflow.
+- [ ] Review CI result, document supported tooling, and resolve issues.
 **Exit:** fresh contributor can understand scope, run validation, and identify next task.
 
 ## M1 — Discovery and deterministic scanner
-- [ ] Choose initial supported ADP layouts and file formats.
-- [ ] Build safe, bounded, read-only scanner.
-- [ ] Parse a minimal set of canonical project artifacts.
-- [ ] Produce versioned JSON with completeness, errors, findings, and evidence references.
+**Status:** Initial prototype committed; not yet verified by a successful CI run.
+- [x] Add a bounded, read-only filesystem discovery prototype.
+- [x] Add initial JSON output mode and schema.
+- [ ] Define and test precise scan-completeness semantics for ignored, oversized, unreadable, and symlinked paths.
+- [ ] Parse canonical ADP records rather than only recognizing filenames.
 - [ ] Add valid, incomplete, contradictory, malformed, and hostile-input fixtures.
-**Exit:** deterministic results; no target code execution or target-file modification.
+**Exit:** deterministic results; no target code execution or target-file modification; tests cover scope and failure behavior.
 
 ## M2 — Rules and metrics
 - [ ] Implement a small high-value rule set.
