@@ -4,7 +4,7 @@
   "active_milestone": "M1",
   "active_contract": "WORK-SCANNER-001",
   "next_milestone": "M2",
-  "next_contract": null,
+  "next_contract": "WORK-DISTRIBUTION-001",
   "contracts": [
     {
       "id": "WORK-BOOTSTRAP-001",
@@ -43,6 +43,36 @@
         "WORK-SCANNER-001"
       ],
       "contract_file": "docs/work/WORK-UI-001.md",
+      "execution": {
+        "mode": "direct",
+        "mutation": "mutating",
+        "branch": "main"
+      }
+    },
+    {
+      "id": "WORK-DASHBOARD-001",
+      "title": "Offline local project dashboard and headless CLI UX",
+      "workstream": "human-visualization",
+      "status": "verified",
+      "depends_on": [
+        "WORK-BOOTSTRAP-001"
+      ],
+      "contract_file": "docs/work/WORK-DASHBOARD-001.md",
+      "execution": {
+        "mode": "direct",
+        "mutation": "mutating",
+        "branch": "main"
+      }
+    },
+    {
+      "id": "WORK-DISTRIBUTION-001",
+      "title": "Authenticated cross-platform releases and one-command installation",
+      "workstream": "release-security",
+      "status": "in_progress",
+      "depends_on": [
+        "WORK-DASHBOARD-001"
+      ],
+      "contract_file": "docs/work/WORK-DISTRIBUTION-001.md",
       "execution": {
         "mode": "direct",
         "mutation": "mutating",
