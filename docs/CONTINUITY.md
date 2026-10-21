@@ -23,6 +23,41 @@ Keep Observatory usable with real ADP projects, including optional ADP Actions a
 - Owner governance gate in https://github.com/FrederikLive/ADP-Observatory/issues/1. Do not publish or auto-execute remote downloads without established authorization, protected releases and verification.
 - Browser open attempt != confirmed visibility; cloud-only agents cannot open the user's desktop browser.
 
+## Immediate user pilot correction checkpoint — 2026-10-21
+
+The first *real* Windows agent run, supplied by the user, generated usable
+HTML but did not show a visible browser window. Its orchestrating agent
+also created/pushed optional project WORK metadata, ran app tests and placed
+binaries in multiple locations. These are UX/agent-boundary problems; do
+**not** repeat them or silently revert the user's project commit.
+
+Implemented in Observatory only:
+- Windows: convert extended `\\?\\` report paths to shell-compatible
+  locations and use ShellExecuteW for associated HTML open. Report
+  `Browser launch: REQUESTED / FAILED / NOT_REQUESTED` explicitly.
+- Agent helper: only trust an explicit opener status; fail closed with
+  `REPORT_SAVED` when an older binary has no status or the opener failed.
+  Return the report's actual path. No repeat scans to force a browser.
+- Skill: strong instruction against creating WORK.json, editing code/docs,
+  `.gitignore`, running target tests, committing/pushing, or installing
+  duplicate executable copies as part of visualization.
+- UI: work statuses are **recorded** by project, not Observatory-certified.
+- Source tests: Windows path normalization, Python browser status, no-open
+  CLI, absent optional WORK remains absent, and report renderer evidence labels.
+- Documentation: [Windows pilot checklist](WINDOWS-PILOT.md) for the next
+  local machine smoke test. Browser visibility cannot be validated remotely.
+
+Verified base: Windows/Linux/macOS package run 39668145354 success,
+CI 39668145620 success, then CI 39668349597 success; check latest
+CI after subsequent documentation changes. No official release,
+protected tag or auto-install exists; don't claim otherwise.
+
+**Next operator validation:** user refreshes a separately approved
+Observatory executable and copied Agent Skill in their local environment,
+runs one report and checks actual desktop visibility; compare target
+Git status/files before and after. No changes to user target project
+are authorized by this checkpoint.
+
 ## Remaining work
 - M1: independent real-world source checks beyond ADP itself, false-positive baselines, hostile/symlink/large-tree tests, historical adapters and source evidence.
 - M2/M3: version-aware metrics, rules, snapshots and historical comparisons; no full conformance yet.
