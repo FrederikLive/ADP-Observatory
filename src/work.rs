@@ -11,9 +11,20 @@ pub struct WorkInspection {
     pub project: Option<String>,
     pub active_contract: Option<String>,
     pub contract_count: Option<usize>,
+    pub contracts: Vec<WorkSummary>,
     pub contract_files: Vec<ContractFileReference>,
     pub reference_inspection_limited: bool,
     pub findings: Vec<WorkFinding>,
+}
+
+#[derive(Serialize)]
+pub struct WorkSummary {
+    pub id: String,
+    pub title: String,
+    pub status: String,
+    pub workstream: Option<String>,
+    pub depends_on: Vec<String>,
+    pub contract_file: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -43,6 +54,7 @@ pub fn inspect(root: &Path) -> WorkInspection {
         project: None,
         active_contract: None,
         contract_count: None,
+        contracts: Vec::new(),
         contract_files: Vec::new(),
         reference_inspection_limited: false,
         findings: Vec::new(),
@@ -271,6 +283,36 @@ pub fn inspect(root: &Path) -> WorkInspection {
                 format!("Invalid status for {id}."),
             ));
         }
+        result.contracts.push(WorkSummary {
+            id: id.to_owned(),
+            title: entry
+                .get("title")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_owned(),
+            status: entry
+                .get("status")
+                .and_then(|v| v.as_str())
+                .unwrap_or("UNKNOWN")
+                .to_owned(),
+            workstream: entry
+                .get("workstream")
+                .and_then(|v| v.as_str())
+                .map(str::to_owned),
+            depends_on: entry
+                .get("depends_on")
+                .and_then(|v| v.as_array())
+                .map(|deps| {
+                    deps.iter()
+                        .filter_map(|v| v.as_str().map(str::to_owned))
+                        .collect()
+                })
+                .unwrap_or_default(),
+            contract_file: entry
+                .get("contract_file")
+                .and_then(|v| v.as_str())
+                .map(str::to_owned),
+        });
         if let Some(file) = entry.get("contract_file").and_then(|v| v.as_str()) {
             if result.contract_files.len() < MAX_REFERENCE_CHECKS {
                 result
@@ -412,6 +454,8 @@ mod tests {
                 let r = inspect(root);
                 assert_eq!(r.status, "STRUCTURALLY_VALID");
                 assert_eq!(r.contract_count, Some(1));
+            assert_eq!(r.contracts[0].id, "WORK-1");
+            assert_eq!(r.contracts[0].status, "in_progress");
             },
         );
     }
