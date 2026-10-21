@@ -35,7 +35,7 @@ fn count(value: &Value) -> String {
 
 fn safe_tag(status: &str) -> &'static str {
     match status {
-        "PRESENT" | "READABLE" | "STRUCTURALLY_VALID" | "COMPLETE" | "verified" => "ok",
+        "PRESENT" | "READABLE" | "STRUCTURALLY_VALID" | "COMPLETE" => "ok",
         "INVALID" | "INVALID_PATH" | "OUTSIDE_ROOT" | "CONFLICT" | "error" => "error",
         "MISSING" | "UNREADABLE" | "UNSUPPORTED" | "UNSUPPORTED_SCHEMA" | "PARTIAL" | "SYMLINK"
         | "NOT_FILE" | "NOT_DIRECTORY" | "warning" | "blocked" => "warn",
@@ -122,7 +122,14 @@ fn show_contracts(report: &Value) -> String {
                     .unwrap_or("NOT_ASSESSED");
                 description.push_str(&format!(" · File: {path} ({state})"));
             }
-            html.push_str(&row(&format!("{id} · {title}"), &description, status, true));
+            // WORK.json statuses are claims supplied by the project, not
+            // independent verification performed by Observatory.
+            html.push_str(&row(
+                &format!("{id} · {title}"),
+                &description,
+                &format!("recorded: {status}"),
+                true,
+            ));
         }
     }
     if html.is_empty() {
@@ -296,7 +303,7 @@ fn show_compatibility(report: &Value) -> String {
             at(report, "/compatibility/format", "UNKNOWN"),
         ),
         (
-            "Known semantics",
+            "WORK schema interpretation",
             at(report, "/compatibility/semantics", "UNKNOWN"),
         ),
         (
@@ -354,7 +361,7 @@ pub fn render(report: &Value) -> String {
         metric(
             "Work contracts",
             &available,
-            "Records in optional WORK.json",
+            "Declared records; statuses are not independently verified",
         ),
         metric(
             "Scan scope",
@@ -429,6 +436,30 @@ mod tests {
         assert!(page.contains("&lt;script&gt;alert(&#39;test&#39;)&lt;/script&gt;"));
         assert!(page.contains("a&amp;b"));
         assert!(page.contains("NOT_ASSESSED"));
+    }
+
+    #[test]
+    fn recorded_verified_contract_does_not_claim_independent_verification() {
+        let report = json!({
+            "work_index": {
+                "status": "STRUCTURALLY_VALID", "contract_count": 1,
+                "contracts": [{
+                    "id": "W-001", "title": "Example",
+                    "status": "verified", "workstream": "delivery",
+                    "depends_on": []
+                }],
+                "contract_files": [], "findings": []
+            },
+            "compatibility": {"protocol": {"limitations": []}, "conformance": "NOT_ASSESSED"},
+            "context": {"records": [], "conflicts": []},
+            "scan_scope": {"status": "COMPLETE"},
+            "limitations": []
+        });
+        let page = render(&report);
+        assert!(page.contains("recorded: verified"));
+        assert!(page.contains("Declared records; statuses are not independently verified"));
+        assert!(!page.contains("<span class=\\"tag ok\\">verified</span>"));
+        assert!(page.contains("Conformance is not assessed"));
     }
 
     #[test]
