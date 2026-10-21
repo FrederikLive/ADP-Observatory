@@ -21,10 +21,12 @@ Make a local-first Observable executable obtainable on supported platforms witho
 - [x] Document checksum vs signed provenance, exact manual verification and preview install commands in docs/RELEASING.md and docs/LAUNCHER.md.
 - [x] CI test pinned download, signed provenance verification, per-user installation and headless scan on Windows x64, Linux x64 and macOS ARM64; see run 39601029440.
 - [ ] Independently test end-user machines, actual PATH integration, offline behavior after installation, unsupported platforms, Unicode/spaced paths, update/uninstall and malicious downloads.
-- [ ] Publish protected, verified tagged release and tested install instructions; only then update ADP human guidance.
+- [x] Build and independently verify a pinned, version-aligned release candidate for Linux x64, Windows x64 and macOS ARM64 without creating any tag/release — run 39624399120.
+- [ ] Configure and independently verify enforced GitHub tag/main protections and human release approval (repository owner action).
+- [ ] Publish a protected, reviewed release with tested install instructions; only then update ADP's human guide with official installation steps.
 
 ## Current state
-In progress. Experimental binaries for Windows x64, Linux x64, and macOS ARM64 have signed provenance and tested download-and-install preview helpers; all three package jobs and all three installer smoke jobs passed. No OS code signature, protected tag, official release, or public first-run bootstrap exists.
+In progress. Release-candidate workflow is green, but it deliberately has no publication permission. Experimental binaries for Windows x64, Linux x64, and macOS ARM64 have signed provenance and tested download-and-install preview helpers; all three package jobs and all three installer smoke jobs passed. No OS code signature, protected tag, official release, or public first-run bootstrap exists.
 
 ## Exact next action
-After preview installer CI success (39601029440), complete end-user validation and configure enforceable release/tag protections. Prepare a reviewed protected-tag release with authentic asset verification; do not publish or auto-execute unverified downloads.
+Release candidate verified in [run 39624399120](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120), source cfe14a008aea130427506f03a65a01bc6d7e9f4d. Next: confirm owner-configured tag/main rulesets and protected release environment. Complete Unicode/offline and negative installation tests, then review a fresh pinned candidate matching the protected release tag. Do not publish before the approval gates are effective.
