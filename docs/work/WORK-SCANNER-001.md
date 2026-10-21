@@ -42,3 +42,24 @@ Canonical ADP does not guarantee all projects use identical layouts. Use version
 
 ## Handoff / next recommended phase / exact next action
 After bootstrap completion, inspect existing src/main.rs and implement the smallest parsing vertical slice with fixtures.
+
+## Compatibility-first scope refinement (2026-10-21)
+
+The current parser is a structural prototype, not a version-aware conformance engine. Preserve existing implementation while incrementally adding safe adapters and source provenance.
+
+### Added atomic units
+- AU-06: define three compatibility dimensions (format, semantics, conformance coverage), with unknown and unsupported states.
+- AU-07: add independent-file fault isolation; preserve partial results for missing/malformed/conflicting records.
+- AU-08: create version and completeness fixture matrix, including optional WORK.json and unknown/newer ADP versions.
+- AU-09: verify no target modifications, no extra ADP metadata requirement, and no false conformance pass.
+- AU-10: test source-linked conflict reporting and conservative relationship extraction.
+
+### Acceptance refinements
+- No analyzer-specific file or mandatory ADP metadata in target projects.
+- Missing optional work ledger yields UNKNOWN/NOT_ASSESSED, not an automatic violation.
+- A readable record under an unsupported ADP version is not automatically semantically understood.
+- A bad file cannot suppress unrelated safe results.
+- Unknown conformance is never represented as a passing verdict.
+
+### Current verification
+Prior M1 scanner CI succeeded in run 39568724881. The new compatibility behavior is planned, not implemented or tested.
