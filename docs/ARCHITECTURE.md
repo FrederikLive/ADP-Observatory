@@ -44,7 +44,7 @@ Never collapse these into a single boolean. A future ADP version may be format-r
 
 ## Components
 - Existing vertical slice: read-only CLI/scanner, compatibility assessment, structured work/context records, static offline HTML report, and optional Agent Skill. Future candidates: richer adapter registry, applicability/rule engine, metric engine, optional local snapshots, and independently reviewed distribution. A loopback-only API is not required by the current viewer.
-- Rust core is the current prototype direction. UI framework is undecided pending a vertical slice.
+- Rust core and a standalone offline HTML/CSS/JS viewer are implemented; a richer framework remains an optional future decision.
 
 ## Security
 Read-only default, no project command execution, no network upload/telemetry by default, bounded traversal, safe symlink handling, escaping, and no arbitrary path APIs. The current static HTML viewer has no listening server or state-changing endpoints. Any future local HTTP service must bind loopback, validate Host/Origin, resist DNS rebinding and authenticate state-changing operations. Release launchers must verify official artifacts before execution.
