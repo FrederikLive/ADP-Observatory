@@ -160,7 +160,6 @@ fn emitted_top_level_report_has_all_schema_required_fields() {
     }
 }
 
-
 #[test]
 fn observatory_can_inspect_its_own_adp_work_records() {
     let output = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
