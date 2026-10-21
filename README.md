@@ -96,7 +96,7 @@ cargo run -- /path/to/your/project
 cargo run -- /path/to/your/project --json
 ```
 
-The evolving JSON schema is `0.2.0` in `schema/scan-report.schema.json`. Tests cover current, older, future, malformed, conflicting, and missing-record fixtures. The CLI has not yet been packaged as a downloadable cross-platform release, and no launcher or dashboard is available.
+The evolving JSON report schema is `0.3.0` in `schema/scan-report.schema.json` (analyzer development version `0.3.0`). It now separates traversal coverage from interpretation and reports bounded contract-file reference status; a referenced file being present does not prove conformance or verification. Tests cover current, older, future, malformed, conflicting, and missing-record fixtures. The CLI has not yet been packaged as a downloadable cross-platform release, and no launcher or dashboard is available.
 
 See [the roadmap](docs/ROADMAP.md) for milestones and acceptance criteria. Features are only considered implemented when the code, tests, documentation, and validation agree.
 
