@@ -14,7 +14,8 @@
     "limitations",
     "work_index",
     "compatibility",
-    "context"
+    "context",
+    "scan_scope"
   ],
   "properties": {
     "schema_version": {
@@ -56,7 +57,9 @@
         "project",
         "active_contract",
         "contract_count",
-        "findings"
+        "findings",
+        "contract_files",
+        "reference_inspection_limited"
       ],
       "properties": {
         "status": {
@@ -116,6 +119,52 @@
             },
             "additionalProperties": false
           }
+        },
+        "contract_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "contract_id",
+              "source",
+              "path",
+              "status",
+              "detail"
+            ],
+            "properties": {
+              "contract_id": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "PRESENT",
+                  "MISSING",
+                  "SYMLINK",
+                  "OUTSIDE_ROOT",
+                  "INVALID_PATH",
+                  "NOT_FILE",
+                  "NOT_DIRECTORY",
+                  "UNREADABLE"
+                ]
+              },
+              "detail": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "reference_inspection_limited": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
@@ -322,6 +371,62 @@
             },
             "additionalProperties": false
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scan_scope": {
+      "type": "object",
+      "required": [
+        "status",
+        "ignored_entries",
+        "symlinks_excluded",
+        "oversized_files_excluded",
+        "nonregular_excluded",
+        "metadata_errors",
+        "directory_errors",
+        "depth_limit_hits",
+        "entry_limit_hits"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "COMPLETE",
+            "COMPLETE_WITH_EXCLUSIONS",
+            "PARTIAL"
+          ]
+        },
+        "ignored_entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "symlinks_excluded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "oversized_files_excluded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nonregular_excluded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata_errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "directory_errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "depth_limit_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "entry_limit_hits": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "additionalProperties": false
