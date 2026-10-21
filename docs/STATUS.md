@@ -1,34 +1,35 @@
 # Project Status
 
 ## Current milestone / phase
-M0 — ADP bootstrap adaptation and verification. The repository already contains a Rust discovery prototype and planning documents; this is an existing-repository adaptation, not a greenfield reset.
+M1 — Discovery and deterministic scanner. Active contract: WORK-SCANNER-001.
 
 ## Recently completed
-- Initial product, architecture, metrics, security, and roadmap documentation.
-- Rust CLI discovery prototype and JSON schema.
-- GitHub Actions quality workflow.
-- ADP project-control-plane adaptation initiated on 2026-10-21.
+- M0 ADP bootstrap control plane established and verified via GitHub Actions run 39567705133.
+- Added a first bounded, read-only parser for .project/WORK.json, structural findings, and unit tests.
+- Extended CLI JSON output and report schema for work-index inspection.
 
 ## In progress
-- WORK-BOOTSTRAP-001: establish canonical ADP project records and verify bootstrap quality.
+- WORK-SCANNER-001: parser and test hardening; CI for latest scanner commits pending.
 
 ## Blocked
-- None established; GitHub CI must be checked after this update.
+- No known external blocker. Do not mark M1 verified until latest CI succeeds.
 
 ## Next recommended phase
-- Outcome: close M0 with a verified bootstrap and begin M1 scanner contract.
-- Why next: the analyzer needs reliable ADP parsing and evidence semantics before UI development.
-- First action: inspect latest CI run, repair failures, then implement and test a narrow canonical-record parser.
+- Outcome: validate M1 first vertical slice, then expand parser fixtures and supported ADP layouts.
+- Why next: accurate evidence and uncertainty handling must precede metrics/dashboard.
+- First action: inspect latest GitHub Actions run; fix failures; add tests for missing work index, duplicate IDs, and hostile/symlinked input.
 
 ## Known issues
-- Scanner currently discovers a small set of filenames, not ADP conformance.
-- No verified platform releases, launchers, dashboard, metric engine, or snapshots.
-- Source repository access is through GitHub API; no claim of a local working tree or locally executed tests.
+- Structural validity is not ADP conformance.
+- Work parser does not yet validate every optional schema property or detect dependency cycles.
+- Scanner remains incomplete: no full record linking, metrics, snapshots, dashboard, or launchers.
+- Remote API does not reveal local working-tree state.
 
 ## Last verified
-- GitHub content API confirms repository files were written; CI result for bootstrap changes is pending.
+- M0: GitHub Actions https://github.com/FrederikLive/ADP-Observatory/actions/runs/39567705133 succeeded.
+- M1 latest commit: CI pending.
 
 ## Git state summary
 - Branch: main.
-- Baseline: existing commits prior to bootstrap preserved.
-- Authorization: current user requested ADP bootstrap; GitHub writes are scoped to this project. No history rewrite or ADP canonical repository modification.
+- Baseline committed; latest scanner changes require verification.
+- User authorized continuing project development. No history rewrite or normative ADP change.
