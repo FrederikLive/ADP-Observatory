@@ -7,16 +7,16 @@ Reproducible, secure, read-only analysis with accurate uncertainty semantics, ex
 Rust formatter and Clippy (warnings as errors).
 
 ## Unit tests
-Rust cargo test. Add tests for parser/rule semantics, unknown states, and deterministic results.
+Rust cargo test. Existing unit tests cover work-index parsing, optional-field validation, version extraction, safe read limits, symlink refusal, independent context failures, and conflicting claims. Continue adding regression tests for unsupported layouts and edge cases.
 
 ## Integration tests
-Fixture repositories for valid, incomplete, contradictory, unsupported, and malicious inputs. Verify that the analyzer does not modify target files or execute target code.
+CLI fixture repositories under `tests/fixtures/` cover current, older, future, missing, malformed, and conflicting records. `tests/scanner.rs` checks output, deterministic results, and unchanged target records. Additional hostile-path and large-repository fixtures remain to be added.
 
 ## Contract/schema tests
 Validate .project/WORK.json against canonical ADP schema/work.schema.json. Validate scan-report JSON against schema/scan-report.schema.json. Ensure schemas match emitted data and compatibility/version policy.
 
 ## End-to-end tests
-Future local CLI and dashboard smoke tests, including path escaping, lifecycle, and offline behavior.
+CLI smoke tests are implemented through `tests/scanner.rs`. Future dashboard smoke tests must cover lifecycle, path escaping, and offline behavior.
 
 ## Accessibility
 Keyboard navigation, semantics, readable contrast, focus management, and accessible result states once dashboard exists.
@@ -40,4 +40,4 @@ Define and test bounded memory/time budgets for representative repositories; rec
 Successful formatting, lint, test, and build; schema validation and fixture tests when implemented; reviewed source/documentation alignment.
 
 ## Known gaps
-No fixtures, comprehensive parser, conformance rule engine, snapshot comparison, dashboard, platform builds, or stable release signing. The initial scanner has no test coverage yet. CI must be checked after bootstrap changes.
+Fixtures and unit/integration tests now exist, but the parser remains a limited ADP 2.7.1 WORK schema-v1 reader. No full conformance engine, complete cross-file evidence linking, comprehensive hostile-input fixture suite, snapshots, dashboard, released platform binaries, or signing. Full recursive JSON Schema conformance tests are not yet implemented; the integration test checks top-level required report fields. CI for the scanner and fixtures passed in GitHub Actions run 39573431375.
