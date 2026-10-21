@@ -1,5 +1,6 @@
 mod compatibility;
 mod records;
+mod references;
 mod work;
 
 use serde::Serialize;
