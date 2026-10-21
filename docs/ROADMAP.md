@@ -3,19 +3,19 @@
 Milestones are proposed work packages, not claims of completion.
 
 ## M0 — Repository foundation
-**Status:** Baseline documentation, Rust package scaffold, and CI workflow committed; first CI result still pending.
+**Status:** ADP control plane established; baseline CI passed on bootstrap commit.
 - [x] Define initial scope, threat model, metric semantics, architecture, and roadmap.
 - [x] Add operating instructions, license, changelog, and contributor guidance.
 - [x] Add Rust package scaffold and formatting/lint/test/build workflow.
-- [ ] Review CI result, document supported tooling, and resolve issues.
+- [x] Review bootstrap CI result and establish ADP control plane.
 **Exit:** fresh contributor can understand scope, run validation, and identify next task.
 
 ## M1 — Discovery and deterministic scanner
-**Status:** Initial prototype committed; not yet verified by a successful CI run.
+**Status:** Read-only discovery prototype and initial WORK.json structural parser committed; parser CI pending.
 - [x] Add a bounded, read-only filesystem discovery prototype.
 - [x] Add initial JSON output mode and schema.
 - [ ] Define and test precise scan-completeness semantics for ignored, oversized, unreadable, and symlinked paths.
-- [ ] Parse canonical ADP records rather than only recognizing filenames.
+- [x] Begin parsing canonical ADP WORK.json records; deeper cross-document linking remains open.
 - [ ] Add valid, incomplete, contradictory, malformed, and hostile-input fixtures.
 **Exit:** deterministic results; no target code execution or target-file modification; tests cover scope and failure behavior.
 
