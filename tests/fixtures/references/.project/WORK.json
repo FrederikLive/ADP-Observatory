@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "project": "Contract reference fixture",
+  "active_contract": "WORK-A",
+  "contracts": [
+    {
+      "id": "WORK-A",
+      "title": "WORK-A",
+      "status": "ready",
+      "depends_on": [],
+      "contract_file": "docs/work/WORK-A.md"
+    },
+    {
+      "id": "WORK-B",
+      "title": "WORK-B",
+      "status": "ready",
+      "depends_on": [],
+      "contract_file": "docs/work/not-found.md"
+    },
+    {
+      "id": "WORK-C",
+      "title": "WORK-C",
+      "status": "ready",
+      "depends_on": [],
+      "contract_file": "../outside.md"
+    },
+    {
+      "id": "WORK-D",
+      "title": "WORK-D",
+      "status": "ready",
+      "depends_on": [],
+      "contract_file": "C:/outside.md"
+    },
+    {
+      "id": "WORK-E",
+      "title": "WORK-E",
+      "status": "ready",
+      "depends_on": [],
+      "contract_file": "docs/work"
+    },
+    {
+      "id": "WORK-F",
+      "title": "WORK-F",
+      "status": "ready",
+      "depends_on": [],
+      "contract_file": "docs/work/WORK-A.md/child"
+    }
+  ]
+}
