@@ -47,7 +47,7 @@ fn main() {
     let context = records::inspect(&root, &work_index);
 
     let report = Report {
-        schema_version: "0.2.0",
+        schema_version: "0.3.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
         target: root.display().to_string(),
         scan_complete: discovery.scope.status != "PARTIAL",
