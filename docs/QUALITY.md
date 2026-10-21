@@ -46,5 +46,6 @@ Fixtures and unit/integration tests now exist, with bounded contract-file refere
 - Rust formatting, lint, unit/integration tests, and build passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011803.
 - Experimental unsigned Windows, macOS, and Linux test/build/smoke/package workflow passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011855.
 - Report renderer has HTML-escaping and no-external-assets tests; CLI integration tests cover offline export, no-open mode, and target write refusal.
-- No real-browser accessibility testing, signed publisher identity, installation verification, or complete conformance engine yet.
+- The preview binary workflow signs GitHub build provenance and verifies the signer workflow before upload. Windows/Linux/macOS preview installers now pass end-to-end download, attestation verification, install and JSON scan CI tests: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39601029440.
+- Still missing: real-browser accessibility review, official protected release and OS code signing, independent end-user install tests, and complete conformance engine.
 
