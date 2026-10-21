@@ -4,6 +4,23 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Windows agent pilot: safer viewing and honest browser status
+- Open HTML reports on Windows using native ShellExecuteW with canonical-path
+  conversion instead of Explorer; print shell-compatible paths and explicit
+  `Browser launch: REQUESTED / FAILED / NOT_REQUESTED` results.
+- The optional Python launcher returns `BROWSER_OPEN_REQUESTED` only with
+  positive CLI evidence, and `REPORT_SAVED` with the actual report path on
+  failure/unsupported desktop/older unmarked binaries.
+- Strengthened skill/setup instructions to prohibit any ADP project writes,
+  work-index creation, app-test execution or Git commit/push during visualization;
+  discouraged installing multiple binaries or copying redundant reports.
+- Clarified dashboard contract statuses as **recorded**, not independently
+  verified, and added regression tests for this evidence distinction.
+- Added [Windows desktop pilot guide](docs/WINDOWS-PILOT.md); actual
+  browser visibility in user IDE sessions remains a manual acceptance gate.
+
+## [Unreleased]
+
 ### Current ADP 2.7.1 / ADP Actions compatibility
 - Tested the *actual pinned* latest ADP repository at commit `9b5ab4694321735e83b93962e1b9975cced130bf` (protocol 2.7.1) in Observatory CI, asserting accurate version/optional-WORK/conformance results and HTML generation (run 39659907217).
 - Added a small, static ADP Actions reference in the offline report; these are suggested coding-agent prompts, not commands executed by the dashboard, and never require extra project metadata.
