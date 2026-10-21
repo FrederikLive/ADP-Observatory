@@ -93,6 +93,22 @@
         "mutation": "mutating",
         "branch": "main"
       }
+    },
+    {
+      "id": "WORK-EXPLORER-001",
+      "title": "Future offline Contract & Evidence Explorer with pre-parsed source document views",
+      "workstream": "human-visualization",
+      "status": "deferred",
+      "depends_on": [
+        "WORK-SCANNER-001",
+        "WORK-DASHBOARD-001"
+      ],
+      "contract_file": "docs/work/WORK-EXPLORER-001.md",
+      "execution": {
+        "mode": "direct",
+        "mutation": "mutating",
+        "branch": "main"
+      }
     }
   ]
 }
