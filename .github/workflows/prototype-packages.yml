@@ -7,8 +7,10 @@ on:
       - "src/**"
       - "web/**"
       - "tests/**"
+      - "scripts/**"
       - "Cargo.toml"
       - ".github/workflows/prototype-packages.yml"
+      - ".github/workflows/installer-smoke.yml"
   workflow_dispatch:
 
 permissions:
