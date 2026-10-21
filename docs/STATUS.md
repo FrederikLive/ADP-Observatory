@@ -4,33 +4,37 @@
 M1 — Discovery and deterministic scanner. Active contract: WORK-SCANNER-001.
 
 ## Recently completed
-- M0 ADP bootstrap verified in GitHub Actions run 39567705133.
-- First WORK.json structural parser and JSON report extension verified in GitHub Actions run 39568724881.
-- Adopted compatibility-first architecture and requirements: ADP agent efficiency and continuity take precedence over analyzer convenience.
-- Revised canonical ADP issue #8 to defer normative changes pending real-project evidence.
+- M0 ADP bootstrap verified in run 39567705133.
+- M1 first compatibility scanner baseline VERIFIED in run 39573431375.
+- Source-file based version detection and sourced version-conflict reporting.
+- WORK.json schema-v1 core/optional field inspection with future schema degradation.
+- Independent STATUS/CONTINUITY inspection, source claims, active-contract conflict reporting.
+- Unit tests and CLI fixtures for current, older, future, missing, malformed, and inconsistent records.
+- JSON report and analyzer development version aligned to 0.2.0.
+- Canonical ADP remains unchanged; ADP issue #8 is evidence-gated.
 
 ## In progress
-- WORK-SCANNER-001: version-aware discovery, fault isolation, provenance, and compatibility fixture design.
-- New compatibility-first requirements are documented, not yet implemented.
+WORK-SCANNER-001: scanner completeness rules, bounded references to contract files, broader hostile-input tests, and real-project calibration.
 
 ## Blocked
-No external blocker identified.
+No external blocker identified. Do not claim the full M1 scanner is complete.
 
 ## Next recommended phase
-- Outcome: implement compatibility state and independent-file failure isolation in M1.
-- Why next: Observatory must safely visualize incomplete or unfamiliar ADP projects before adding metrics.
-- First action: design format/semantic/conformance compatibility result types and fixture matrix, then implement the smallest vertical slice.
+- Outcome: harden discovery and resolve only safe, explicitly referenced contract-file paths.
+- Why next: reliable scan boundaries and evidence links are required before meaningful metrics or dashboard visualizations.
+- First action: inspect latest GitHub Actions run; implement file-reference checks with missing/symlinked/outside-root fixtures and honest scan-completeness reporting.
 
 ## Known issues
-- Current parser checks structural WORK.json fields only; not full ADP conformance.
-- No version-aware adapters, cross-file conflict resolution, complete fixtures, dashboard, metrics, or launchers.
-- Remote API does not establish local working-tree cleanliness.
+- Semantic support is scoped to WORK_JSON_SCHEMA_V1_ONLY on explicitly recognized ADP 2.7.1; older/future versions are conservatively unsupported.
+- Conformance remains NOT_ASSESSED for all projects. Structural validity is not normative ADP conformance.
+- Complete cross-file evidence linking, version adapters, snapshots, dashboard, metrics, and safe release launchers are not implemented.
+- Remote API access does not reveal an agent's local working-tree changes.
 
 ## Last verified
-- M0: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39567705133 — passed.
-- M1 structural parser: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39568724881 — passed.
-- Compatibility-first design documentation: committed; no executable compatibility behavior claimed.
+- M0 bootstrap: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39567705133 — success.
+- M1 compatibility implementation and CLI fixture suite: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39573431375 — success.
+- Documentation-only commits after that run need not be misrepresented as code-level test evidence.
 
 ## Git state summary
 - Branch: main.
-- Changes committed through GitHub API; no ADP normative files changed.
+- Commits made through authorized GitHub connector; no normative ADP changes.
