@@ -85,24 +85,26 @@ This is the target architecture, not a claim that all components are implemented
 
 ## One-command launch direction
 
-The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **Neither the installed launcher nor the dashboard exists yet**; today the scanner runs from a Rust checkout as described below.
+The intended human experience is to enter an ADP project and run `adp-observatory .` to open its local dashboard. A separate headless `adp-observatory scan . --json` mode is planned for CI and agents. **The offline dashboard is implemented in the development CLI**, but no verified installer or official release exists yet. Today the application runs from a Rust checkout or experimental CI artifact.
 
 Install-once, verified native releases are the preferred first delivery mechanism. A safe first-run download-and-execute helper may follow, but it must verify publisher identity and artifact integrity before running. We will not use blind remote-script execution or require installation inside every ADP repository. See [the launcher and distribution design](docs/LAUNCHER.md).
 
 ## Current prototype
 
-The Rust CLI now discovers selected ADP markers and safely inspects optional `.project/WORK.json` records using the supported schema-v1 structural rules. It can detect explicit protocol versions, display a limited compatibility report, examine `docs/STATUS.md` and `docs/CONTINUITY.md`, and preserve conflicting active-contract claims with source references. Missing or invalid files do not stop independent analysis.
+The Rust CLI and offline HTML viewer now discover selected ADP markers and safely inspects optional `.project/WORK.json` records using the supported schema-v1 structural rules. It can detect explicit protocol versions, display a limited compatibility report, examine `docs/STATUS.md` and `docs/CONTINUITY.md`, and preserve conflicting active-contract claims with source references. Missing or invalid files do not stop independent analysis.
 
 Semantic support currently means **WORK.json schema v1 for an explicitly identified ADP 2.7.1 project**, not complete understanding of the protocol. Older, newer, and unknown versions remain displayable where format parsing is safe, but are not declared fully supported. **Full ADP conformance is never assessed by this prototype.**
 
-Build and run from a Rust development environment:
+Build from a Rust checkout of this repository, then enter an ADP project directory and run:
 
 ```bash
-cargo run -- /path/to/your/project
-cargo run -- /path/to/your/project --json
+cargo run --manifest-path /absolute/path/to/ADP-Observatory/Cargo.toml -- .
+cargo run --manifest-path /absolute/path/to/ADP-Observatory/Cargo.toml -- scan . --json
 ```
 
-The evolving JSON report schema is `0.3.0` in `schema/scan-report.schema.json` (analyzer development version `0.3.0`). It now separates traversal coverage from interpretation and reports bounded contract-file reference status; a referenced file being present does not prove conformance or verification. Tests cover current, older, future, malformed, conflicting, missing-record, and safe/unsafe contract-reference fixtures. CI also runs Observatory against its own ADP work records. The CLI has not yet been packaged as a downloadable cross-platform release, and no launcher or dashboard is available.
+The first command produces a **standalone offline HTML dashboard** in the user's application cache directory and attempts to open it in the default browser. The second produces headless JSON without opening a browser. Use `--no-open` to generate a dashboard without starting a browser, or `report . --output /outside/project/report.html` to choose an existing external output directory. Generated reports contain local project paths and should be treated as potentially sensitive.
+
+The evolving JSON report schema is `0.4.0` in `schema/scan-report.schema.json` (analyzer development version `0.4.0`). It now separates traversal coverage from interpretation and reports bounded contract-file reference status; a referenced file being present does not prove conformance or verification. Tests cover current, older, future, malformed, conflicting, missing-record, and safe/unsafe contract-reference fixtures. CI also runs Observatory against its own ADP work records. The browser view is offline, has no listening HTTP server and uses no external assets. Experimental unsigned Windows/macOS/Linux CI packages are being tested; they are not signed or published as official verified releases. Persistent metrics and historical snapshots are not implemented.
 
 See [the roadmap](docs/ROADMAP.md) for milestones and acceptance criteria. Features are only considered implemented when the code, tests, documentation, and validation agree.
 
