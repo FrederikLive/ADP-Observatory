@@ -1,0 +1,95 @@
+name: Preview installer smoke tests
+
+on:
+  workflow_run:
+    workflows: ["Prototype binary packages"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+
+jobs:
+  unix:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    name: ${{ matrix.os } verified install
+    runs-on: ${{ matrix.os }
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }
+          persist-credentials: false
+      - name: Reject wrong source SHA without modifying project
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }
+          RUN_ID: ${{ github.event.workflow_run.id }
+        run: |
+          set -euo pipefail
+          cd tests/fixtures/current
+          if bash "$GITHUB_WORKSPACE/scripts/install-preview.sh" \
+            --run-id "$RUN_ID" \
+            --expected-sha 0000000000000000000000000000000000000000 \
+            --install-dir "$RUNNER_TEMP/obs-negative"; then
+            echo "Installer accepted an incorrect source SHA" >&2
+            exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/obs-negative"
+      - name: Download, verify, install, and scan
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }
+          RUN_ID: ${{ github.event.workflow_run.id }
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }
+        run: |
+          set -euo pipefail
+          cd tests/fixtures/current
+          bash "$GITHUB_WORKSPACE/scripts/install-preview.sh" \
+            --run-id "$RUN_ID" \
+            --expected-sha "$EXPECTED_SHA" \
+            --install-dir "$RUNNER_TEMP/obs-bin"
+          "$RUNNER_TEMP/obs-bin/adp-observatory" --version
+          "$RUNNER_TEMP/obs-bin/adp-observatory" scan . --json > "$RUNNER_TEMP/scan.json"
+          python3 -c 'import json,sys; data=json.load(open(sys.argv[1])); assert data["compatibility"]["conformance"] == "NOT_ASSESSED"' "$RUNNER_TEMP/scan.json"
+          test ! -e ./adp-observatory
+
+  windows:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    name: windows-x64 verified install
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }
+          persist-credentials: false
+      - name: Reject wrong source SHA without modifying project
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }
+          RUN_ID: ${{ github.event.workflow_run.id }
+        run: |
+          Set-Location "$env:GITHUB_WORKSPACE/tests/fixtures/current"
+          & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/scripts/install-preview.ps1" -RunId "$env:RUN_ID" -ExpectedSha "0000000000000000000000000000000000000000" -InstallDir "$env:RUNNER_TEMP/obs-negative"
+          if ($LASTEXITCODE -eq 0) { throw "Installer accepted incorrect SHA" }
+          if (Test-Path "$env:RUNNER_TEMP/obs-negative") { throw "Installer touched destination on failed validation" }
+      - name: Download, verify, install and scan
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }
+          RUN_ID: ${{ github.event.workflow_run.id }
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }
+        run: |
+          Set-Location "$env:GITHUB_WORKSPACE/tests/fixtures/current"
+          & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/scripts/install-preview.ps1" -RunId "$env:RUN_ID" -ExpectedSha "$env:EXPECTED_SHA" -InstallDir "$env:RUNNER_TEMP/obs-bin"
+          if ($LASTEXITCODE -ne 0) { throw "Installer failed" }
+          $exe = Join-Path "$env:RUNNER_TEMP/obs-bin" "adp-observatory.exe"
+          & $exe --version
+          if ($LASTEXITCODE -ne 0) { throw "Installed binary startup failed" }
+          $data = & $exe scan . --json | Out-String | ConvertFrom-Json
+          if ($data.compatibility.conformance -ne "NOT_ASSESSED") { throw "Incorrect conformance claim" }
+          if (Test-Path ./adp-observatory.exe) { throw "Project unexpectedly modified" }
