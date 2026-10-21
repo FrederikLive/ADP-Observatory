@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FrederikLive/ADP-Observatory/blob/main/schema/scan-report.schema.json",
+  "title": "ADP-Observatory scan report",
+  "type": "object",
+  "required": ["schema_version", "analyzer_version", "target", "scan_complete", "files_examined", "files_skipped", "adp_markers", "limitations"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "analyzer_version": {"type": "string"},
+    "target": {"type": "string"},
+    "scan_complete": {"type": "boolean"},
+    "files_examined": {"type": "integer", "minimum": 0},
+    "files_skipped": {"type": "integer", "minimum": 0},
+    "adp_markers": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
