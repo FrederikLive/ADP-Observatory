@@ -35,6 +35,10 @@ fn cache_directory() -> PathBuf {
 }
 
 fn ensure_directory(directory: &Path, project: &Path, create: bool) -> Result<PathBuf, String> {
+    // Compare canonical paths on every platform. /var on macOS and Windows
+    // short-name aliases otherwise make a simple starts_with() unreliable.
+    let project = fs::canonicalize(project)
+        .map_err(|e| format!("Cannot resolve analyzed project directory: {e}"))?;
     if create {
         // Refuse an in-project cache root before creating any directories.
         let mut ancestor = directory;
@@ -176,7 +180,7 @@ mod tests {
         let (project, outside) = roots();
         let destination = outside.join("scan.html");
         let saved = save(&project, Some(&destination), "offline html").expect("save");
-        assert_eq!(saved, destination);
+        assert_eq!(saved, fs::canonicalize(&destination).expect("canonical destination"));
         assert_eq!(fs::read_to_string(&saved).expect("read"), "offline html");
         assert!(save(&project, Some(&destination), "overwrite").is_err());
         fs::remove_dir_all(project.parent().unwrap()).expect("cleanup");
