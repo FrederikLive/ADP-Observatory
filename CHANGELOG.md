@@ -4,6 +4,17 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Optional agent-activated dashboard
+- Added a progressively disclosed `adp-observatory` Agent Skill for explicit
+  user requests such as "show Observatory", with conditional trust/install
+  reference and no mandatory ADP changes.
+- Added a standard-library Python launch helper that finds an existing
+  approved executable, refuses project-local executable paths, distinguishes
+  desktop/headless execution and returns a verified offline report path.
+- Added unit and end-to-end CI tests for browser fallback, missing/unsafe
+  executables and actual compiled Observatory HTML generation.
+
+
 ### Release-candidate preparation (not published)
 - Added a read-only, fail-closed candidate gate checking full source SHA, main branch, Cargo package version, VERSION, and report schema version.
 - Added source-pinned multi-platform candidate builds and provenance verification, with temporary versioned artifacts, manifest and checksums, but no GitHub tag/release publication.
