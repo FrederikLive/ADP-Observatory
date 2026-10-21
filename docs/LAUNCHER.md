@@ -1,6 +1,6 @@
 # Launching and distributing ADP-Observatory
 
-**Status:** Offline dashboard and headless CLI are implemented in development 0.4.0. GitHub Actions has successfully produced experimental Windows x64, Linux x64, and macOS runner binaries with signed build-provenance attestations. **These are not an official released installer, platform code-signed application, or verified first-run downloader.**
+**Status:** Development 0.4.0 provides the offline dashboard and headless CLI. CI builds signed-provenance experimental Windows x64, Linux x64, and macOS ARM64 binaries. Preview installers now pass pinned-download, attestation-verification, install and scan smoke tests on all three platforms (run 39601029440). **No official protected release, OS code-signed installer, or zero-prerequisite first-run downloader exists yet.**
 
 ## User experience
 
@@ -38,6 +38,26 @@ A successful experimental matrix run is available at [GitHub Actions #3959784268
 4. Invoke that verified binary by its explicit filesystem path from within the desired ADP project. For example on Linux/macOS, `/path/to/adp-observatory .`; in PowerShell, `& "C:\\path\\to\\adp-observatory.exe" .`. The application then generates the offline report and attempts to open it in the browser.
 
 Do not bypass operating-system security warnings to run an unsigned executable. Artifact provenance is not equivalent to OS code signing or a trusted installer. The release source/branch may change during development: pin a known workflow run for repeatable testing instead of assuming the newest artifact is vetted.
+
+## Install once using the experimentally verified helpers
+
+See [RELEASING.md](RELEASING.md) for prerequisites and the complete preview instructions. From an ADP project directory, invoke the **locally reviewed** helper with an explicit successful packaging run ID and full source SHA:
+
+Linux x64 / macOS ARM64:
+
+```sh
+bash /path/to/ADP-Observatory/scripts/install-preview.sh --run-id RUN_ID --expected-sha FULL_40_CHARACTER_SHA
+```
+
+Windows x64 PowerShell:
+
+```powershell
+& "C:\path\to\ADP-Observatory\scripts\install-preview.ps1" -RunId RUN_ID -ExpectedSha "FULL_40_CHARACTER_SHA"
+```
+
+The helpers require an independently installed, authenticated GitHub CLI (`gh`). They reject a mismatched run/SHA, verify the binary checksum and GitHub signature plus source workflow/commit, and install outside the ADP project. They do not change PATH; use the printed executable path or configure PATH yourself. CI successfully exercised both successful installation and deliberate wrong-SHA rejection on Windows, Linux and macOS: [installer smoke run 39601029440](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39601029440).
+
+These are **developer preview installers**, not a general-audience one-command downloader or official release. Unsupported architectures, expired artifacts, or failed verification must fail closed.
 
 ## First-run trade-off: one command versus trusted execution
 
