@@ -24,6 +24,11 @@ GitHub Actions run 39575987006 succeeded at its revision for formatting, Clippy,
 - M1 reference safety, coverage reporting, self-scan, and version 0.3.0: VERIFIED — run 39575987006.
 - Full historical format support, complete conformance, and real-world false-positive calibration: NOT IMPLEMENTED or NOT ASSESSED.
 
+## Human-facing integration checkpoint
+- The separate canonical ADP repository now has a non-normative docs/OBSERVATORY.md guide and short README/USING_ADP links; ADP validator passed on documentation-only commit 3dd321e7 (GitHub Actions run 39592315852).
+- Observatory docs/LAUNCHER.md defines a future, trusted install-once binary and `adp-observatory .` local-dashboard UX, plus planned headless `scan . --json` command.
+- The launcher, signed downloads, and dashboard remain NOT IMPLEMENTED. Avoid copying one-shot examples into docs until supported release artifacts are independently verified. The active M1 scanner contract and exact next action remain unchanged.
+
 ## Work in progress
 Calibrate parser and scope results against small/mature real ADP projects and grow targeted regression tests. M1 remains in progress.
 
