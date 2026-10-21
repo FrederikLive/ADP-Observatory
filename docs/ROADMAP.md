@@ -37,7 +37,7 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
 ## M4 — Cross-platform release and launchers
-**Status:** Experimental CI binaries for Windows x64, Linux x64 and macOS runner pass tests and have signed build-provenance attestations (run 39596794393). No official code-signed release or installer yet.
+**Status:** Experimental CI binaries for Windows x64, Linux x64 and macOS runner pass tests and have signed build-provenance attestations (run 39597842680, including signer-workflow verification). No official code-signed release or installer yet.
 - [x] Test Windows x64, Linux x64 and macOS runner binaries in CI; other architectures and real-machine install tests remain outstanding.
 - [x] Produce experimental workflow artifacts and signed build-provenance attestations; [ ] establish a protected tagged official release with independently verified release metadata.
 - [ ] Support install-once execution from any project directory: `adp-observatory .`; keep headless CLI mode for JSON and CI.
