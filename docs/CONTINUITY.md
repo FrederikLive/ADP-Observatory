@@ -1,48 +1,41 @@
 # Continuity
 
 ## Active objective
-Deliver an official safe optional Observatory release while protecting ADP's agent-first efficiency and support for incomplete/older project records.
+Keep Observatory usable with real ADP projects, including optional ADP Actions and update guidance, without adding agent tokens, new required records, project writes or false conformance claims.
 
-## Active work and ownership
-M1 scanner calibration remains active: WORK-SCANNER-001, in_progress. M4 distribution: WORK-DISTRIBUTION-001, in_progress, now blocked on repository-owner release governance. Offline viewer WORK-DASHBOARD-001 verified. Original WORK-UI-001 deferred/superseded with history retained.
+## Active contracts
+- M1 / WORK-SCANNER-001: in_progress (broader real-project and version-adapter calibration remains).
+- M4 / WORK-DISTRIBUTION-001: in_progress, blocked on owner-controlled official release protection.
+- WORK-DASHBOARD-001: verified offline local view.
+- WORK-AGENT-LAUNCH-001: verified local/headless on-demand skill slice, not a public first-use installer.
+- WORK-UI-001: deferred historical umbrella, superseded.
 
-## Last known good state
-- Development 0.4.0 supports local offline dashboard `adp-observatory .`, explicit HTML export, and `scan . --json`. It does not offer full ADP conformance or historical snapshots.
-- Preview installers passed install and scan tests for Windows x64, Linux x64 and macOS ARM64 (run 39601029440), requiring gh CLI, full SHA and a pinned CI run.
-- Release candidate workflow `.github/workflows/release-candidate.yml` added with `scripts/check_release_candidate.py` and `tests/test_release_validation.py`. It rejects wrong SHA/ref/versions and produces signed-provenance temporary candidate assets, **without any GitHub release publishing permissions or steps**.
-- Release-candidate run 39624399120 succeeded for all three platforms at exact source commit cfe14a008aea130427506f03a65a01bc6d7e9f4d.
-- docs/RELEASING.md contains owner-side GitHub branch/tag ruleset and release-environment setup steps; release-governance issue #1 tracks manual owner actions.
-- Added Unicode/spaced-path/offline installer checks to the existing installer smoke workflow. Their new follow-on CI has not completed and must remain NOT VERIFIED.
+## Latest compatibility checkpoint — 2026-10-21
+- Canonical `FrederikLive/ADP` `main` = `9b5ab4694321735e83b93962e1b9975cced130bf`, protocol **2.7.1**. Its new ADP Actions and update guide are non-normative; no version bump or mandatory analyzer data source occurred. ADP validator run 39658735485 succeeded.
+- Observatory CI 39659907217 checked out that **exact** upstream commit and scanned it with the compiled Rust analyzer, verifying `protocol.value=2.7.1`, `format=NOT_PRESENT` for absent optional WORK, `semantics=NOT_ASSESSED`, `conformance=NOT_ASSESSED`, and correct HTML generation.
+- The same CI confirmed Observatory's real `.project/WORK.json` is structurally valid and a remote protocol reference does not fabricate a local version.
+- Static ADP Actions suggestions added to offline report; no client execution, dependencies, network requests, required project files, background agent reads or project mutation. Agent Skill now explicitly avoids conflating `Show Observatory` with `Show ADP Actions` or `Update ADP`.
+- Updated README, ADP integration, quality, roadmap, work contract, changelog and security/agent guidance for this reality.
 
-## Agent-activated Observatory checkpoint
+## Installation / release evidence
+- Windows x64, Linux x64, macOS ARM64 experimental installers verified signed CI artifacts, rejected incorrect SHA, installed per-user and scanned Unicode/spaced project paths offline in Actions 39660008091 — success.
+- Upload-only v0.4.0 signed-provenance release candidate passed in run 39624399120; no official OS-code-signed or protected tagged release exists.
+- Owner governance gate in https://github.com/FrederikLive/ADP-Observatory/issues/1. Do not publish or auto-execute remote downloads without established authorization, protected releases and verification.
+- Browser open attempt != confirmed visibility; cloud-only agents cannot open the user's desktop browser.
 
-- User approved a small, optional ADP discovery hint pointing to the official Observatory Agent Skill, with no normative protocol changes (ADP remains 2.7.1).
-- The Agent Skill and conditional installer reference live in `skills/adp-observatory/`. `scripts/launch.py` discovers an existing trusted local executable without network access, refuses one inside the project, and returns `REPORT_SAVED` or `BROWSER_OPEN_REQUESTED` (an attempt, not proof of user visibility).
-- Regression tests and full compiled-app offline report passed in GitHub CI run 39652171472. ADP repository validation for the new optional pointer passed run 39652005147. WORK-AGENT-LAUNCH-001 is verified for the local/headless slice.
-- Existing ADP projects are not silently updated; agent-level skill installation or a one-line router hint remains an optional adoption path.
-- Missing official release/approved auto-install and cloud-only browser access must remain explicit limitations. Do not turn the skill reference into permission to run remote code.
-- Next development work: finish release governance in WORK-DISTRIBUTION-001 and test real local desktop agent harnesses; do not add more normative ADP rules just for Observatory.
-
-## Blocker / investigation
-- No repository rulesets existed at last check. The connector cannot create these admin controls or read branch protection (403). Owner must configure and verify active main/v* tag rulesets and release approval environment before publication.
-- Candidate binaries have signed build provenance, **not** operating-system signatures. Clean-machine acceptance and platform signing policy remain open.
-- Release candidate artifacts are temporary, not tagged production artifacts; no official release has been published.
+## Remaining work
+- M1: independent real-world source checks beyond ADP itself, false-positive baselines, hostile/symlink/large-tree tests, historical adapters and source evidence.
+- M2/M3: version-aware metrics, rules, snapshots and historical comparisons; no full conformance yet.
+- M4: enforced GitHub tag/main protections, approved release, end-user install/browser smoke, signing policy, update/uninstall. User/harness approval is required for first installation.
 
 ## Exact next action
-1. Inspect repo HEAD, rulesets, branch protections if accessible, newest CI (especially pending Unicode/offline smoke test) and active contracts.
-2. Ask/check that repository owner completed [release-governance issue #1](https://github.com/FrederikLive/ADP-Observatory/issues/1); validate enforced main/v* rulesets and deployment environment with actual evidence.
-3. Finish end-user install tests and approve version/signing/release caveats.
-4. Produce a fresh source-pinned candidate matching a protected release tag, compare assets/attestations, and only then publish through a reviewed gated process. No automatic or unapproved publication.
-5. Update STATUS/CONTINUITY with exact verification. Return to M1 scanner calibration after the distribution release milestone is unblocked.
+1. Inspect `main` HEAD and newest CI (including the post-documentation run); verify the upstream pinned ADP SHA still matches intended baseline.
+2. Extend M1 tests with an independent representative consumer project, assess false positives and source evidence; fix only observed gaps.
+3. For M4, verify owner-configured GitHub protection/ruleset and independent release approval before official publication.
+4. Record new evidence in existing STATUS/CONTINUITY/contracts only when substantive; do not introduce ADP-side visualization metadata or extra routine agent reads.
 
-## Decisions maintained
-- Canonical ADP remains normative agent-first; Observatory is a non-authoritative optional analysis companion, requiring no added project metadata or agent context.
-- Unknown/unsupported/incomplete evidence must never become a zero, false conformance failure or passing verdict.
-- Signed GitHub build provenance is distinct from OS code-signing; release approval requires owner-controlled protection.
-- No release/tag creation, destructive Git operation or deployment was performed in this checkpoint.
+## Decisions and recovery
+ADP remains the agent-first normative protocol; Observatory is optional, human-facing and read-only by default. Unknown/missing records do not become zeros, passing verdicts or automatic conformance failures. `docs/COMMANDS.md` belongs to ADP agent-action guidance, not Observatory's analyzer requirements. GitHub API changes were authorized under the user's continuation request; remote API cannot prove local worktree cleanliness. No tag, official release or destructive action authorized by this file.
 
 ## Last checkpoint
-2026-10-21: v0.4.0 upload-only release candidate green (39624399120), tag/main rulesets absent, governance issue #1 created, new installer regression tests pending.
-
-## Git authorization and recovery
-Github main updated through connector under the user's continue directive. Local working-tree cleanliness is unknowable from remote state. No durable authorization to bypass review or release-governance policy exists.
+2026-10-21 — current ADP 2.7.1 Actions compatibility verified, cross-platform Unicode/offline installer checks passed, release governance still blocked.
