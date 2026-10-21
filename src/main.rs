@@ -1,3 +1,5 @@
+mod compatibility;
+mod records;
 mod work;
 
 use serde::Serialize;
@@ -17,6 +19,8 @@ struct Report {
     files_skipped: usize,
     adp_markers: Vec<String>,
     work_index: work::WorkInspection,
+    compatibility: compatibility::Compatibility,
+    context: records::ContextInspection,
     limitations: Vec<String>,
 }
 
@@ -52,6 +56,11 @@ fn main() {
         &mut complete,
     );
 
+    markers.sort();
+    let work_index = work::inspect(&root);
+    let compatibility = compatibility::inspect(&root, &work_index);
+    let context = records::inspect(&root, &work_index);
+
     let report = Report {
         schema_version: "0.1.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
@@ -60,9 +69,11 @@ fn main() {
         files_examined: examined,
         files_skipped: skipped,
         adp_markers: markers,
-        work_index: work::inspect(&root),
+        work_index,
+        compatibility,
+        context,
         limitations: vec![
-            "Initial structural work-index inspection only; this is not a full ADP conformance assessment.".into(),
+            "Structural and contextual inspection only; this is not a full ADP conformance assessment.".into(),
             "No project scripts or commands are executed.".into(),
             "Dashboard, metric calculations, and historical snapshots are not implemented.".into(),
         ],
@@ -86,6 +97,19 @@ fn main() {
             println!("  - {marker}");
         }
         println!("Work index: {}", report.work_index.status);
+        println!(
+            "Compatibility: format={}, semantics={}, conformance={}",
+            report.compatibility.format,
+            report.compatibility.semantics,
+            report.compatibility.conformance
+        );
+        println!("Protocol version: {}", report.compatibility.protocol.value.as_deref().unwrap_or(report.compatibility.protocol.status));
+        for conflict in &report.context.conflicts {
+            println!("Conflict in {}:", conflict.field);
+            for claim in &conflict.claims {
+                println!("  {}: {}", claim.path, claim.value);
+            }
+        }
         for finding in &report.work_index.findings {
             println!(
                 "  [{}] {}: {}",
