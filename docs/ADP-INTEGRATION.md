@@ -1,6 +1,6 @@
 # ADP Integration — Compatibility-First Decision
 
-**Status: design decision, not a normative ADP amendment.** Canonical ADP remains in FrederikLive/ADP. No changes to ADP.md, ADP.min.md, or its schema are authorized or needed at this stage.
+**Status: optional user-invoked integration implemented; not a normative ADP amendment.** Canonical ADP remains in FrederikLive/ADP. At the user's explicit request, non-normative on-demand skill references were added to its portable/compact guidance and AGENTS template. No ADP schema, required project records, or agent workflow obligations have changed.
 
 ## Protected ADP intent
 ADP optimizes agent throughput, low token consumption, minimal context retrieval, project understanding, durable history, and reliable cold-session continuity. Observatory exists to help humans visualize that existing information. **The analyzer must adapt to the protocol, never require the protocol to serve the analyzer.**
@@ -32,3 +32,24 @@ Use fixtures for no WORK.json, missing continuity, conflicting claims, invalid J
 
 ## Feedback loop
 Observatory may identify candidate ADP improvements, but observations do not become normative rules automatically. A human-reviewed proposal must show interoperability benefit and acceptable cost to agent operation.
+
+## Optional Agent Launch implementation (2026-10-21)
+
+A user's request such as "show Observatory" conditionally leads an ADP-aware
+agent to the official `skills/adp-observatory/SKILL.md`. All executable
+discovery, desktop-versus-headless behavior and approved-installation guidance
+are owned here, not in ADP. The associated standard-library Python helper
+`skills/adp-observatory/scripts/launch.py` does not download software, runs
+only an existing explicitly trusted executable outside the scanned project,
+returns structured success/limitation states and produces an HTML report via
+the existing offline dashboard.
+
+**Trust boundary:** an ADP hint is *discovery*, not authorization to execute
+remote code. A verified public release is still pending owner-controlled
+release governance; first-use installation must follow the separately reviewed
+provenance/approval process. A remote-only agent cannot promise to open the
+user's local browser.
+
+Future integrations should use the same discover-on-demand pattern rather
+than adding another ADP protocol or mandatory event log. For older projects,
+adopt the optional hint manually or install the skill at the harness/user level.
