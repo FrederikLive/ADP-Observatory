@@ -81,3 +81,14 @@ All milestones must preserve ADP's low-token, fast-agent, continuity-first desig
 
 ### M6 gate
 - [ ] Do not amend ADP unless repeated real-project evidence shows an agent-beneficial interoperability gap independent of Observatory.
+
+## Early visualization and packaging checkpoint (development 0.4.0)
+- [x] Implement a first **offline static HTML dashboard** with contracts, source references, compatibility, limitations, and local client-side filtering; not yet a full evidence or history dashboard.
+- [x] Implement dashboard/report/headless scan CLI modes; a Rust checkout is still required absent an installed binary.
+- [x] Test experimental unsigned Windows/macOS/Linux build artifacts and CLI smoke tests (run 39596011855).
+- [ ] Independently authenticated release signing/provenance, verified first-run installer, stable package distribution and update/uninstall.
+- [ ] Real browser accessibility/usability testing and full historical metrics/snapshots.
+- [ ] Calibrate against real projects with missing and incompatible ADP artifacts.
+
+This is an early M3/M4 vertical slice tracked by WORK-UI-001; M1 remains active and the core ADP protocol is unchanged.
+
