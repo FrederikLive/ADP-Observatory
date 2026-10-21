@@ -19,10 +19,6 @@ fn escape_html(raw: &str) -> String {
     out
 }
 
-fn string<'a>(value: &'a Value, fallback: &'a str) -> &'a str {
-    value.as_str().unwrap_or(fallback)
-}
-
 fn at<'a>(value: &'a Value, pointer: &str, fallback: &'a str) -> &'a str {
     value
         .pointer(pointer)
