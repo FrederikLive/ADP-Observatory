@@ -103,7 +103,15 @@ fn main() {
             report.compatibility.semantics,
             report.compatibility.conformance
         );
-        println!("Protocol version: {}", report.compatibility.protocol.value.as_deref().unwrap_or(report.compatibility.protocol.status));
+        println!(
+            "Protocol version: {}",
+            report
+                .compatibility
+                .protocol
+                .value
+                .as_deref()
+                .unwrap_or(report.compatibility.protocol.status)
+        );
         for conflict in &report.context.conflicts {
             println!("Conflict in {}:", conflict.field);
             for claim in &conflict.claims {
