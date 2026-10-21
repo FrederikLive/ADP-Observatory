@@ -16,7 +16,7 @@ CLI fixture repositories under `tests/fixtures/` cover current, older, future, m
 Validate .project/WORK.json against canonical ADP schema/work.schema.json. Validate scan-report JSON against schema/scan-report.schema.json. Ensure schemas match emitted data and compatibility/version policy.
 
 ## End-to-end tests
-CLI smoke tests are implemented through `tests/scanner.rs`. Future dashboard smoke tests must cover lifecycle, path escaping, and offline behavior.
+CLI smoke tests are implemented through `tests/scanner.rs`. Offline HTML dashboard CLI tests cover generated report contents, escaping, output outside the project, headless mode and no-open mode. Real-browser accessibility, offline rendering and platform-specific browser launching still need independent testing.
 
 ## Accessibility
 Keyboard navigation, semantics, readable contrast, focus management, and accessible result states once dashboard exists.
@@ -40,7 +40,7 @@ Define and test bounded memory/time budgets for representative repositories; rec
 Successful formatting, lint, test, and build; schema validation and fixture tests when implemented; reviewed source/documentation alignment.
 
 ## Known gaps
-Fixtures and unit/integration tests now exist, with bounded contract-file reference inspection and explicit scan coverage. The parser remains a limited ADP 2.7.1 WORK schema-v1 reader. No full conformance engine, complete cross-file evidence linking, comprehensive hostile-input fixture suite, snapshots, dashboard, released platform binaries, or signing. Full recursive JSON Schema conformance tests are not yet implemented; the integration test checks top-level required report fields. CI for the 0.3.0 scanner implementation and tests passed in GitHub Actions run 39575987006; check the most recent repository CI after subsequent documentation updates.
+Fixtures and unit/integration tests now exist, with bounded contract-file reference inspection and explicit scan coverage. The parser remains a limited ADP 2.7.1 WORK schema-v1 reader. No full conformance engine, complete cross-file evidence linking, comprehensive hostile-input fixture suite, snapshots, production installer, or OS code signing. The initial standalone offline dashboard exists. Full recursive JSON Schema conformance tests are not yet implemented; the integration test checks top-level required report fields. Development 0.4.0 passed Rust CI at https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596170547; Windows/Linux/macOS experimental matrix with signed GitHub build provenance passed at https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596794393.
 
 ## Dashboard and cross-platform prototype checkpoint
 - Rust formatting, lint, unit/integration tests, and build passed: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011803.
