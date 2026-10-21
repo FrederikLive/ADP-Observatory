@@ -36,6 +36,20 @@ Milestones are proposed work packages, not claims of completion.
 - [x] Show scan scope, completeness, and unknown/not-assessed values in the offline report.
 **Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
+## Optional Agent Launch (M3/M4 integration slice)
+
+- [x] Provide an optional skill triggered by "show Observatory", owning
+  implementation outside ADP (WORK-AGENT-LAUNCH-001).
+- [x] Implement local/existing binary discovery, offline HTML launch, and
+  graceful headless fallback; verify Python unit tests and actual compiled
+  CLI end-to-end under CI.
+- [x] Link from optional non-normative portable/compact ADP guidance and
+  generated agent-router template.
+- [ ] Support unattended first-time installation only after verified official
+  distribution and user/harness authorization are available.
+- [ ] Validate browser opening in supported desktop harnesses. Never confuse
+  a cloud-browser report with the user's local browser.
+
 ## M4 — Cross-platform release and launchers
 **Status:** Preview installation passes three-platform CI (39601029440); signed and SHA-pinned candidate assets pass three-platform packaging (39624399120). No GitHub tag rulesets yet and no official release, OS code-signing, or automatic first-run setup.
 - [x] Test Windows x64, Linux x64 and macOS runner binaries in CI; other architectures and real-machine install tests remain outstanding.
