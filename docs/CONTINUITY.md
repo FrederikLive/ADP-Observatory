@@ -66,3 +66,13 @@ GitHub default branch main updated through connector. Local staged/unstaged/untr
 - Source of authorization: current user's instruction to continue Observatory development.
 - Generated policies do not self-authorize commits/push/history rewrites.
 - Next safe action: inspect CI and calibrate real project coverage.
+
+## Implemented dashboard vertical slice — 2026-10-21
+- Development version 0.4.0: `src/dashboard.rs`, `web/report.html`, `web/report.css`, `web/report.js` render a self-contained offline HTML visualization. `src/cli.rs` adds dashboard/report/scan modes. `src/output.rs` handles path-safe HTML output and browser opener; `src/work.rs` exposes contract summaries.
+- Cross-platform tests revealed Windows and macOS canonical path aliases; fixed by canonicalizing the analyzed project before output containment checks.
+- Verified code run: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011803.
+- Verified experimental unsigned platform packages: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596011855.
+- New related contract: WORK-UI-001. Active contract remains WORK-SCANNER-001; no normative ADP changes.
+- No signed release or installer has shipped. A user may use Rust from a checkout; a system-wide `adp-observatory .` requires installing the executable.
+- Exact next UI action: evaluate tested publisher verification/signing and installation flow, then run clean-machine manual browser accessibility checks. Do not advertise unsigned artifacts as official trusted downloads.
+
