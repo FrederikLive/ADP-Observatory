@@ -1,6 +1,6 @@
 # Launching and distributing ADP-Observatory
 
-**Status:** Offline dashboard and headless CLI are implemented in development 0.4.0. Experimental unsigned CI binary packages are being tested; **no signed official release, installer or verified first-run downloader has shipped**.
+**Status:** Offline dashboard and headless CLI are implemented in development 0.4.0. GitHub Actions has successfully produced experimental Windows x64, Linux x64, and macOS runner binaries with signed build-provenance attestations. **These are not an official released installer, platform code-signed application, or verified first-run downloader.**
 
 ## User experience
 
@@ -19,6 +19,25 @@ adp-observatory scan . --json
 ```
 
 The development executable now supports this headless command. The legacy `adp-observatory PROJECT --json` shortcut remains supported. Both report-format compatibility and release-distribution guarantees are **pre-stable**.
+
+## Experimental builds: inspect and verify before executing
+
+A successful experimental matrix run is available at [GitHub Actions #39596794393](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39596794393). Each platform job tests, builds, smoke-tests, records SHA-256, creates a GitHub/Sigstore-signed build provenance attestation for the binary, and uploads a workflow artifact.
+
+**Manual testing only; this is not a public release.** To check an experimental binary:
+
+1. Open the successful workflow run and download the artifact for the correct OS and architecture.
+2. Extract the binary and `SHA256SUMS.txt`. Check the SHA-256 file digest against the supplied checksum to catch corruption, but do not treat that alone as publisher authentication.
+3. Using an independently installed GitHub CLI that supports artifact verification, validate provenance **before execution**, from the extracted directory:
+
+   ```sh
+   gh attestation verify ./adp-observatory --repo FrederikLive/ADP-Observatory
+   ```
+
+   On Windows, replace the binary name with `adp-observatory.exe`. A successful verification should identify GitHub's signed attestation associated with this repository. **Do not execute if verification fails or provenance unexpectedly names another repository/workflow/commit.**
+4. Invoke that verified binary by its explicit filesystem path from within the desired ADP project. For example on Linux/macOS, `/path/to/adp-observatory .`; in PowerShell, `& "C:\\path\\to\\adp-observatory.exe" .`. The application then generates the offline report and attempts to open it in the browser.
+
+Do not bypass operating-system security warnings to run an unsigned executable. Artifact provenance is not equivalent to OS code signing or a trusted installer. The release source/branch may change during development: pin a known workflow run for repeatable testing instead of assuming the newest artifact is vetted.
 
 ## First-run trade-off: one command versus trusted execution
 
@@ -69,9 +88,9 @@ A single OS-agnostic install-and-run line is not a portable promise. Publish exp
 
 ## Delivery sequence and acceptance
 
-1. Finalize the scanner's supported versions, safe file handling, and JSON schema.
-2. Provide a basic usable local dashboard and explicit CLI mode separation.
-3. Create a GitHub Actions release matrix for selected supported OS/CPU architectures.
+1. Finalize the scanner's supported versions, safe file handling, and JSON schema (currently a tested limited subset).
+2. Provide a basic usable local dashboard and explicit CLI mode separation (implemented in the development executable).
+3. Create a GitHub Actions OS/CPU matrix for experimental artifacts and signed provenance (Windows x64, Linux x64, macOS runner implemented and verified; no official release yet).
 4. Publish a signed or otherwise authentically verifiable tagged release and checksums/provenance; exercise install from a clean machine.
 5. Add verified platform-specific installer/launcher, cache/update/uninstall support, and clear offline/error behavior.
 6. Publish tested copy/paste commands and update the human-facing ADP integration guide **only after working releases exist**.
