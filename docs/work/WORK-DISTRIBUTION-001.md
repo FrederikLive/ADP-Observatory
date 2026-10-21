@@ -16,13 +16,13 @@ Make a local-first Observable executable obtainable on supported platforms witho
 
 ## Acceptance criteria
 - [x] Matrix tests, builds and smoke checks for Windows x64, Linux x64 and macOS runner on 2026-10-21; run 39596011855.
-- [ ] Attach verifiable build provenance to each experimental packaged binary; verify validation workflow.
+- [x] Attach GitHub/Sigstore-signed build provenance to each experimental packaged binary; all three matrix jobs passed (run 39596794393).
 - [ ] Document checksums vs cryptographic attestation and exact user-verification steps.
 - [ ] Test clean-machine install, PATH, offline use, platform mismatch, Unicode paths, update/uninstall.
 - [ ] Publish protected, verified tagged release and tested install instructions; only then update ADP human guidance.
 
 ## Current state
-In progress; experimental unsigned CI artifacts exist, but no official signed/attested release or install command has been published.
+In progress. Experimental binaries for Windows x64, Linux x64, and macOS runner now have GitHub-signed provenance attestations. They are not OS-code-signed and are not an official published release or trusted installation command.
 
 ## Exact next action
-Add GitHub artifact attestations and test that all OS matrix jobs successfully produce provenance for the binaries; then prepare a versioned manual installation design before considering one-shot bootstrappers.
+Run a clean-machine manual verification using `gh attestation verify` for each platform artifact; then design protected tagged releases and install-once user commands. Never auto-execute an unverified download.
