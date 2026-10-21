@@ -27,3 +27,21 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_agent_launch.py -v
       - name: Build
         run: cargo build --release
+      - name: End-to-end on-demand local report launch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 skills/adp-observatory/scripts/launch.py \
+            --project tests/fixtures/current \
+            --binary "$PWD/target/release/adp-observatory" \
+            --no-open > "$RUNNER_TEMP/agent-launch.json"
+          python3 - "$RUNNER_TEMP/agent-launch.json" <<'PY'
+          import json, pathlib, sys
+          result = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert result["status"] == "REPORT_SAVED", result
+          report = pathlib.Path(result["report_path"]).resolve(strict=True)
+          project = pathlib.Path("tests/fixtures/current").resolve(strict=True)
+          assert report.suffix == ".html", report
+          assert project not in report.parents, report
+          assert "ADP Observatory" in report.read_text(encoding="utf-8")
+          PY
