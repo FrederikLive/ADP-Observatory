@@ -36,9 +36,9 @@
     },
     {
       "id": "WORK-UI-001",
-      "title": "Implement offline project dashboard and experimental cross-platform packages",
+      "title": "Original offline UI and packaging umbrella (superseded by separate contracts)",
       "workstream": "visualization-and-distribution",
-      "status": "in_progress",
+      "status": "deferred",
       "depends_on": [
         "WORK-SCANNER-001"
       ],
