@@ -4,6 +4,15 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### Added in development baseline 0.4.0
+- Standalone offline light-themed HTML project viewer, with no listening server or remote page resources.
+- Dashboard/report/scan CLI modes, local contract search, and display of structured contracts even when no contract_file path is provided.
+- Escaped project-supplied text and out-of-project HTML report storage with cross-platform canonical-path safety checks.
+- Experimental, unsigned Windows/macOS/Linux GitHub Actions packages and tests (not official signed releases).
+- Versioned JSON report schema 0.4.0 and ADP work contract WORK-UI-001.
+
+
+
 ### Added in development baseline 0.3.0
 - Bounded, read-only inspection of explicit contract-file paths with missing/unsafe reference states.
 - Explicit scan scope: complete, complete with exclusions, or partial, with separately counted errors and exclusions.
