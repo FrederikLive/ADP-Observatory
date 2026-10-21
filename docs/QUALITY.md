@@ -54,7 +54,7 @@ Fixtures and unit/integration tests now exist, with bounded contract-file refere
 - `scripts/check_release_candidate.py` validates immutable full SHA, `refs/heads/main`, VERSION, Cargo.toml and JSON report schema version. Positive and negative tests in `tests/test_release_validation.py`.
 - The [release candidate workflow 39624399120](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39624399120) passed its source gate, Rust formatting, Clippy, unit/integration tests, release build, and independently verified GitHub/Sigstore binary attestations on Windows x64, Linux x64 and macOS ARM64.
 - CI artifacts are explicitly marked `release_state: candidate_only`, are stored for only 14 days, and do not constitute an official released or operating-system-signed application.
-- The additional Unicode/spaces and offline installer scan checks were committed in workflow `.github/workflows/installer-smoke.yml`, but their downstream workflow was still queued when this checkpoint was written. **Verification status: NOT RUN / pending CI.** Do not mark those new cases passed without checking the specific run.
+- Unicode/spaced-path and offline scan/HTML report checks in `.github/workflows/installer-smoke.yml` **passed** on Windows x64, Linux x64 and macOS ARM64 in [installer run 39660008091](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39660008091). This covers CI environments, not independent user-machine browser visibility.
 - GitHub repository tag rulesets were absent at check time. Publishing remains held on [owner release-governance issue #1](https://github.com/FrederikLive/ADP-Observatory/issues/1), independent clean-machine review, and release approval.
 
 ## On-demand Agent Skill test checkpoint — 2026-10-21
@@ -64,3 +64,11 @@ Fixtures and unit/integration tests now exist, with bounded contract-file refere
 - First end-to-end verification: [GitHub Actions 39652171472](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39652171472) — success.
 - No claim that cloud agents can open a user's local browser, or that the helper authenticates executables. Trusted first-time installation is gated by separate release/approval policy.
 - Canonical ADP validation after adding optional discovery references: [ADP validation 39652005147](https://github.com/FrederikLive/ADP/actions/runs/39652005147) — success.
+
+## ADP Actions real-repository compatibility checkpoint — 2026-10-21
+
+- [CI 39659907217](https://github.com/FrederikLive/ADP-Observatory/actions/runs/39659907217) pinned `FrederikLive/ADP` at `9b5ab4694321735e83b93962e1b9975cced130bf`, verified optional router and Actions docs, then scanned the real repository and exported HTML.
+- Confirmed known source version 2.7.1, absent optional work index correctly reported as not present / not assessed, and no invented conformance verdict or error for missing optional WORK.
+- Confirmed Observatory's own work index stays structurally readable and version uncertainty isn't promoted to a known version solely from a remote reference.
+- The dashboard's example ADP Actions are static copyable phrases for humans to ask agents, **not** local commands, enforcement rules or another ADP metadata source.
+- This is a pinned-commit smoke test plus existing fixtures, not an exhaustive historical compatibility, conformance or security certification.
