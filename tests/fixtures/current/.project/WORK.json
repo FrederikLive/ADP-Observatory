@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "project": "Current fixture",
+  "active_contract": "WORK-A",
+  "contracts": [
+    {
+      "id": "WORK-A",
+      "title": "Implement feature",
+      "status": "verified",
+      "depends_on": []
+    }
+  ]
+}
