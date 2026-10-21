@@ -159,3 +159,23 @@ fn emitted_top_level_report_has_all_schema_required_fields() {
         assert!(report.get(key).is_some(), "missing required field: {key}");
     }
 }
+
+
+#[test]
+fn observatory_can_inspect_its_own_adp_work_records() {
+    let output = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg(env!("CARGO_MANIFEST_DIR"))
+        .arg("--json")
+        .output()
+        .expect("run repository self-scan");
+    assert!(output.status.success());
+    let report: Value = serde_json::from_slice(&output.stdout).expect("JSON output");
+    assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
+    let refs = report["work_index"]["contract_files"]
+        .as_array()
+        .expect("contract file references");
+    assert!(!refs.is_empty());
+    assert!(refs.iter().all(|r| r["status"] == "PRESENT"));
+    assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
+    assert_eq!(report["context"]["conflicts"].as_array().unwrap().len(), 0);
+}
