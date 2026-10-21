@@ -25,6 +25,12 @@ M1 scanner calibration: WORK-SCANNER-001 (in_progress). Parallel M4 trusted dist
 - **Automated verification:** Rust format/lint/tests and Windows/Linux/macOS native package checks passed after the P0 changes (CI 39668145620; package 39668145354), with additional launcher safety and wording passing CI 39668349597. Final documentation-only commits require latest CI check.
 - **Not yet demonstrated:** Visible browser tab in the user's actual Antigravity session and a manual confirmation that the target project's files/Git state were untouched. Instructions and evidence fields: [docs/WINDOWS-PILOT.md](WINDOWS-PILOT.md).
 
+## Future dashboard feature captured (not implemented)
+
+- Deferred **WORK-EXPLORER-001**: [Contract & Evidence Explorer](work/WORK-EXPLORER-001.md), tracked in [issue #3](https://github.com/FrederikLive/ADP-Observatory/issues/3), proposes clickable contract/context records with **precomputed, bounded, source-traceable Markdown sections and a safe offline rendered viewer**.
+- Today's scanner checks contract-file presence but does **not** parse the referenced Markdown contents. Proposed deterministic analysis must distinguish recorded claims from independently verified evidence and keep source lines/limits visible.
+- This is a **future M3 enhancement only**. No runtime code, JSON schema, mandatory ADP files, project writes or changes to active/next contracts have been introduced.
+
 ## Open items / release governance
 - Official protected GitHub release, operating-system code signing/notarization, one-prompt unattended first-time installation and actual local-desktop browser smoke tests are **not complete**. GitHub rulesets were absent at the last review; owner-controlled protections/approvals remain necessary. See https://github.com/FrederikLive/ADP-Observatory/issues/1.
 - M1 remains open for wider representative user-project calibration, historical version adapters, hostile-input/race hardening, evidence graph and full JSON Schema coverage.
