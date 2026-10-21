@@ -87,7 +87,10 @@ fn main() {
         }
         println!("Work index: {}", report.work_index.status);
         for finding in &report.work_index.findings {
-            println!("  [{}] {}: {}", finding.severity, finding.code, finding.message);
+            println!(
+                "  [{}] {}: {}",
+                finding.severity, finding.code, finding.message
+            );
         }
         println!("No full ADP conformance verdict is produced.");
         for item in &report.limitations {
