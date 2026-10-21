@@ -66,6 +66,16 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: dist/${{ matrix.binary }}
+      - name: Verify signed provenance against this repository
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BINARY: ${{ matrix.binary }}
+        run: |
+          set -euo pipefail
+          gh attestation verify "dist/$BINARY" \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/prototype-packages.yml"
       - uses: actions/upload-artifact@v4
         with:
           name: adp-observatory-${{ matrix.platform }}-prototype
