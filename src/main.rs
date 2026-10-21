@@ -71,7 +71,7 @@ fn run() -> Result<(), String> {
             "Historical snapshots and complete verification metrics are not implemented.".into(),
         ],
     };
-    let auto_open = matches!(request.mode, cli::Mode::Dashboard { open: true });
+    let auto_open = matches!(&request.mode, cli::Mode::Dashboard { open: true });
     match request.mode {
         cli::Mode::Json => {
             let json = serde_json::to_string_pretty(&report)
