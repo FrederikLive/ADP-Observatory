@@ -63,7 +63,10 @@ pub fn inspect(root: &Path, id: &str, index: usize, raw: &str) -> ContractFileRe
         );
     }
 
-    let components: Vec<_> = raw.split('/').filter(|c| !c.is_empty() && *c != ".").collect();
+    let components: Vec<_> = raw
+        .split('/')
+        .filter(|c| !c.is_empty() && *c != ".")
+        .collect();
     if components.iter().any(|c| *c == "..") {
         return outcome(
             id,
@@ -150,8 +153,10 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("clock")
             .as_nanos();
-        let root = std::env::temp_dir()
-            .join(format!("adp-observatory-reference-{}-{nonce}", std::process::id()));
+        let root = std::env::temp_dir().join(format!(
+            "adp-observatory-reference-{}-{nonce}",
+            std::process::id()
+        ));
         fs::create_dir_all(root.join("docs/work")).expect("directory");
         fs::write(root.join("docs/work/WORK-A.md"), "contract").expect("contract");
         test(&root);
@@ -164,22 +169,36 @@ mod tests {
             let item = inspect(root, "WORK-A", 0, "docs/work/WORK-A.md");
             assert_eq!(item.status, "PRESENT");
             assert_eq!(item.source, ".project/WORK.json#/contracts/0/contract_file");
-            assert_eq!(fs::read_to_string(root.join("docs/work/WORK-A.md")).unwrap(), "contract");
+            assert_eq!(
+                fs::read_to_string(root.join("docs/work/WORK-A.md")).unwrap(),
+                "contract"
+            );
         });
     }
 
     #[test]
     fn missing_reference_does_not_fail_other_items() {
         with_root(|root| {
-            assert_eq!(inspect(root, "WORK-B", 1, "docs/work/nope.md").status, "MISSING");
-            assert_eq!(inspect(root, "WORK-A", 0, "docs/work/WORK-A.md").status, "PRESENT");
+            assert_eq!(
+                inspect(root, "WORK-B", 1, "docs/work/nope.md").status,
+                "MISSING"
+            );
+            assert_eq!(
+                inspect(root, "WORK-A", 0, "docs/work/WORK-A.md").status,
+                "PRESENT"
+            );
         });
     }
 
     #[test]
     fn rejects_absolute_and_parent_traversal() {
         with_root(|root| {
-            for path in ["/etc/passwd", "../escape.md", "docs/../../escape", "C:/escape.md"] {
+            for path in [
+                "/etc/passwd",
+                "../escape.md",
+                "docs/../../escape",
+                "C:/escape.md",
+            ] {
                 let status = inspect(root, "WORK-X", 0, path).status;
                 assert!(matches!(status, "OUTSIDE_ROOT" | "INVALID_PATH"));
             }
@@ -189,7 +208,12 @@ mod tests {
     #[test]
     fn rejects_ambiguous_cross_platform_paths() {
         with_root(|root| {
-            for path in [r"docs\work\WORK-A.md", "", "docs/work/a\0b.md", "docs/work/a:b"] {
+            for path in [
+                r"docs\work\WORK-A.md",
+                "",
+                "docs/work/a\0b.md",
+                "docs/work/a:b",
+            ] {
                 assert_eq!(inspect(root, "WORK-X", 0, path).status, "INVALID_PATH");
             }
         });
@@ -210,12 +234,21 @@ mod tests {
     fn refuses_symlink_file_and_parent() {
         use std::os::unix::fs::symlink;
         with_root(|root| {
-            symlink(root.join("docs/work/WORK-A.md"), root.join("docs/work/linked.md"))
-                .expect("file symlink");
+            symlink(
+                root.join("docs/work/WORK-A.md"),
+                root.join("docs/work/linked.md"),
+            )
+            .expect("file symlink");
             symlink(root.join("docs/work"), root.join("linked-directory"))
                 .expect("directory symlink");
-            assert_eq!(inspect(root, "WORK-X", 0, "docs/work/linked.md").status, "SYMLINK");
-            assert_eq!(inspect(root, "WORK-X", 0, "linked-directory/WORK-A.md").status, "SYMLINK");
+            assert_eq!(
+                inspect(root, "WORK-X", 0, "docs/work/linked.md").status,
+                "SYMLINK"
+            );
+            assert_eq!(
+                inspect(root, "WORK-X", 0, "linked-directory/WORK-A.md").status,
+                "SYMLINK"
+            );
         });
     }
 }
