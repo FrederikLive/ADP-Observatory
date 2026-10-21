@@ -6,6 +6,8 @@ ADP-Observatory helps people understand the evidence already present in an ADP-e
 
 **Your project stays untouched.** During a normal scan or dashboard launch, Observatory reads supported project files but does not modify source code, `ADP.md`, `AGENTS.md`, work records, Git history, `.gitignore`, or any other file within the analyzed repository. It does not execute project scripts or automatically install dependencies. Generated reports and application files are kept **outside** the repository, so you do not need to add Observatory entries to your project's `.gitignore`.
 
+**The agent must respect the same boundary.** Asking a coding agent to "set up Observatory" is not permission to create `.project/WORK.json`, run the application's tests, or commit/push changes to make the dashboard look more complete. Missing optional records stay missing; the dashboard explains what it could not assess.
+
 > **Project status:** Early development (M1 scanner with a working offline HTML viewer). Historical metrics, snapshots, and broader analysis remain planned. Missing or unsupported evidence is reported honestly; an Observatory report is not a full ADP conformance assessment.
 
 ## Compatibility with current ADP Actions (21 October 2026)
@@ -133,6 +135,14 @@ directly even when this helper is not locally available.
 The canonical [ADP protocol](https://github.com/FrederikLive/ADP) contains
 only a short conditional pointer to the skill. Daily agent work and ADP
 conformance do not depend on Observatory.
+
+## First Windows desktop pilot: lessons and fixes
+
+An early Windows coding-agent pilot successfully built and ran the local analyzer but did not visibly open the generated report in the user's browser. The agent also created and pushed an optional project work index during setup—**outside the authorized scope of visualization**. These are genuine UX and orchestration gaps, not evidence that the scanner itself writes project files.
+
+The Windows viewer now requests opening HTML files through the native Shell API using shell-compatible paths instead of passing canonical extended-length paths to Explorer. After generating the HTML, the CLI prints `Browser launch: REQUESTED`, `FAILED`, or `NOT_REQUESTED`; a successful launch request is **not proof** that the user's desktop displayed the tab. The optional [Agent Skill](skills/adp-observatory/SKILL.md) and [launcher](skills/adp-observatory/scripts/launch.py) use that explicit outcome and provide a confirmed report path as a fallback. They are instructed to leave the analyzed project and its Git history untouched.
+
+The [Windows desktop pilot checklist](docs/WINDOWS-PILOT.md) explains how to test the updated executable **from a trusted source checkout or verified CI artifact**, diagnose a default-browser association, and distinguish browser visibility from a successful HTML report. CI validates Windows API compilation and path/status behavior; a real Antigravity desktop retest remains necessary. Do not assume older installed binaries or copied agent skills automatically acquire these fixes.
 
 ## One-command launch direction
 
