@@ -18,7 +18,7 @@ pub struct ContextRecord {
     pub limitation: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub struct Claim {
     pub path: &'static str,
     pub line: Option<usize>,
