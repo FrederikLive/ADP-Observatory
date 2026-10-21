@@ -37,9 +37,11 @@ Milestones are proposed work packages, not claims of completion.
 **Exit:** human-facing reports distinguish evidence from claims, history remains local and optional, and accessibility/security acceptance is verified.
 
 ## M4 — Cross-platform release and launchers
-**Status:** Signed-provenance experimental binaries and per-user preview installers pass CI across Windows x64, Linux x64 and macOS ARM64 (packaging run 39600862632; installer run 39601029440). No official protected release, OS code signing, or automatic first-run setup yet.
+**Status:** Preview installation passes three-platform CI (39601029440); signed and SHA-pinned candidate assets pass three-platform packaging (39624399120). No GitHub tag rulesets yet and no official release, OS code-signing, or automatic first-run setup.
 - [x] Test Windows x64, Linux x64 and macOS runner binaries in CI; other architectures and real-machine install tests remain outstanding.
-- [x] Produce experimental workflow artifacts and signed build-provenance attestations; [ ] establish a protected tagged official release with independently verified release metadata.
+- [x] Produce experimental workflow artifacts and signed build-provenance attestations.
+- [x] Generate version/SHA-checked, provenance-verified, upload-only release candidates in three platforms (run 39624399120).
+- [ ] Establish enforceable protected tag/main rulesets and reviewed official GitHub release assets.
 - [x] Demonstrate pinned, verified, per-user preview installation and `adp-observatory .` executable behavior on CI runners (run 39601029440); [ ] graduate to an official general-user installation.
 - [x] Provide manual preview helpers with per-user installation directories, no privilege escalation or target-repository writes; [ ] evaluate end-user security/installer UX and official packages.
 - [ ] Evaluate an optional one-shot first-run launcher only when executable verification is feasible.
@@ -93,5 +95,5 @@ All milestones must preserve ADP's low-token, fast-agent, continuity-first desig
 - [ ] Real browser accessibility/usability testing and full historical metrics/snapshots.
 - [ ] Calibrate against real projects with missing and incompatible ADP artifacts.
 
-This is an early M3/M4 vertical slice tracked by WORK-UI-001; M1 remains active and the core ADP protocol is unchanged.
+This early M3/M4 work is tracked by verified WORK-DASHBOARD-001 and in-progress WORK-DISTRIBUTION-001. WORK-UI-001 is a superseded umbrella retained as history. M1 remains active; canonical ADP is unchanged.
 
