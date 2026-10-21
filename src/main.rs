@@ -1,11 +1,14 @@
+mod cli;
 mod compatibility;
+mod dashboard;
 mod discovery;
+mod output;
 mod records;
 mod references;
 mod work;
 
 use serde::Serialize;
-use std::{env, fs, path::PathBuf, process};
+use std::{fs, process};
 
 #[derive(Serialize)]
 struct Report {
@@ -24,28 +27,31 @@ struct Report {
 }
 
 fn main() {
-    let mut args = env::args_os().skip(1);
-    let root = match args.next() {
-        Some(path) => PathBuf::from(path),
-        None => {
-            eprintln!("Usage: adp-observatory <project-directory> [--json]");
-            process::exit(2);
-        }
-    };
-    let json = args.any(|arg| arg == "--json");
-    let root = match fs::canonicalize(&root) {
-        Ok(path) if path.is_dir() => path,
-        _ => {
-            eprintln!("Error: project path must exist and be a directory.");
-            process::exit(2);
-        }
-    };
+    if let Err(message) = run() {
+        eprintln!("ADP-Observatory: {message}\n\n{}", cli::USAGE);
+        process::exit(2);
+    }
+}
 
+fn run() -> Result<(), String> {
+    let request = cli::parse()?;
+    if request.mode == cli::Mode::Help {
+        print!("{}", cli::USAGE);
+        return Ok(());
+    }
+    if request.mode == cli::Mode::Version {
+        println!("ADP-Observatory {}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
+
+    let root = match fs::canonicalize(&request.target) {
+        Ok(path) if path.is_dir() => path,
+        _ => return Err("Project path must exist and be a directory".into()),
+    };
     let discovery = discovery::Discovery::inspect(&root);
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
-
     let report = Report {
         schema_version: "0.3.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
@@ -62,66 +68,85 @@ fn main() {
             "Structural and contextual inspection only; this is not a full ADP conformance assessment.".into(),
             "scan_complete means traversal completed within policy; intentionally excluded files and independent parse errors are reported separately.".into(),
             "No project scripts or commands are executed.".into(),
-            "Dashboard, metric calculations, and historical snapshots are not implemented.".into(),
+            "Historical snapshots and complete verification metrics are not implemented.".into(),
         ],
     };
-
-    if json {
-        println!(
-            "{}",
-            serde_json::to_string_pretty(&report).unwrap_or_else(|_| "{}".into())
-        );
-    } else {
-        println!("ADP-Observatory {}", report.analyzer_version);
-        println!("Target: {}", report.target);
-        println!("Scan complete: {}", report.scan_complete);
-        println!("Scan scope: {}", report.scan_scope.status);
-        println!(
-            "Files examined: {}; skipped: {}",
-            report.files_examined, report.files_skipped
-        );
-        println!("ADP markers:");
-        for marker in &report.adp_markers {
-            println!("  - {marker}");
+    match request.mode {
+        cli::Mode::Json => {
+            let json = serde_json::to_string_pretty(&report)
+                .map_err(|error| format!("Could not serialize scan report: {error}"))?;
+            println!("{json}");
         }
-        println!("Work index: {}", report.work_index.status);
-        println!("Semantic scope: {}", report.compatibility.semantic_scope);
-        for reference in &report.work_index.contract_files {
-            println!(
-                "Contract file [{}]: {} -> {}",
-                reference.contract_id, reference.path, reference.status
-            );
-        }
-        println!(
-            "Compatibility: format={}, semantics={}, conformance={}",
-            report.compatibility.format,
-            report.compatibility.semantics,
-            report.compatibility.conformance
-        );
-        println!(
-            "Protocol version: {}",
-            report
-                .compatibility
-                .protocol
-                .value
-                .as_deref()
-                .unwrap_or(report.compatibility.protocol.status)
-        );
-        for conflict in &report.context.conflicts {
-            println!("Conflict in {}:", conflict.field);
-            for claim in &conflict.claims {
-                println!("  {}: {}", claim.path, claim.value);
+        cli::Mode::Text => print_text(&report),
+        cli::Mode::Dashboard { open } | cli::Mode::HtmlOnly => {
+            let data = serde_json::to_value(&report)
+                .map_err(|error| format!("Could not serialize dashboard inputs: {error}"))?;
+            let html = dashboard::render(&data);
+            let destination = output::save(&root, request.output.as_deref(), &html)?;
+            println!("Local ADP report: {}", destination.display());
+            println!("Analysis is read-only. ADP conformance has not been assessed.");
+            if matches!(request.mode, cli::Mode::Dashboard { open: true }) && open {
+                if let Err(error) = output::open_browser(&destination) {
+                    eprintln!("Browser could not be opened automatically: {error}");
+                    eprintln!("Open the report file above manually. The report was saved successfully.");
+                }
             }
         }
-        for finding in &report.work_index.findings {
-            println!(
-                "  [{}] {}: {}",
-                finding.severity, finding.code, finding.message
-            );
+        cli::Mode::Help | cli::Mode::Version => unreachable!("Handled before analyzing project"),
+    }
+    Ok(())
+}
+
+fn print_text(report: &Report) {
+    println!("ADP-Observatory {}", report.analyzer_version);
+    println!("Target: {}", report.target);
+    println!("Scan complete: {}", report.scan_complete);
+    println!("Scan scope: {}", report.scan_scope.status);
+    println!(
+        "Files examined: {}; skipped: {}",
+        report.files_examined, report.files_skipped
+    );
+    println!("ADP markers:");
+    for marker in &report.adp_markers {
+        println!("  - {marker}");
+    }
+    println!("Work index: {}", report.work_index.status);
+    println!("Semantic scope: {}", report.compatibility.semantic_scope);
+    for reference in &report.work_index.contract_files {
+        println!(
+            "Contract file [{}]: {} -> {}",
+            reference.contract_id, reference.path, reference.status
+        );
+    }
+    println!(
+        "Compatibility: format={}, semantics={}, conformance={}",
+        report.compatibility.format,
+        report.compatibility.semantics,
+        report.compatibility.conformance
+    );
+    println!(
+        "Protocol version: {}",
+        report
+            .compatibility
+            .protocol
+            .value
+            .as_deref()
+            .unwrap_or(report.compatibility.protocol.status)
+    );
+    for conflict in &report.context.conflicts {
+        println!("Conflict in {}:", conflict.field);
+        for claim in &conflict.claims {
+            println!("  {}: {}", claim.path, claim.value);
         }
-        println!("No full ADP conformance verdict is produced.");
-        for item in &report.limitations {
-            println!("- {item}");
-        }
+    }
+    for finding in &report.work_index.findings {
+        println!(
+            "  [{}] {}: {}",
+            finding.severity, finding.code, finding.message
+        );
+    }
+    println!("No full ADP conformance verdict is produced.");
+    for item in &report.limitations {
+        println!("- {item}");
     }
 }
