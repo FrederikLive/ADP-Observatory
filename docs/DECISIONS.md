@@ -32,3 +32,11 @@
 - **Q-008 Launcher packaging:** decide per-OS signed installer/package manager routes and whether authenticated one-shot helpers are worth the extra attack surface. See docs/LAUNCHER.md.
 - **Q-009 Initial rules:** prioritize correctness, applicability, and low false-positive risk.
 - **Q-010 Markdown linking:** determine reliable explicit-reference extraction versus speculative inference.
+
+- **D-020 On-demand agent visualization:** a tiny optional ADP router reference
+  points to the canonical Observatory Agent Skill only for explicit user
+  requests; local executable discovery/browser fallback and approved-install
+  detail stay in Observatory. No extra agent checkpoints, project records, MCP
+  server, or automatic unverified downloads are introduced. A remote-only
+  agent must not claim to have opened a user's browser.
+
