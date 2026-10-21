@@ -77,3 +77,30 @@ project. The pinned upstream compatibility test in [CI 39659907217](https://gith
 confirmed the new ADP guidance and report are coherent. The complete
 one-prompt first-time installer remains gated by official release
 protections and local host authorization.
+
+## Follow-up on first Windows local-agent pilot — 2026-10-21
+
+A real Antigravity coding-agent setup completed compilation and report
+generation but duplicated installed binaries and HTML artifacts, did not
+visibly open the user's browser, and unnecessarily created/committed/pushed
+an optional project WORK index. These are inappropriate actions for a
+visualization request and must not recur.
+
+The conditional skill now starts with an explicit non-interference boundary:
+no project source or ADP record edits, no test/build commands in the
+analyzed repository, no Git stage/commit/push and no WORK.json generation
+to fill missing data. Reuse one approved installed executable; emit one
+report per request. The helper uses explicit browser outcome markers and
+preserves the HTML path on failure or unknown outcome.
+
+- [x] Windows canonical-path compatibility via native ShellExecuteW.
+- [x] Test Windows path conversion and explicit CLI/browser result semantics.
+- [x] Test failed/unknown browser results, and one-report headless invocation.
+- [x] Display `recorded: verified` rather than suggesting independent evidence.
+- [ ] **User-visible browser success** in a real local Antigravity Windows
+  desktop session. CI cannot assess window visibility.
+- [ ] Independent retest verifies no target-project mutation and only one
+  installed executable/skill; see docs/WINDOWS-PILOT.md.
+
+These improvements do not authorize new ADP requirements, target project
+mutations or unverified first-time installation.
