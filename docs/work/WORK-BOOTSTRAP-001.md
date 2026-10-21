@@ -26,14 +26,14 @@ An existing ADP-Observatory repository with a complete, lean, ADP-governed contr
 Canonical ADP 2.7.1; existing project repository and GitHub CI.
 
 ## Current state
-In progress. The documentation bootstrap was performed through GitHub API. CI verification remains to be checked.
+Verified baseline. GitHub Actions run 39567705133 completed successfully on commit b9e9184699ce115d43ee868211191a5fb30e8b94. This establishes the bootstrap development baseline; it does not claim comprehensive behavioral ADP conformance.
 
 ## Plan / atomic units
 - AU-01: inspect canonical ADP and existing project — completed, based on GitHub reads.
-- AU-02: add status/continuity/work contracts/quality — in progress.
-- AU-03: update root AGENTS operational router — pending.
-- AU-04: inspect CI and verify consistency — pending.
-- AU-05: close bootstrap and activate scanner contract — pending.
+- AU-02: add status/continuity/work contracts/quality — completed.
+- AU-03: update root AGENTS operational router — completed.
+- AU-04: inspect CI and verify consistency — completed for bootstrap commit.
+- AU-05: close bootstrap and activate scanner contract — completed.
 
 ## Validation / evidence
 - GitHub file contents and commit responses.
@@ -46,3 +46,8 @@ Do not duplicate normative ADP text or turn Observatory-specific rules into ADP 
 
 ## Handoff / next recommended phase / exact next action
 Read docs/CONTINUITY.md, check latest CI and bootstrap contract, fix any failures, and advance to WORK-SCANNER-001 only with recorded evidence.
+
+## Completion evidence
+- GitHub Actions: https://github.com/FrederikLive/ADP-Observatory/actions/runs/39567705133 (success).
+- Canonical work schema structure, contract IDs, statuses, and dependencies checked.
+- Limitation: full ADP behavioral conformance and independent local working-tree review remain outside this baseline verification.
