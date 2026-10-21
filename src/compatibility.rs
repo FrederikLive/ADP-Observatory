@@ -214,8 +214,11 @@ mod tests {
             )
             .expect("write");
             fs::create_dir_all(root.join(".project")).expect("mkdir");
-            fs::write(root.join(".project/WORK.json"), r#"{"schema_version":1,"project":"P","contracts":[]}"#)
-                .expect("write");
+            fs::write(
+                root.join(".project/WORK.json"),
+                r#"{"schema_version":1,"project":"P","contracts":[]}"#,
+            )
+            .expect("write");
             let report = inspect(root, &work::inspect(root));
             assert_eq!(report.format, "READABLE");
             assert_eq!(report.semantics, "UNSUPPORTED");
@@ -252,8 +255,7 @@ mod tests {
                 "# ADP.md\n> **Agent Development Protocol — Version 2.7.1**",
             )
             .expect("write");
-            fs::write(root.join("ADP.min.md"), "**Protocol version:** 3.0.0")
-                .expect("write");
+            fs::write(root.join("ADP.min.md"), "**Protocol version:** 3.0.0").expect("write");
             let report = detect_version(root);
             assert_eq!(report.status, "CONFLICT");
             assert_eq!(report.sources.len(), 2);
