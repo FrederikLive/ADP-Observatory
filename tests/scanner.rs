@@ -45,7 +45,10 @@ fn adp_280_assignment_fixture_is_supported_without_verified_completion() {
     assert_eq!(report["compatibility"]["semantics"], "SUPPORTED");
     assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
-    assert_eq!(report["work_index"]["contracts"][0]["status"], "in_progress");
+    assert_eq!(
+        report["work_index"]["contracts"][0]["status"],
+        "in_progress"
+    );
     let findings = report["work_index"]["findings"].as_array().unwrap();
     assert!(findings.is_empty(), "unexpected findings: {findings:?}");
 }
