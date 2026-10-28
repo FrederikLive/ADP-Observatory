@@ -346,14 +346,17 @@ pub fn inspect(root: &Path) -> WorkInspection {
                                 matches!(value.as_str(), Some("read_only" | "mutating"))
                             }
                             "branch" => nullable_string(value),
-                            "assignment" => value.is_null() || value.as_object().is_some_and(|assignment| {
-                                assignment.iter().all(|(name, field)| {
-                                    matches!(
-                                        name.as_str(),
-                                        "role" | "provider" | "model" | "selection_basis"
-                                    ) && field.as_str().is_some_and(|text| !text.is_empty())
-                                })
-                            }),
+                            "assignment" => {
+                                value.is_null()
+                                    || value.as_object().is_some_and(|assignment| {
+                                        assignment.iter().all(|(name, field)| {
+                                            matches!(
+                                                name.as_str(),
+                                                "role" | "provider" | "model" | "selection_basis"
+                                            ) && field.as_str().is_some_and(|text| !text.is_empty())
+                                        })
+                                    })
+                            }
                             _ => false,
                         };
                         if !valid {
@@ -545,7 +548,10 @@ mod tests {
             with_work(&payload, |root| {
                 let result = inspect(root);
                 assert_eq!(result.status, "INVALID");
-                assert!(result.findings.iter().any(|f| f.code == "work.execution_field"));
+                assert!(result
+                    .findings
+                    .iter()
+                    .any(|f| f.code == "work.execution_field"));
             });
         }
     }
