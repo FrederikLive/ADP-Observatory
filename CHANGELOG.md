@@ -4,6 +4,13 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
+### ADP 2.8.0 compatibility (pending branch CI)
+- Recognize ADP 2.8.0 as semantically supported **only for the existing optional WORK.json schema-v1 structural subset**, retaining ADP 2.7.1 support and keeping full conformance NOT_ASSESSED.
+- Allow and validate optional `execution.assignment` snapshots using the canonical ADP 2.8.0 schema, including nullable assignment and rejecting unknown or invalid nested fields. Assignment is historical project metadata, not a running agent or quota signal.
+- Add explicit unit and CLI fixture regression coverage; pin upstream integration CI to the reviewed 2.8.0 source commit `226e8010b892efcaa1d3be8922210fb1af0952c7`.
+- No normative ADP changes, project-side files, runtime agent orchestration or official release.
+
+
 ### Windows agent pilot: safer viewing and honest browser status
 - Open HTML reports on Windows using native ShellExecuteW with canonical-path
   conversion instead of Explorer; print shell-compatible paths and explicit
