@@ -131,7 +131,8 @@ fn show_contracts(report: &Value) -> String {
                 details.push_str(&keyval("Declared source file", path));
                 details.push_str(&keyval("Reference presence", state));
                 if let Some(document) = documents.and_then(|docs| {
-                    docs.iter().find(|document| at(document, "/path", "") == path)
+                    docs.iter()
+                        .find(|document| at(document, "/path", "") == path)
                 }) {
                     details.push_str(&keyval(
                         "Source read state",
@@ -139,7 +140,10 @@ fn show_contracts(report: &Value) -> String {
                     ));
                     details.push_str(&keyval("Read bytes", &count(&document["bytes"])));
                     details.push_str(&keyval("Source lines", &count(&document["line_count"])));
-                    details.push_str(&keyval("Headings found", &count(&document["heading_count"])));
+                    details.push_str(&keyval(
+                        "Headings found",
+                        &count(&document["heading_count"]),
+                    ));
                 } else {
                     details.push_str(&keyval("Source read state", "NOT_ASSESSED"));
                 }
