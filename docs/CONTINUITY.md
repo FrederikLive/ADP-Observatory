@@ -84,3 +84,10 @@ ADP remains the agent-first normative protocol; Observatory is optional, human-f
 
 ## Last checkpoint
 2026-10-21 — current ADP 2.7.1 Actions compatibility verified, cross-platform Unicode/offline installer checks passed, release governance still blocked.
+
+## New upstream compatibility slice — 2026-10-28 (review branch)
+- Found upstream ADP 2.8.0 commit `226e8010b892efcaa1d3be8922210fb1af0952c7`; Observatory's scanner and CI still targeted 2.7.1.
+- On `fix/adp-2-8-compatibility-20261028`, updated WORK schema-v1 execution assignment validation, recognized 2.8.0 limited semantic coverage, added 2.8.0 fixture + regression tests and repinned the real-upstream CI checkout. No canonical ADP changes or scanned-project mutations.
+- Verification is **pending branch CI / PR review**. Do not mark this slice VERIFIED until checks complete. No official release or merge was authorized.
+- Next exact action: review CI results and fix failures on this branch; then calibrate a real consumer-project scan and bound secure document reads before scheduling `WORK-EXPLORER-001` Slice 1.
+
