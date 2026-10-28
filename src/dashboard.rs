@@ -139,7 +139,7 @@ impl DeclaredProgress {
 
     fn percent(&self) -> Option<usize> {
         let denominator = self.applicable();
-        (denominator != 0).then_some((self.counts[0] * 100 + denominator / 2) / denominator)
+        (self.counts[0] * 100 + denominator / 2).checked_div(denominator)
     }
 }
 
@@ -283,11 +283,9 @@ fn show_workstreams(progress: Option<&DeclaredProgress>) -> String {
     for (stream, counts) in &work.streams {
         let total: usize = counts.iter().sum();
         let applicable = total - counts[4];
-        let (value, pct) = if applicable == 0 {
-            ("NOT_APPLICABLE".into(), 0)
-        } else {
-            let pct = (counts[0] * 100 + applicable / 2) / applicable;
-            (format!("{} / {} · {pct}%", counts[0], applicable), pct)
+        let (value, pct) = match (counts[0] * 100 + applicable / 2).checked_div(applicable) {
+            Some(pct) => (format!("{} / {} · {pct}%", counts[0], applicable), pct),
+            None => ("NOT_APPLICABLE".into(), 0),
         };
         rows.push_str(&format!(
             "<div class=\"stream-row\"><div class=\"stream-head\"><span class=\"stream-name\">{}</span><span class=\"stream-value\">{}</span></div><div class=\"stream-track\"><span style=\"width:{pct}%\"></span></div><p class=\"stream-note\">{} underway · {} blocked · {} planned/deferred · {} cancelled</p></div>",
@@ -723,6 +721,23 @@ mod tests {
         assert!(html.contains("UNKNOWN"));
         assert!(html.contains("a structurally valid work index is required"));
         assert!(!html.contains("50%"));
+    }
+
+    #[test]
+    fn no_applicable_contracts_does_not_divide_by_zero() {
+        let report = json!({
+            "work_index": {
+                "status":"STRUCTURALLY_VALID",
+                "contract_count":1,
+                "contracts":[{"id":"WORK-CANCELLED","status":"cancelled","workstream":"archived"}]
+            }
+        });
+        let progress = DeclaredProgress::from_report(&report).unwrap();
+        assert_eq!(progress.applicable(), 0);
+        assert_eq!(progress.percent(), None);
+        let html = render(&report);
+        assert!(html.contains("NOT_APPLICABLE"));
+        assert!(html.contains("UNKNOWN"));
     }
 
     #[test]
