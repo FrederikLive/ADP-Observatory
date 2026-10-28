@@ -157,6 +157,25 @@ fn referenced_contract_files_are_checked_without_interpreting_them_as_conformanc
 }
 
 #[test]
+fn source_snapshot_report_contains_only_bounded_metadata() {
+    let report = scan("references");
+    let source = &report["source_inspection"];
+    assert_eq!(source["source_text_embedded"], false);
+    assert_eq!(source["document_limit"], 128);
+    assert_eq!(source["per_document_byte_limit"], 131072);
+    let documents = source["documents"].as_array().expect("source documents");
+    let present = documents
+        .iter()
+        .find(|doc| doc["path"] == "docs/work/WORK-A.md")
+        .expect("referenced Markdown");
+    assert_eq!(present["state"], "READABLE");
+    assert_eq!(present["sha256"].as_str().unwrap().len(), 64);
+    assert!(present.get("content").is_none());
+    assert!(present.get("headings").is_none());
+    assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
+}
+
+#[test]
 fn scan_scope_reports_exclusions_separately_from_failures() {
     let report = scan("current");
     assert_eq!(report["scan_scope"]["status"], "COMPLETE");
