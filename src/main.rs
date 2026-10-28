@@ -5,6 +5,7 @@ mod discovery;
 mod output;
 mod records;
 mod references;
+mod source_reader;
 mod work;
 
 use serde::Serialize;
@@ -19,6 +20,7 @@ struct Report {
     files_examined: usize,
     files_skipped: usize,
     scan_scope: discovery::ScanScope,
+    source_inspection: source_reader::SourceInspection,
     adp_markers: Vec<String>,
     work_index: work::WorkInspection,
     compatibility: compatibility::Compatibility,
@@ -52,14 +54,16 @@ fn run() -> Result<(), String> {
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
+    let source_inspection = source_reader::inspect(&root, work_index.contracts.iter().filter_map(|contract| contract.contract_file.clone()));
     let report = Report {
-        schema_version: "0.4.0",
+        schema_version: "0.5.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
         target: root.display().to_string(),
         scan_complete: discovery.scope.status != "PARTIAL",
         files_examined: discovery.files_examined,
         files_skipped: discovery.files_skipped,
         scan_scope: discovery.scope,
+        source_inspection,
         adp_markers: discovery.markers,
         work_index,
         compatibility,
@@ -123,6 +127,7 @@ fn print_text(report: &Report) {
         println!("  - {marker}");
     }
     println!("Work index: {}", report.work_index.status);
+    println!("Source documents: {} ({} bytes; {})", report.source_inspection.documents.len(), report.source_inspection.bytes_read, report.source_inspection.status);
     println!("Semantic scope: {}", report.compatibility.semantic_scope);
     for reference in &report.work_index.contract_files {
         println!(
