@@ -346,6 +346,14 @@ pub fn inspect(root: &Path) -> WorkInspection {
                                 matches!(value.as_str(), Some("read_only" | "mutating"))
                             }
                             "branch" => nullable_string(value),
+                            "assignment" => value.as_object().is_some_and(|assignment| {
+                                assignment.iter().all(|(name, field)| {
+                                    matches!(
+                                        name.as_str(),
+                                        "role" | "provider" | "model" | "selection_basis"
+                                    ) && field.as_str().is_some_and(|text| !text.is_empty())
+                                })
+                            }),
                             _ => false,
                         };
                         if !valid {
@@ -501,6 +509,38 @@ mod tests {
                 assert!(r.findings.iter().any(|f| f.code == "work.execution_field"));
             },
         );
+    }
+
+    #[test]
+    fn adp_280_optional_assignment_is_structurally_valid() {
+        with_work(
+            r#"{"schema_version":1,"project":"P","contracts":[{"id":"WORK-A","title":"A","status":"in_progress","depends_on":[],"execution":{"mode":"delegated","mutation":"mutating","branch":"feature/a","assignment":{"role":"lead_programmer","provider":"openai","model":"example-model","selection_basis":"capability_based"}}}]}"#,
+            |root| {
+                let result = inspect(root);
+                assert_eq!(result.status, "STRUCTURALLY_VALID");
+                assert!(result.findings.is_empty());
+            },
+        );
+    }
+
+    #[test]
+    fn invalid_assignment_fields_are_rejected_without_running_agents() {
+        for assignment in [
+            r#"{"role":""}"#,
+            r#"{"provider":42}"#,
+            r#"{"unrecognized":"not allowed"}"#,
+            r#"null"#,
+            r#""not an object""#,
+        ] {
+            let payload = format!(
+                r#"{{"schema_version":1,"project":"P","contracts":[{{"id":"WORK-A","title":"A","status":"ready","depends_on":[],"execution":{{"assignment":{assignment}}}}}]}}"#
+            );
+            with_work(&payload, |root| {
+                let result = inspect(root);
+                assert_eq!(result.status, "INVALID");
+                assert!(result.findings.iter().any(|f| f.code == "work.execution_field"));
+            });
+        }
     }
 
     #[test]
