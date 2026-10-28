@@ -54,12 +54,22 @@ fn run() -> Result<(), String> {
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
-    let source_inspection = source_reader::inspect(
-        &root,
+    // A document-count budget must not silently exclude the active contract.
+    let active_file = work_index.active_contract.as_deref().and_then(|id| {
         work_index
             .contracts
             .iter()
-            .filter_map(|contract| contract.contract_file.clone()),
+            .find(|contract| contract.id == id)
+            .and_then(|contract| contract.contract_file.clone())
+    });
+    let source_inspection = source_reader::inspect(
+        &root,
+        active_file.into_iter().chain(
+            work_index
+                .contracts
+                .iter()
+                .filter_map(|contract| contract.contract_file.clone()),
+        ),
     );
     let report = Report {
         schema_version: "0.5.0",

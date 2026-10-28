@@ -246,7 +246,7 @@ fn large_work_ledger_is_bounded_and_preserves_target_bytes() {
     let work_path = root.join(".project/WORK.json");
     let original = serde_json::to_vec(&serde_json::json!({
         "schema_version": 1, "project": "Synthetic performance fixture",
-        "active_contract": "WORK-000", "contracts": contracts
+        "active_contract": "WORK-299", "contracts": contracts
     })).unwrap();
     fs::write(&work_path, &original).unwrap();
     let run = || {
@@ -262,6 +262,11 @@ fn large_work_ledger_is_bounded_and_preserves_target_bytes() {
     assert_eq!(first["source_inspection"]["documents"].as_array().unwrap().len(), 128);
     assert_eq!(first["source_inspection"]["omitted_documents"], 174);
     assert_eq!(first["source_inspection"]["status"], "PARTIAL");
+    assert_eq!(
+        first["source_inspection"]["documents"][2]["path"],
+        "docs/work/WORK-299.md",
+        "active contract must remain in bounded source collection"
+    );
     assert_eq!(first["source_inspection"]["source_text_embedded"], false);
     assert_eq!(first["compatibility"]["conformance"], "NOT_ASSESSED");
     assert_eq!(fs::read(&work_path).unwrap(), original);
