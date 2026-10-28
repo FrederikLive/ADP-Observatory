@@ -41,7 +41,7 @@ pub fn inspect(root: &Path, work: &WorkInspection) -> Compatibility {
         "NOT_ASSESSED"
     } else {
         match (protocol.status, protocol.value.as_deref()) {
-            ("KNOWN", Some("2.7.1")) => "SUPPORTED",
+            ("KNOWN", Some("2.7.1" | "2.8.0")) => "SUPPORTED",
             ("KNOWN", _) => "UNSUPPORTED",
             ("CONFLICT", _) => "CONFLICT",
             _ => "UNKNOWN",
@@ -204,6 +204,31 @@ mod tests {
             assert_eq!(report.protocol.status, "KNOWN");
             assert_eq!(report.protocol.value.as_deref(), Some("2.7.1"));
             assert_eq!(report.format, "NOT_PRESENT");
+        });
+    }
+
+    #[test]
+    fn adp_280_work_schema_v1_is_supported_but_not_certified() {
+        with_project(|root| {
+            fs::write(
+                root.join("ADP.md"),
+                "# ADP.md\n> **Agent Development Protocol — Version 2.8.0 (2026-10-23)**",
+            )
+            .expect("write protocol");
+            fs::create_dir_all(root.join(".project")).expect("create directory");
+            fs::write(
+                root.join(".project/WORK.json"),
+                r#"{"schema_version":1,"project":"P","contracts":[{"id":"WORK-A","title":"A","status":"ready","depends_on":[],"execution":{"assignment":{"role":"reviewer","selection_basis":"capability_based"}}}]}"#,
+            )
+            .expect("write work index");
+            let work = work::inspect(root);
+            assert_eq!(work.status, "STRUCTURALLY_VALID");
+            let report = inspect(root, &work);
+            assert_eq!(report.protocol.value.as_deref(), Some("2.8.0"));
+            assert_eq!(report.format, "READABLE");
+            assert_eq!(report.semantics, "SUPPORTED");
+            assert_eq!(report.semantic_scope, "WORK_JSON_SCHEMA_V1_ONLY");
+            assert_eq!(report.conformance, "NOT_ASSESSED");
         });
     }
 
