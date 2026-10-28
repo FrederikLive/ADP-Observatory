@@ -1,6 +1,6 @@
 # Dashboard V2 — Research, metrics contract and interactive design proposal
 
-**Status:** DESIGN PROPOSAL / NON-PRODUCTION MOCK — 2026-10-28  
+**Status:** DESIGN DIRECTION ACCEPTED by user — 2026-10-28; prototype remains NON-PRODUCTION and fictional  
 **Artifact:** `design_examples/observatory-dashboard-v2.html`  
 **Source references:** [`docs/METRICS.md`](../METRICS.md), [`docs/work/WORK-EXPLORER-001.md`](../work/WORK-EXPLORER-001.md), [`docs/work/WORK-DASHBOARD-001.md`](../work/WORK-DASHBOARD-001.md), [`docs/SECURITY.md`](../SECURITY.md).  
 **Evidence level:** UI concept; synthetic dataset; no actual user-project scan, verification, historical snapshots, independent security assessment, or ADP protocol modification.
@@ -64,4 +64,4 @@ The prototype includes usable anchor navigation, chart-range toggle, workstream 
 
 Actual verification execution; full ADP conformance evaluation; score based on subjective heuristics; automatic file reconciliation or Git writes; cloud service; remote APIs; LLM summarization; durable historical snapshots; new mandatory ADP records; release approval; or changing the current production dashboard.
 
-**Decision requested at review:** accept the navigation/visual hierarchy and semantic separation before porting to Rust/HTML. The design serves as a spec and interactive example, not as a verified claim about the project.
+**Decision recorded 2026-10-28:** the user accepted Dashboard V2 as the design direction and requested integration into the repository. See [`DESIGN.md`](../../DESIGN.md). Implementation remains separate from this design-only PR; no production, security, or release verification is implied.
