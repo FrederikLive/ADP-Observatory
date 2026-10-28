@@ -38,6 +38,19 @@ fn current_version_reads_structured_work_without_claiming_conformance() {
 }
 
 #[test]
+fn adp_280_assignment_fixture_is_supported_without_verified_completion() {
+    let report = scan("adp-280");
+    assert_eq!(report["compatibility"]["protocol"]["value"], "2.8.0");
+    assert_eq!(report["compatibility"]["format"], "READABLE");
+    assert_eq!(report["compatibility"]["semantics"], "SUPPORTED");
+    assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
+    assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
+    assert_eq!(report["work_index"]["contracts"][0]["status"], "in_progress");
+    let findings = report["work_index"]["findings"].as_array().unwrap();
+    assert!(findings.is_empty(), "unexpected findings: {findings:?}");
+}
+
+#[test]
 fn absent_optional_work_index_does_not_fail_independent_context() {
     let report = scan("partial");
     assert_eq!(report["work_index"]["status"], "UNKNOWN");
