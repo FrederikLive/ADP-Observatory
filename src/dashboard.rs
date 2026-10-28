@@ -240,7 +240,13 @@ fn show_state_chart(progress: Option<&DeclaredProgress>) -> String {
     if work.total == 0 {
         return "<div class=\"empty\">No declared contracts available for a status distribution.</div>".into();
     }
-    let names = ["Declared verified", "Underway", "Blocked", "Planned / deferred", "Cancelled"];
+    let names = [
+        "Declared verified",
+        "Underway",
+        "Blocked",
+        "Planned / deferred",
+        "Cancelled",
+    ];
     let colors = ["#476af3", "#16ad9d", "#d66f79", "#e6ac51", "#a8b5c7"];
     let mut legend = String::new();
     let mut bars = String::new();
@@ -571,7 +577,10 @@ pub fn render(report: &Value) -> String {
         .replace("<!--__PROJECT_PATH__-->", &escape_html(project))
         .replace("<!--__METRICS__-->", &summary)
         .replace("<!--__STATES__-->", &show_state_chart(progress.as_ref()))
-        .replace("<!--__WORKSTREAMS__-->", &show_workstreams(progress.as_ref()))
+        .replace(
+            "<!--__WORKSTREAMS__-->",
+            &show_workstreams(progress.as_ref()),
+        )
         .replace("<!--__ADP_VERSION__-->", &escape_html(version))
         .replace("<!--__SCAN_STATUS__-->", &escape_html(scope))
         .replace("<!--__SEMANTIC_STATUS__-->", &escape_html(semantics))
