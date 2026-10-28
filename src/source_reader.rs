@@ -395,15 +395,22 @@ mod tests {
     use super::*;
     use std::{
         fs,
+        sync::atomic::{AtomicU64, Ordering},
         time::{SystemTime, UNIX_EPOCH},
     };
+
+    static NEXT_TEST_ROOT: AtomicU64 = AtomicU64::new(0);
 
     fn with_project(test: impl FnOnce(&Path)) {
         let id = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let root = std::env::temp_dir().join(format!("obs-source-{}-{id}", std::process::id()));
+        let root = std::env::temp_dir().join(format!(
+            "obs-source-{}-{id}-{}",
+            std::process::id(),
+            NEXT_TEST_ROOT.fetch_add(1, Ordering::Relaxed)
+        ));
         fs::create_dir_all(root.join("docs/work")).unwrap();
         test(&root);
         fs::remove_dir_all(root).unwrap();
