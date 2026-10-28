@@ -516,6 +516,48 @@ mod tests {
     }
 
     #[test]
+    fn contract_disclosure_escapes_data_and_shows_only_source_metadata() {
+        let report = json!({
+            "work_index": {
+                "status": "STRUCTURALLY_VALID", "contract_count": 1,
+                "contracts": [{
+                    "id": "WORK-X", "title": "<img src=x onerror=alert(1)>",
+                    "status": "verified", "workstream": "<script>bad()</script>",
+                    "depends_on": ["WORK-OLD"], "contract_file": "docs/work/WORK-X.md"
+                }],
+                "contract_files": [{
+                    "contract_id": "WORK-X", "path": "docs/work/WORK-X.md",
+                    "status": "PRESENT"
+                }],
+                "findings": []
+            },
+            "source_inspection": {
+                "status": "COMPLETE", "documents": [{
+                    "path": "docs/work/WORK-X.md", "state": "READABLE",
+                    "bytes": 120, "line_count": 11, "heading_count": 3
+                }], "bytes_read": 120
+            },
+            "compatibility": {"protocol": {"limitations": []}, "conformance": "NOT_ASSESSED"},
+            "context": {"records": [], "conflicts": []},
+            "scan_scope": {"status": "COMPLETE"},
+            "limitations": []
+        });
+        let html = render(&report);
+        assert!(html.contains("<details class=\"list-row filterable contract-item\">"));
+        assert!(html.contains("<summary class=\"contract-summary\">"));
+        assert!(html.contains("&lt;img src=x onerror=alert(1)&gt;"));
+        assert!(!html.contains("<img src=x onerror=alert(1)>"));
+        assert!(!html.contains("<script>bad()</script>"));
+        assert!(html.contains("Source read state"));
+        assert!(html.contains("Headings found"));
+        assert!(html.contains("recorded: verified"));
+        assert!(html.contains("Document content is not embedded"));
+        assert!(html.contains("WORK-OLD"));
+        assert!(html.contains("NOT_ASSESSED"));
+        assert!(!html.contains("file://"));
+    }
+
+    #[test]
     fn offline_report_has_no_external_urls_or_dependencies() {
         let report = json!({
             "work_index": {"contract_files": [], "findings": []},
