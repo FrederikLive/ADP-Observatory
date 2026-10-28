@@ -205,7 +205,10 @@ fn observatory_can_inspect_its_own_adp_work_records() {
     assert!(output.status.success());
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let watched = [".project/WORK.json", "docs/STATUS.md", "docs/CONTINUITY.md"];
-    let before: Vec<_> = watched.iter().map(|path| fs::read(root.join(path)).unwrap()).collect();
+    let before: Vec<_> = watched
+        .iter()
+        .map(|path| fs::read(root.join(path)).unwrap())
+        .collect();
     let report: Value = serde_json::from_slice(&output.stdout).expect("JSON output");
     for (index, path) in watched.iter().enumerate() {
         assert_eq!(fs::read(root.join(path)).unwrap(), before[index]);
@@ -223,12 +226,24 @@ fn observatory_can_inspect_its_own_adp_work_records() {
 #[test]
 fn large_work_ledger_is_bounded_and_preserves_target_bytes() {
     use std::time::{SystemTime, UNIX_EPOCH};
-    let stamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-    let root = std::env::temp_dir().join(format!("observatory-large-{}-{stamp}", std::process::id()));
+    let stamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let root =
+        std::env::temp_dir().join(format!("observatory-large-{}-{stamp}", std::process::id()));
     fs::create_dir_all(root.join(".project")).unwrap();
     fs::create_dir_all(root.join("docs/work")).unwrap();
-    fs::write(root.join("docs/STATUS.md"), "# Status\nNo certification claimed.\n").unwrap();
-    fs::write(root.join("docs/CONTINUITY.md"), "# Continuity\nNo automatic execution.\n").unwrap();
+    fs::write(
+        root.join("docs/STATUS.md"),
+        "# Status\nNo certification claimed.\n",
+    )
+    .unwrap();
+    fs::write(
+        root.join("docs/CONTINUITY.md"),
+        "# Continuity\nNo automatic execution.\n",
+    )
+    .unwrap();
 
     let mut contracts = Vec::new();
     let mut before = Vec::new();
@@ -247,24 +262,42 @@ fn large_work_ledger_is_bounded_and_preserves_target_bytes() {
     let original = serde_json::to_vec(&serde_json::json!({
         "schema_version": 1, "project": "Synthetic performance fixture",
         "active_contract": "WORK-299", "contracts": contracts
-    })).unwrap();
+    }))
+    .unwrap();
     fs::write(&work_path, &original).unwrap();
     let run = || {
         let result = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
-            .arg("scan").arg(&root).arg("--json").output().expect("invoke CLI");
-        assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+            .arg("scan")
+            .arg(&root)
+            .arg("--json")
+            .output()
+            .expect("invoke CLI");
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
         assert!(result.stdout.len() < 1024 * 1024);
         assert!(!String::from_utf8_lossy(&result.stdout).contains("SECRET_BODY_ONLY"));
         serde_json::from_slice::<Value>(&result.stdout).unwrap()
     };
     let first = run();
-    assert_eq!(first, run(), "same project should produce deterministic scan");
-    assert_eq!(first["source_inspection"]["documents"].as_array().unwrap().len(), 128);
+    assert_eq!(
+        first,
+        run(),
+        "same project should produce deterministic scan"
+    );
+    assert_eq!(
+        first["source_inspection"]["documents"]
+            .as_array()
+            .unwrap()
+            .len(),
+        128
+    );
     assert_eq!(first["source_inspection"]["omitted_documents"], 174);
     assert_eq!(first["source_inspection"]["status"], "PARTIAL");
     assert_eq!(
-        first["source_inspection"]["documents"][2]["path"],
-        "docs/work/WORK-299.md",
+        first["source_inspection"]["documents"][2]["path"], "docs/work/WORK-299.md",
         "active contract must remain in bounded source collection"
     );
     assert_eq!(first["source_inspection"]["source_text_embedded"], false);
