@@ -316,11 +316,18 @@ fn line_at(text: &str, byte_index: usize) -> usize {
 /// Read only named, in-root documents (bounded by count and aggregate bytes).
 /// Do not serialize document contents: opt-in source export is a later feature.
 pub fn inspect(root: &Path, contract_paths: impl Iterator<Item = String>) -> SourceInspection {
-    let mut paths: BTreeSet<String> =
-        ["docs/STATUS.md".to_owned(), "docs/CONTINUITY.md".to_owned()]
-            .into_iter()
-            .collect();
-    paths.extend(contract_paths);
+    // Respect work ledger order so the document limit cannot starve
+    // active/recent contracts; independent context records always come first.
+    let mut seen = BTreeSet::new();
+    let mut paths = Vec::new();
+    for path in ["docs/STATUS.md".to_owned(), "docs/CONTINUITY.md".to_owned()]
+        .into_iter()
+        .chain(contract_paths)
+    {
+        if seen.insert(path.clone()) {
+            paths.push(path);
+        }
+    }
     let omitted_documents = paths.len().saturating_sub(MAX_DOCUMENTS);
     let reader = Reader::new(root);
     let mut inspection = SourceInspection {
@@ -526,6 +533,56 @@ mod tests {
                 reader.read_markdown("docs/work").unwrap_err(),
                 ReadFailure::Unsupported
             );
+        });
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_junction_to_external_directory_is_refused() {
+        use std::process::Command;
+        with_project(|root| {
+            let external = root.with_extension("external");
+            fs::create_dir_all(&external).unwrap();
+            fs::write(external.join("outside.md"), "# EXTERNAL_SECRET").unwrap();
+            let junction = root.join("junction");
+            let command = format!(
+                "mklink /J \"{}\" \"{}\"",
+                junction.display(),
+                external.display()
+            );
+            let output = Command::new("cmd")
+                .args(["/C", &command])
+                .output()
+                .expect("create junction");
+            assert!(
+                output.status.success(),
+                "junction setup failed: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+            let mut reader = Reader::new(root).unwrap();
+            assert!(
+                reader.read_markdown("junction/outside.md").is_err(),
+                "junction cannot open external content"
+            );
+            assert_eq!(reader.bytes_read, 0);
+            fs::remove_dir(&junction).unwrap();
+            fs::remove_dir_all(&external).unwrap();
+        });
+    }
+
+    #[test]
+    fn preserves_contract_order_and_context_priority_under_limits() {
+        with_project(|root| {
+            fs::write(root.join("docs/STATUS.md"), "# Status").unwrap();
+            let list = (0..300)
+                .rev()
+                .map(|id| format!("docs/work/WORK-{id:03}.md"));
+            let result = inspect(root, list);
+            assert_eq!(result.documents.len(), MAX_DOCUMENTS);
+            assert_eq!(result.documents[0].path, "docs/STATUS.md");
+            assert_eq!(result.documents[1].path, "docs/CONTINUITY.md");
+            assert_eq!(result.documents[2].path, "docs/work/WORK-299.md");
+            assert_eq!(result.omitted_documents, 302 - MAX_DOCUMENTS);
         });
     }
 
