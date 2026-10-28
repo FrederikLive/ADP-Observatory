@@ -147,7 +147,7 @@ impl Reader {
         options.read(true).follow(FollowSymlinks::No);
         #[cfg(unix)]
         options.nonblock(true); // Avoid a blocking special-file open before fstat.
-        let mut file = parent.open_with(name, &options).map_err(map_open)?;
+        let file = parent.open_with(name, &options).map_err(map_open)?;
         let opened = file.metadata().map_err(map_io)?;
         if !opened.is_file() || opened.file_type().is_symlink() {
             return Err(ReadFailure::Unsafe);
