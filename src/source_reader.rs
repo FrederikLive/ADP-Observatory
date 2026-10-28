@@ -167,7 +167,7 @@ impl Reader {
         file.take((allowed + 1) as u64)
             .read_to_end(&mut bytes)
             .map_err(map_io)?;
-        self.bytes_read += bytes.len();
+        self.bytes_read += bytes.len().min(remaining);
         if bytes.len() > MAX_DOCUMENT_BYTES {
             return Err(ReadFailure::TooLarge);
         }
