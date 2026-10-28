@@ -1,14 +1,21 @@
 //! Safe, capability-relative, read-only Markdown snapshot foundation.
 //! Document bytes and headings stay in memory; the serialized report contains
 //! metadata only. A later, explicitly opted-in viewer may consume bounded views.
-use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
 #[cfg(unix)]
 use cap_fs_ext::OpenOptionsSyncExt;
-use cap_std::{ambient_authority, fs::{Dir, OpenOptions}};
+use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
+use cap_std::{
+    ambient_authority,
+    fs::{Dir, OpenOptions},
+};
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeSet, io::{ErrorKind, Read}, path::Path};
+use std::{
+    collections::BTreeSet,
+    io::{ErrorKind, Read},
+    path::Path,
+};
 
 const MAX_DOCUMENTS: usize = 128;
 const MAX_DOCUMENT_BYTES: usize = 128 * 1024;
@@ -98,7 +105,10 @@ impl Reader {
     fn new(root: &Path) -> Result<Self, ReadFailure> {
         let root = Dir::open_ambient_dir(root, ambient_authority())
             .map_err(|_| ReadFailure::Unreadable)?;
-        Ok(Self { root, bytes_read: 0 })
+        Ok(Self {
+            root,
+            bytes_read: 0,
+        })
     }
 
     fn read_markdown(&mut self, path: &str) -> Result<SourceSnapshot, ReadFailure> {
@@ -171,7 +181,12 @@ impl Reader {
             return Err(ReadFailure::LongLine);
         }
         let headings = parse_headings(&text);
-        Ok(SourceSnapshot { text, headings, digest, line_count })
+        Ok(SourceSnapshot {
+            text,
+            headings,
+            digest,
+            line_count,
+        })
     }
 }
 
@@ -196,20 +211,52 @@ fn map_open(error: std::io::Error) -> ReadFailure {
 }
 
 fn validate_path(path: &str) -> Result<Vec<&str>, ReadFailure> {
-    if path.is_empty() || path.len() > MAX_PATH_BYTES || path.contains('\\')
-        || path.chars().any(|c| c.is_control() || matches!(c, ':' | '*' | '?' | '"' | '<' | '>' | '|'))
+    if path.is_empty()
+        || path.len() > MAX_PATH_BYTES
+        || path.contains('\\')
+        || path
+            .chars()
+            .any(|c| c.is_control() || matches!(c, ':' | '*' | '?' | '"' | '<' | '>' | '|'))
         || path.starts_with('/')
     {
         return Err(ReadFailure::InvalidPath);
     }
     let parts: Vec<_> = path.split('/').collect();
-    if parts.len() > MAX_COMPONENTS || parts.iter().any(|p| p.is_empty() || *p == "." || *p == ".." || (p.ends_with('.') || p.ends_with(' '))) {
+    if parts.len() > MAX_COMPONENTS
+        || parts.iter().any(|p| {
+            p.is_empty() || *p == "." || *p == ".." || (p.ends_with('.') || p.ends_with(' '))
+        })
+    {
         return Err(ReadFailure::InvalidPath);
     }
     // Windows reserves these names even with a file extension.
     if parts.iter().any(|p| {
         let stem = p.split('.').next().unwrap_or("").to_ascii_uppercase();
-        matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL" | "COM1" | "COM2" | "COM3" | "COM4" | "COM5" | "COM6" | "COM7" | "COM8" | "COM9" | "LPT1" | "LPT2" | "LPT3" | "LPT4" | "LPT5" | "LPT6" | "LPT7" | "LPT8" | "LPT9")
+        matches!(
+            stem.as_str(),
+            "CON"
+                | "PRN"
+                | "AUX"
+                | "NUL"
+                | "COM1"
+                | "COM2"
+                | "COM3"
+                | "COM4"
+                | "COM5"
+                | "COM6"
+                | "COM7"
+                | "COM8"
+                | "COM9"
+                | "LPT1"
+                | "LPT2"
+                | "LPT3"
+                | "LPT4"
+                | "LPT5"
+                | "LPT6"
+                | "LPT7"
+                | "LPT8"
+                | "LPT9"
+        )
     }) {
         return Err(ReadFailure::InvalidPath);
     }
@@ -224,8 +271,12 @@ fn parse_headings(text: &str) -> Vec<Heading> {
             Event::Start(Tag::Heading { level, .. }) => {
                 current = Some(Heading {
                     level: match level {
-                        HeadingLevel::H1 => 1, HeadingLevel::H2 => 2, HeadingLevel::H3 => 3,
-                        HeadingLevel::H4 => 4, HeadingLevel::H5 => 5, HeadingLevel::H6 => 6,
+                        HeadingLevel::H1 => 1,
+                        HeadingLevel::H2 => 2,
+                        HeadingLevel::H3 => 3,
+                        HeadingLevel::H4 => 4,
+                        HeadingLevel::H5 => 5,
+                        HeadingLevel::H6 => 6,
                     },
                     title: String::new(),
                     start_line: line_at(text, range.start),
@@ -235,7 +286,9 @@ fn parse_headings(text: &str) -> Vec<Heading> {
             Event::Text(value) | Event::Code(value) if current.is_some() => {
                 if let Some(heading) = &mut current {
                     let room = 256_usize.saturating_sub(heading.title.len());
-                    heading.title.push_str(&value.chars().take(room).collect::<String>());
+                    heading
+                        .title
+                        .push_str(&value.chars().take(room).collect::<String>());
                 }
             }
             Event::End(TagEnd::Heading(_)) => {
@@ -253,16 +306,20 @@ fn parse_headings(text: &str) -> Vec<Heading> {
 }
 
 fn line_at(text: &str, byte_index: usize) -> usize {
-    text.as_bytes()[..byte_index.min(text.len())].iter().filter(|&&byte| byte == b'\n').count() + 1
+    text.as_bytes()[..byte_index.min(text.len())]
+        .iter()
+        .filter(|&&byte| byte == b'\n')
+        .count()
+        + 1
 }
 
 /// Read only named, in-root documents (bounded by count and aggregate bytes).
 /// Do not serialize document contents: opt-in source export is a later feature.
 pub fn inspect(root: &Path, contract_paths: impl Iterator<Item = String>) -> SourceInspection {
-    let mut paths: BTreeSet<String> = [
-        "docs/STATUS.md".to_owned(),
-        "docs/CONTINUITY.md".to_owned(),
-    ].into_iter().collect();
+    let mut paths: BTreeSet<String> =
+        ["docs/STATUS.md".to_owned(), "docs/CONTINUITY.md".to_owned()]
+            .into_iter()
+            .collect();
     paths.extend(contract_paths);
     let omitted_documents = paths.len().saturating_sub(MAX_DOCUMENTS);
     let reader = Reader::new(root);
@@ -305,13 +362,22 @@ pub fn inspect(root: &Path, contract_paths: impl Iterator<Item = String>) -> Sou
             inspection.status = "PARTIAL";
             for path in paths.into_iter().take(MAX_DOCUMENTS) {
                 inspection.documents.push(SourceSummary {
-                    path, state: "UNREADABLE", bytes: None, sha256: None,
-                    line_count: None, heading_count: None,
+                    path,
+                    state: "UNREADABLE",
+                    bytes: None,
+                    sha256: None,
+                    line_count: None,
+                    heading_count: None,
                 });
             }
         }
     }
-    if omitted_documents > 0 || inspection.documents.iter().any(|d| d.state != "READABLE" && d.state != "MISSING") {
+    if omitted_documents > 0
+        || inspection
+            .documents
+            .iter()
+            .any(|d| d.state != "READABLE" && d.state != "MISSING")
+    {
         inspection.status = "PARTIAL";
     }
     inspection
@@ -320,10 +386,16 @@ pub fn inspect(root: &Path, contract_paths: impl Iterator<Item = String>) -> Sou
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{fs, time::{SystemTime, UNIX_EPOCH}};
+    use std::{
+        fs,
+        time::{SystemTime, UNIX_EPOCH},
+    };
 
     fn with_project(test: impl FnOnce(&Path)) {
-        let id = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let id = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         let root = std::env::temp_dir().join(format!("obs-source-{}-{id}", std::process::id()));
         fs::create_dir_all(root.join("docs/work")).unwrap();
         test(&root);
@@ -346,8 +418,10 @@ mod tests {
             assert_eq!(result.headings[1].title, "Acceptance criteria");
             assert_eq!(result.line_count, 10);
             let output = serde_json::to_string(&inspect(
-                root, ["docs/work/WORK-É.md".to_owned()].into_iter()
-            )).unwrap();
+                root,
+                ["docs/work/WORK-É.md".to_owned()].into_iter(),
+            ))
+            .unwrap();
             assert!(!output.contains("Acceptance criteria"));
             assert!(!output.contains("Example"));
             assert!(output.contains("READABLE"));
@@ -358,10 +432,23 @@ mod tests {
     fn refuses_outside_paths_and_unsupported_content() {
         with_project(|root| {
             let mut reader = Reader::new(root).unwrap();
-            for name in ["../private.md", "/tmp/private.md", "C:/private.md", "docs/./work.md", "docs//a.md", "docs/CON.md"] {
-                assert_eq!(reader.read_markdown(name).unwrap_err(), ReadFailure::InvalidPath);
+            for name in [
+                "../private.md",
+                "/tmp/private.md",
+                "C:/private.md",
+                "docs/./work.md",
+                "docs//a.md",
+                "docs/CON.md",
+            ] {
+                assert_eq!(
+                    reader.read_markdown(name).unwrap_err(),
+                    ReadFailure::InvalidPath
+                );
             }
-            assert_eq!(reader.read_markdown("docs/file.json").unwrap_err(), ReadFailure::Unsupported);
+            assert_eq!(
+                reader.read_markdown("docs/file.json").unwrap_err(),
+                ReadFailure::Unsupported
+            );
             assert_eq!(reader.bytes_read, 0);
         });
     }
@@ -369,13 +456,30 @@ mod tests {
     #[test]
     fn enforces_bounded_file_size_and_invalid_utf8() {
         with_project(|root| {
-            fs::write(root.join("docs/work/huge.md"), vec![b'x'; MAX_DOCUMENT_BYTES + 1]).unwrap();
+            fs::write(
+                root.join("docs/work/huge.md"),
+                vec![b'x'; MAX_DOCUMENT_BYTES + 1],
+            )
+            .unwrap();
             fs::write(root.join("docs/work/bad.md"), [0xff, 0xfe]).unwrap();
-            fs::write(root.join("docs/work/long.md"), "x".repeat(MAX_LINE_BYTES + 1)).unwrap();
+            fs::write(
+                root.join("docs/work/long.md"),
+                "x".repeat(MAX_LINE_BYTES + 1),
+            )
+            .unwrap();
             let mut reader = Reader::new(root).unwrap();
-            assert_eq!(reader.read_markdown("docs/work/huge.md").unwrap_err(), ReadFailure::TooLarge);
-            assert_eq!(reader.read_markdown("docs/work/bad.md").unwrap_err(), ReadFailure::InvalidUtf8);
-            assert_eq!(reader.read_markdown("docs/work/long.md").unwrap_err(), ReadFailure::LongLine);
+            assert_eq!(
+                reader.read_markdown("docs/work/huge.md").unwrap_err(),
+                ReadFailure::TooLarge
+            );
+            assert_eq!(
+                reader.read_markdown("docs/work/bad.md").unwrap_err(),
+                ReadFailure::InvalidUtf8
+            );
+            assert_eq!(
+                reader.read_markdown("docs/work/long.md").unwrap_err(),
+                ReadFailure::LongLine
+            );
         });
     }
 
@@ -385,8 +489,14 @@ mod tests {
             fs::write(root.join("docs/STATUS.md"), "# Status").unwrap();
             let a = inspect(root, std::iter::empty());
             assert_eq!(a.documents.len(), 2);
-            assert!(a.documents.iter().any(|d| d.path == "docs/STATUS.md" && d.state == "READABLE"));
-            assert!(a.documents.iter().any(|d| d.path == "docs/CONTINUITY.md" && d.state == "MISSING"));
+            assert!(a
+                .documents
+                .iter()
+                .any(|d| d.path == "docs/STATUS.md" && d.state == "READABLE"));
+            assert!(a
+                .documents
+                .iter()
+                .any(|d| d.path == "docs/CONTINUITY.md" && d.state == "MISSING"));
             assert!(!root.join(".project/WORK.json").exists());
         });
     }
@@ -397,12 +507,25 @@ mod tests {
         use std::os::unix::fs::symlink;
         with_project(|root| {
             fs::write(root.join("docs/work/original.md"), "# Original").unwrap();
-            symlink(root.join("docs/work/original.md"), root.join("docs/work/file-link.md")).unwrap();
+            symlink(
+                root.join("docs/work/original.md"),
+                root.join("docs/work/file-link.md"),
+            )
+            .unwrap();
             symlink(root.join("docs/work"), root.join("shortcut")).unwrap();
             let mut reader = Reader::new(root).unwrap();
-            assert_eq!(reader.read_markdown("docs/work/file-link.md").unwrap_err(), ReadFailure::Unsafe);
-            assert_eq!(reader.read_markdown("shortcut/original.md").unwrap_err(), ReadFailure::Unsafe);
-            assert_eq!(reader.read_markdown("docs/work").unwrap_err(), ReadFailure::Unsupported);
+            assert_eq!(
+                reader.read_markdown("docs/work/file-link.md").unwrap_err(),
+                ReadFailure::Unsafe
+            );
+            assert_eq!(
+                reader.read_markdown("shortcut/original.md").unwrap_err(),
+                ReadFailure::Unsafe
+            );
+            assert_eq!(
+                reader.read_markdown("docs/work").unwrap_err(),
+                ReadFailure::Unsupported
+            );
         });
     }
 
