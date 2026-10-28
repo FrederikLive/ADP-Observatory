@@ -545,13 +545,15 @@ mod tests {
             fs::create_dir_all(&external).unwrap();
             fs::write(external.join("outside.md"), "# EXTERNAL_SECRET").unwrap();
             let junction = root.join("junction");
+            // PowerShell creates a real NTFS junction without developer mode.
+            // Escape PowerShell single-quoted strings even for local fixture paths.
+            let link_path = junction.to_string_lossy().replace('\'', "''");
+            let target_path = external.to_string_lossy().replace('\'', "''");
             let command = format!(
-                "mklink /J \"{}\" \"{}\"",
-                junction.display(),
-                external.display()
+                "New-Item -ItemType Junction -Path '{link_path}' -Target '{target_path}' -ErrorAction Stop | Out-Null"
             );
-            let output = Command::new("cmd")
-                .args(["/C", &command])
+            let output = Command::new("powershell")
+                .args(["-NoProfile", "-NonInteractive", "-Command", &command])
                 .output()
                 .expect("create junction");
             assert!(
