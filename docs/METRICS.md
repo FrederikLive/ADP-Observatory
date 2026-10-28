@@ -17,6 +17,15 @@ Never convert these states to zero or pass. Show denominators and coverage besid
 - delivery.completed_unverified: units declared complete but missing required verification.
 - delivery.unresolved_dependencies: explicitly recorded unresolved dependencies; do not infer blocker-hours.
 
+### Implemented dashboard metric: `delivery.declared_completion` (view rule v1)
+
+- **Input:** optional structurally valid schema-v1 `.project/WORK.json`, with a declared count matching the accepted contract records and every status recognized by the scanner. This is *recorded* delivery, not independent verification or engineering-hour weighting.
+- **Formula:** `100 × count(status == verified) / count(status != cancelled)`, rounded to the nearest integer. Cancelled items are excluded; deferred, candidate, ready, blocked, in_progress, implemented and verifying remain in the denominator. All nine statuses are mutually exclusive.
+- **States:** `KNOWN` only for a valid ledger with nonzero applicable records; `UNKNOWN` for invalid/missing/mismatched/unsupported ledgers or zero denominator. No total is inferred when inputs are missing. Snapshot trend remains `NOT_ASSESSED`.
+- **Display:** show numerator/denominator and excluded-cancelled count on the card; workstream charts use the same semantics per workstream. Group recorded `verified`, underway (`in_progress`/`implemented`/`verifying`), blocked, planned/deferred (`ready`/`candidate`/`deferred`), cancelled.
+- **Coverage caveat:** `Reference presence` is the share of declared contract-file references whose metadata state is `PRESENT`, and is shown only when all such references are inspected; it **does not** mean required evidence was provided or accepted. `evidence.required_coverage` remains `NOT_ASSESSED` until an independent required-evidence inventory/rule exists.
+- **Limits:** version-independent heuristic of *declared record status*, not full ADP semantics; no new scan actions, files, source excerpts or external access. Test cases cover missing/invalid ledger, unmatched count, unsupported status and cancelled-only denominator.
+
 ## Evidence and traceability
 - evidence.required_coverage: applicable required evidence present / applicable required evidence.
 - evidence.missing_required: count of missing required evidence references.

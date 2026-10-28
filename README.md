@@ -20,7 +20,7 @@ With a previously approved installed binary, a local agent can invoke the skill'
 
 ## Design direction
 
-**Approved Dashboard V2 visual baseline:** [DESIGN.md](DESIGN.md) · [interactive HTML example](design_examples/observatory-dashboard-v2.html) · [research and metric semantics](docs/research/DASHBOARD-V2-RESEARCH.md). This design example uses entirely fictional values; the current CLI dashboard remains unchanged pending separately tested production implementation. No historical trend or independently verified completion is implied.
+**Approved Dashboard V2 visual baseline:** [DESIGN.md](DESIGN.md) · [interactive HTML example](design_examples/observatory-dashboard-v2.html) · [research and metric semantics](docs/research/DASHBOARD-V2-RESEARCH.md). The standalone design example uses fictional values; the production V2 report renders only available project records, with UNKNOWN for invalid ledgers, source-presence counts instead of proof, and no fictional historical trend. No independent project completion verification is implied.
 
 ## Core objectives
 

@@ -6,7 +6,7 @@
 
 - [Interactive standalone HTML prototype](design_examples/observatory-dashboard-v2.html). All example project names, counts, percentages and trend data are synthetic.
 - [Research and metric semantics](docs/research/DASHBOARD-V2-RESEARCH.md), referencing the existing [metric catalogue](docs/METRICS.md) and [Contract & Evidence Explorer specification](docs/work/WORK-EXPLORER-001.md).
-- Existing production report remains in `web/report.html`, `web/report.css`, `web/report.js` and `src/dashboard.rs` until an implementation PR is tested and merged.
+- The standalone prototype remains fictional. The first production V2 visual/declared-metrics slice lives in the Rust/HTML renderer (implementation PR #10); it does not yet implement historical snapshots, independent evidence verification or source excerpt navigation.
 
 ## Approved product and interaction decisions
 
