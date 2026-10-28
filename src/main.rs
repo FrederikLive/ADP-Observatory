@@ -54,7 +54,13 @@ fn run() -> Result<(), String> {
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
-    let source_inspection = source_reader::inspect(&root, work_index.contracts.iter().filter_map(|contract| contract.contract_file.clone()));
+    let source_inspection = source_reader::inspect(
+        &root,
+        work_index
+            .contracts
+            .iter()
+            .filter_map(|contract| contract.contract_file.clone()),
+    );
     let report = Report {
         schema_version: "0.5.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
@@ -127,7 +133,12 @@ fn print_text(report: &Report) {
         println!("  - {marker}");
     }
     println!("Work index: {}", report.work_index.status);
-    println!("Source documents: {} ({} bytes; {})", report.source_inspection.documents.len(), report.source_inspection.bytes_read, report.source_inspection.status);
+    println!(
+        "Source documents: {} ({} bytes; {})",
+        report.source_inspection.documents.len(),
+        report.source_inspection.bytes_read,
+        report.source_inspection.status
+    );
     println!("Semantic scope: {}", report.compatibility.semantic_scope);
     for reference in &report.work_index.contract_files {
         println!(
