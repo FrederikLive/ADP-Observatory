@@ -87,6 +87,9 @@ fn show_contracts(report: &Value) -> String {
     let references = report
         .pointer("/work_index/contract_files")
         .and_then(Value::as_array);
+    let documents = report
+        .pointer("/source_inspection/documents")
+        .and_then(Value::as_array);
     if let Some(items) = report
         .pointer("/work_index/contracts")
         .and_then(Value::as_array)
@@ -108,8 +111,13 @@ fn show_contracts(report: &Value) -> String {
                 })
                 .filter(|s| !s.is_empty())
                 .unwrap_or_else(|| "None declared".into());
-            let mut description =
-                format!("Workstream: {workstream} · Dependencies: {dependencies}");
+
+            let mut details = String::new();
+            details.push_str(&keyval("Contract ID", id));
+            details.push_str(&keyval("Workstream", workstream));
+            details.push_str(&keyval("Declared dependencies", &dependencies));
+            details.push_str(&keyval("Recorded status", status));
+
             if let Some(path) = item.get("contract_file").and_then(Value::as_str) {
                 let state = references
                     .and_then(|links| {
@@ -118,17 +126,40 @@ fn show_contracts(report: &Value) -> String {
                                 && at(reference, "/path", "") == path
                         })
                     })
-                    .map(|reference| at(reference, "/status", "UNKNOWN"))
+                    .map(|reference| at(reference, "/status", "NOT_ASSESSED"))
                     .unwrap_or("NOT_ASSESSED");
-                description.push_str(&format!(" · File: {path} ({state})"));
+                details.push_str(&keyval("Declared source file", path));
+                details.push_str(&keyval("Reference presence", state));
+                if let Some(document) = documents.and_then(|docs| {
+                    docs.iter().find(|document| at(document, "/path", "") == path)
+                }) {
+                    details.push_str(&keyval(
+                        "Source read state",
+                        at(document, "/state", "NOT_ASSESSED"),
+                    ));
+                    details.push_str(&keyval("Read bytes", &count(&document["bytes"])));
+                    details.push_str(&keyval("Source lines", &count(&document["line_count"])));
+                    details.push_str(&keyval("Headings found", &count(&document["heading_count"])));
+                } else {
+                    details.push_str(&keyval("Source read state", "NOT_ASSESSED"));
+                }
+            } else {
+                details.push_str(&keyval("Declared source file", "None"));
             }
-            // WORK.json statuses are claims supplied by the project, not
-            // independent verification performed by Observatory.
-            html.push_str(&row(
-                &format!("{id} · {title}"),
-                &description,
-                &format!("recorded: {status}"),
-                true,
+
+            // The built-in details/summary control works offline without JS,
+            // retains keyboard navigation, and never follows a project file.
+            // Metadata is escaped before entering any HTML context.
+            html.push_str(&format!(
+                "<details class=\"list-row filterable contract-item\">\
+                 <summary class=\"contract-summary\"><span class=\"row-title\">{}</span>{}</summary>\
+                 <div class=\"contract-detail\"><div class=\"keyvalues\">{}</div>\
+                 <p class=\"section-help\">WORK.json records are project claims. \
+                 File presence and parsed source metadata are not independent proof of completion \
+                 or ADP conformance. Document content is not embedded.</p></div></details>",
+                escape_html(&format!("{id} · {title}")),
+                tag(&format!("recorded: {status}")),
+                details
             ));
         }
     }
