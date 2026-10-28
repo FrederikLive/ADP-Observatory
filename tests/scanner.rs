@@ -303,10 +303,10 @@ fn large_work_ledger_is_bounded_and_preserves_target_bytes() {
     assert_eq!(first["source_inspection"]["source_text_embedded"], false);
     assert_eq!(first["compatibility"]["conformance"], "NOT_ASSESSED");
     assert_eq!(fs::read(&work_path).unwrap(), original);
-    for number in 0..300 {
+    for (number, expected) in before.iter().enumerate() {
         assert_eq!(
             fs::read(root.join(format!("docs/work/WORK-{number:03}.md"))).unwrap(),
-            before[number]
+            *expected
         );
     }
     assert_eq!(fs::read_dir(root.join("docs/work")).unwrap().count(), 300);
