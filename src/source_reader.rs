@@ -1,7 +1,9 @@
 //! Safe, capability-relative, read-only Markdown snapshot foundation.
 //! Document bytes and headings stay in memory; the serialized report contains
 //! metadata only. A later, explicitly opted-in viewer may consume bounded views.
-use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt, OpenOptionsSyncExt};
+use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
+#[cfg(unix)]
+use cap_fs_ext::OpenOptionsSyncExt;
 use cap_std::{ambient_authority, fs::{Dir, OpenOptions}};
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd};
 use serde::Serialize;
