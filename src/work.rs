@@ -346,7 +346,7 @@ pub fn inspect(root: &Path) -> WorkInspection {
                                 matches!(value.as_str(), Some("read_only" | "mutating"))
                             }
                             "branch" => nullable_string(value),
-                            "assignment" => value.as_object().is_some_and(|assignment| {
+                            "assignment" => value.is_null() || value.as_object().is_some_and(|assignment| {
                                 assignment.iter().all(|(name, field)| {
                                     matches!(
                                         name.as_str(),
@@ -524,12 +524,19 @@ mod tests {
     }
 
     #[test]
+    fn null_assignment_is_permitted_by_optional_adp_280_schema() {
+        with_work(
+            r#"{"schema_version":1,"project":"P","contracts":[{"id":"WORK-A","title":"A","status":"ready","depends_on":[],"execution":{"assignment":null}}]}"#,
+            |root| assert_eq!(inspect(root).status, "STRUCTURALLY_VALID"),
+        );
+    }
+
+    #[test]
     fn invalid_assignment_fields_are_rejected_without_running_agents() {
         for assignment in [
             r#"{"role":""}"#,
             r#"{"provider":42}"#,
             r#"{"unrecognized":"not allowed"}"#,
-            r#"null"#,
             r#""not an object""#,
         ] {
             let payload = format!(
