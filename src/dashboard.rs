@@ -725,6 +725,29 @@ mod tests {
     }
 
     #[test]
+    fn hostile_workstream_name_is_escaped_in_visual_summary() {
+        let report = json!({
+            "work_index": {
+                "status":"STRUCTURALLY_VALID",
+                "contract_count":1,
+                "contracts":[{
+                    "id":"WORK-A", "title":"Test", "status":"verified",
+                    "workstream":"<img src=x onerror=alert(1)>"
+                }],
+                "contract_files":[], "findings":[]
+            },
+            "compatibility":{"protocol":{"limitations":[]},"conformance":"NOT_ASSESSED"},
+            "context":{"records":[],"conflicts":[]},
+            "scan_scope":{"status":"COMPLETE"},
+            "limitations":[]
+        });
+        let html = render(&report);
+        assert!(html.contains("&lt;img src=x onerror=alert(1)&gt;"));
+        assert!(!html.contains("<img src=x onerror=alert(1)>"));
+        assert!(!html.contains("https://"));
+    }
+
+    #[test]
     fn no_applicable_contracts_does_not_divide_by_zero() {
         let report = json!({
             "work_index": {
