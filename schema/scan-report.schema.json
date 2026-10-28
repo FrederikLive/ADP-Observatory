@@ -15,7 +15,8 @@
     "work_index",
     "compatibility",
     "context",
-    "scan_scope"
+    "scan_scope",
+    "source_inspection"
   ],
   "properties": {
     "schema_version": {
@@ -472,6 +473,114 @@
         "entry_limit_hits": {
           "type": "integer",
           "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "source_inspection": {
+      "type": "object",
+      "required": [
+        "status",
+        "documents",
+        "document_limit",
+        "per_document_byte_limit",
+        "total_byte_limit",
+        "bytes_read",
+        "omitted_documents",
+        "source_text_embedded"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "COMPLETE",
+            "PARTIAL"
+          ]
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "state",
+              "bytes",
+              "sha256",
+              "line_count",
+              "heading_count"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "READABLE",
+                  "MISSING",
+                  "UNSAFE",
+                  "NOT_FILE",
+                  "TOO_LARGE",
+                  "LIMITED",
+                  "INVALID_UTF8",
+                  "LONG_LINE",
+                  "UNREADABLE",
+                  "INVALID_PATH",
+                  "UNSUPPORTED"
+                ]
+              },
+              "bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "sha256": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "line_count": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "heading_count": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "document_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "per_document_byte_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total_byte_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bytes_read": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "omitted_documents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_text_embedded": {
+          "const": false
         }
       },
       "additionalProperties": false
