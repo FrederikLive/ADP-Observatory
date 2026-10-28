@@ -720,7 +720,8 @@ mod tests {
         let html = render(&report);
         assert!(html.contains("UNKNOWN"));
         assert!(html.contains("a structurally valid work index is required"));
-        assert!(!html.contains("50%"));
+        assert!(html.contains("<span class=\"metric-value\">UNKNOWN</span>"));
+        assert!(!html.contains("<span class=\"metric-value\">50%</span>"));
     }
 
     #[test]
