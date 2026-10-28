@@ -39,6 +39,8 @@ pub struct SourceSummary {
     pub heading_count: Option<usize>,
 }
 
+#[allow(dead_code)] // Retained for the future opt-in, source-backed Explorer view.
+#[derive(Debug)]
 struct Heading {
     level: u8,
     title: String,
@@ -46,6 +48,7 @@ struct Heading {
     end_line: usize,
 }
 
+#[derive(Debug)]
 struct SourceSnapshot {
     text: String,
     headings: Vec<Heading>,
@@ -198,7 +201,7 @@ fn validate_path(path: &str) -> Result<Vec<&str>, ReadFailure> {
         return Err(ReadFailure::InvalidPath);
     }
     let parts: Vec<_> = path.split('/').collect();
-    if parts.len() > MAX_COMPONENTS || parts.iter().any(|p| p.is_empty() || *p == "." || *p == ".." || p.ends_with(['.', ' '])) {
+    if parts.len() > MAX_COMPONENTS || parts.iter().any(|p| p.is_empty() || *p == "." || *p == ".." || (p.ends_with('.') || p.ends_with(' '))) {
         return Err(ReadFailure::InvalidPath);
     }
     // Windows reserves these names even with a file extension.
@@ -329,7 +332,7 @@ mod tests {
     fn reads_headings_with_exact_source_lines_without_serializing_text() {
         with_project(|root| {
             let path = root.join("docs/work/WORK-É.md");
-            let text = "# Purpose\n\nExample\n\n\`\`\`md\n# Not a heading\n\`\`\`\n\n## Acceptance criteria\n- [ ] Check\n";
+            let text = "# Purpose\n\nExample\n\n```md\n# Not a heading\n```\n\n## Acceptance criteria\n- [ ] Check\n";
             fs::write(&path, text).unwrap();
             let mut reader = Reader::new(root).unwrap();
             let result = reader.read_markdown("docs/work/WORK-É.md").unwrap();
