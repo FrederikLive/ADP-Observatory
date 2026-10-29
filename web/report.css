@@ -94,3 +94,11 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
  .v2-shell .v2-chart-panel{min-height:0}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Source-backed dependency ledger, bounded for the offline report. */
+.v2-dependencies{margin-bottom:18px}
+.v2-dependencies .dependency-summary{font-size:12px;line-height:1.7;color:#52647c;margin:14px 0;font-weight:550}
+.v2-dependencies .dependency-summary strong{font-size:15px;color:#293d64}
+.v2-dependencies .dependency-row{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) auto;align-items:center;gap:8px;padding:11px 9px;border-top:1px solid #edf0f7;font-size:11px;color:#455675;overflow-wrap:anywhere}
+.v2-dependencies .dependency-row small{font-size:10px;color:#7c8aa1}
+@media(max-width:610px){.v2-dependencies .dependency-row{grid-template-columns:1fr 18px 1fr}.v2-dependencies .dependency-row small{grid-column:1/-1}}

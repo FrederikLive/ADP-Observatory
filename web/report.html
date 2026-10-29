@@ -19,6 +19,7 @@
       <a class="nav-link current" href="#overview">▦ <span>Overview</span></a>
       <a class="nav-link" href="#progress">◴ <span>Delivery progress</span></a>
       <a class="nav-link" href="#workstreams">▤ <span>Workstreams</span></a>
+      <a class="nav-link" href="#dependencies">⤳ <span>Dependencies</span></a>
       <a class="nav-link" href="#contracts">☷ <span>Contract Explorer</span></a>
       <a class="nav-link" href="#findings">◇ <span>Findings</span></a>
       <a class="nav-link" href="#scope">⚙ <span>Scope &amp; trust</span></a>
@@ -56,6 +57,11 @@
         <div class="panel-head"><div><p class="eyebrow">PROJECT DELIVERY</p><h2 id="workstreams-title">Progress by workstream</h2></div><span class="tag neutral">DECLARED</span></div>
         <p class="section-help">Completed / applicable contracts per recorded workstream; a progress bar reflects declared status, not verification quality or time spent.</p>
         <div class="workstream-list"><!--__WORKSTREAMS__--></div>
+      </section>
+      <section class="panel v2-dependencies" id="dependencies" aria-labelledby="dependencies-title">
+        <div class="panel-head"><div><p class="eyebrow">RECORDED RELATIONSHIPS</p><h2 id="dependencies-title">Dependency visibility</h2></div><span class="tag neutral">DECLARED</span></div>
+        <p class="section-help">Explicit WORK.json dependency links. “Pending” means the referenced contract's recorded status is not verified. This is not a critical-path analysis or a proven blocker.</p>
+        <div class="dependency-list"><!--__DEPENDENCIES__--></div>
       </section>
       <div class="columns">
         <div class="primary">
