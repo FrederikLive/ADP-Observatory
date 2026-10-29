@@ -773,10 +773,10 @@ mod tests {
                 "contracts":[{"id":"WORK-A","status":"verified"}]
             }
         });
-        assert!(DeclaredProgress::from_report(&report).is_none());
+        assert!(DeclaredProgress::from_metrics(&actual_metrics(&report)).is_none());
         report["work_index"]["contract_count"] = json!(1);
         report["work_index"]["contracts"][0]["status"] = json!("unrecognized");
-        assert!(DeclaredProgress::from_report(&report).is_none());
+        assert!(DeclaredProgress::from_metrics(&actual_metrics(&report)).is_none());
     }
 
     #[test]
