@@ -333,4 +333,3 @@ mod tests {
         assert_eq!(m.references.percent, None);
     }
 }
-
