@@ -87,150 +87,109 @@ fn row(title: &str, detail: &str, status: &str, filterable: bool) -> String {
 /// evidence, source quality, independently verified work, or overall project
 /// readiness. Any invalid ledger suppresses all derived percentages.
 struct DeclaredProgress {
-    counts: [usize; 5], // verified, underway, blocked, planned, cancelled
+    counts: [usize; 5],
     total: usize,
     streams: BTreeMap<String, [usize; 5]>,
+    applicable: usize,
+    percent: Option<u64>,
 }
-
 impl DeclaredProgress {
-    fn from_report(report: &Value) -> Option<Self> {
-        if at(report, "/work_index/status", "") != "STRUCTURALLY_VALID" {
+    fn from_metrics(metrics: &crate::metrics::Metrics) -> Option<Self> {
+        if !matches!(metrics.delivery.state.as_str(), "KNOWN" | "NOT_APPLICABLE") {
             return None;
         }
-        let contracts = report
-            .pointer("/work_index/contracts")
-            .and_then(Value::as_array)?;
-        if report
-            .pointer("/work_index/contract_count")
-            .and_then(Value::as_u64)
-            != Some(contracts.len() as u64)
-        {
-            return None;
-        }
-        let mut result = Self {
-            counts: [0; 5],
-            total: 0,
-            streams: BTreeMap::new(),
-        };
-        for contract in contracts {
-            let group = match contract.get("status").and_then(Value::as_str)? {
-                "verified" => 0,
-                "in_progress" | "implemented" | "verifying" => 1,
-                "blocked" => 2,
-                "ready" | "candidate" | "deferred" => 3,
-                "cancelled" => 4,
-                _ => return None,
-            };
-            let stream = contract
-                .get("workstream")
-                .and_then(Value::as_str)
-                .filter(|name| !name.trim().is_empty())
-                .unwrap_or("Unassigned");
-            result.counts[group] += 1;
-            result.total += 1;
-            result.streams.entry(stream.to_owned()).or_insert([0; 5])[group] += 1;
-        }
-        Some(result)
-    }
-
-    fn applicable(&self) -> usize {
-        self.total - self.counts[4]
-    }
-
-    fn percent(&self) -> Option<usize> {
-        let denominator = self.applicable();
-        (self.counts[0] * 100 + denominator / 2).checked_div(denominator)
+        let counts = &metrics.delivery.statuses;
+        let values = [counts.verified, counts.underway, counts.blocked, counts.planned, counts.cancelled];
+        let streams = metrics.delivery.workstreams.iter().map(|s| {
+            let c = &s.statuses;
+            (s.name.clone(), [c.verified, c.underway, c.blocked, c.planned, c.cancelled])
+        }).collect();
+        Some(Self {
+            counts: values, total: counts.total(), streams,
+            applicable: metrics.delivery.applicable,
+            percent: metrics.delivery.percent,
+        })
     }
 }
 
-fn show_live_metrics(report: &Value, progress: Option<&DeclaredProgress>) -> String {
+fn actual_metrics(report: &Value) -> crate::metrics::Metrics {
+    // CLI supplies the serialized metrics; legacy render-only test fixtures
+    // may omit them, in which case the *same* pure metric rule runs locally.
+    report.get("metrics")
+        .and_then(|data| serde_json::from_value(data.clone()).ok())
+        .unwrap_or_else(|| crate::metrics::analyze(&report["work_index"]))
+}
+
+fn show_live_metrics(m: &crate::metrics::Metrics, progress: Option<&DeclaredProgress>) -> String {
     let mut results = Vec::new();
     match progress {
         Some(work) => {
-            let value = work
-                .percent()
-                .map(|amount| format!("{amount}%"))
+            let value = work.percent.map(|amount| format!("{amount}%"))
                 .unwrap_or_else(|| "UNKNOWN".into());
             results.push(metric(
                 "Declared completion",
                 &value,
                 &format!(
                     "{}/{} declared verified / non-cancelled contracts; {} cancelled excluded. Declared records; statuses are not independently verified",
-                    work.counts[0],
-                    work.applicable(),
-                    work.counts[4]
+                    work.counts[0], work.applicable, work.counts[4]
                 ),
             ));
             results.push(metric(
-                "Active contracts",
-                &work.counts[1].to_string(),
-                "Recorded in_progress, implemented or verifying",
+                "Active contracts", &work.counts[1].to_string(),
+                "Recorded in_progress, implemented or verifying"
             ));
             results.push(metric(
-                "Recorded blockers",
-                &work.counts[2].to_string(),
-                "Explicit blocked status only; other findings listed separately",
+                "Recorded blockers", &work.counts[2].to_string(),
+                "Explicit blocked status only; other findings listed separately"
             ));
         }
         None => {
-            results.push(metric(
-                "Declared completion",
-                "UNKNOWN",
-                "Invalid, missing or unsupported work ledger. Declared records; statuses are not independently verified",
-            ));
-            results.push(metric(
-                "Active contracts",
-                "UNKNOWN",
-                "No trustworthy contract-state breakdown",
-            ));
-            results.push(metric(
-                "Recorded blockers",
-                "UNKNOWN",
-                "No trustworthy contract-state breakdown",
-            ));
+            results.push(metric("Declared completion", "UNKNOWN",
+                "Invalid, missing or unsupported work ledger. Declared records; statuses are not independently verified"));
+            results.push(metric("Active contracts", "UNKNOWN", "No trustworthy contract-state breakdown"));
+            results.push(metric("Recorded blockers", "UNKNOWN", "No trustworthy contract-state breakdown"));
         }
     }
-
-    let references = report
-        .pointer("/work_index/contract_files")
-        .and_then(Value::as_array);
-    let source_metric = progress.and_then(|_| {
-        if report
-            .pointer("/work_index/reference_inspection_limited")
-            .and_then(Value::as_bool)
-            == Some(true)
-        {
-            return None;
-        }
-        let expected = report
-            .pointer("/work_index/contracts")
-            .and_then(Value::as_array)?
-            .iter()
-            .filter(|item| item.get("contract_file").and_then(Value::as_str).is_some())
-            .count();
-        let refs = references?;
-        if refs.len() != expected || expected == 0 {
-            return None;
-        }
-        let present = refs
-            .iter()
-            .filter(|item| item.get("status").and_then(Value::as_str) == Some("PRESENT"))
-            .count();
-        Some((present, expected))
-    });
-    match source_metric {
-        Some((present, total)) => results.push(metric(
-            "Reference presence",
-            &format!("{}%", (present * 100 + total / 2) / total),
-            &format!("{present}/{total} declared contract-file references present; not evidence verification"),
-        )),
-        None => results.push(metric(
-            "Reference presence",
-            "NOT_ASSESSED",
-            "No complete set of readable contract-file references",
-        )),
+    let references = &m.references;
+    if let Some(pct) = references.percent {
+        results.push(metric(
+            "Reference presence", &format!("{pct}%"),
+            &format!("{}/{} contract-file paths present; {} missing · {} other states. This is not evidence verification",
+                references.present, references.expected,
+                references.missing, references.denied_or_unsupported),
+        ));
+    } else {
+        results.push(metric("Reference presence", &references.state,
+            &format!("{}/{} observed paths; {} examined; coverage is not independently verified",
+                references.present, references.expected, references.inspected)));
     }
     results.join("")
+}
+
+fn show_dependency_inspection(m: &crate::metrics::Metrics) -> String {
+    if m.dependencies.state != "KNOWN" {
+        return "<div class=\"empty\">Dependency coverage UNKNOWN or PARTIAL: check the work index findings.</div>".into();
+    }
+    let mut html = format!(
+        "<div class=\"dependency-summary\"><strong>{}</strong> explicitly declared dependency links · <strong>{}</strong> target records not marked verified</div>",
+        m.dependencies.declared_edges, m.dependencies.pending_by_recorded_status
+    );
+    if m.dependencies.details.is_empty() {
+        html.push_str("<p class=\"section-help\">No pending-by-recorded-status dependencies are declared. This does not verify completion or prove absence of blockers.</p>");
+    }
+    for item in m.dependencies.details.iter().take(12) {
+        html.push_str(&format!(
+            "<div class=\"dependency-row\"><span>{}</span><span aria-hidden=\"true\">→</span><span>{}</span><small>recorded: {}</small></div>",
+            escape_html(&item.contract_id),
+            escape_html(&item.depends_on),
+            escape_html(&item.target_recorded_status)
+        ));
+    }
+    let not_displayed = m.dependencies.details.len().saturating_sub(12) + m.dependencies.omitted_details;
+    if not_displayed > 0 {
+        html.push_str(&format!("<p class=\"section-help\">{not_displayed} additional recorded dependency relationships not shown in this summary.</p>"));
+    }
+    html
 }
 
 fn show_state_chart(progress: Option<&DeclaredProgress>) -> String {
@@ -566,8 +525,9 @@ pub fn render(report: &Value) -> String {
     let work = at(report, "/work_index/status", "UNKNOWN");
     let scope = at(report, "/scan_scope/status", "PARTIAL");
     let semantics = at(report, "/compatibility/semantics", "UNKNOWN");
-    let progress = DeclaredProgress::from_report(report);
-    let summary = show_live_metrics(report, progress.as_ref());
+    let metrics = actual_metrics(report);
+    let progress = DeclaredProgress::from_metrics(&metrics);
+    let summary = show_live_metrics(&metrics, progress.as_ref());
     let (findings, finding_count) = append_findings(report);
     TEMPLATE
         .replace("/*__STYLES__*/", STYLE)
@@ -575,6 +535,7 @@ pub fn render(report: &Value) -> String {
         .replace("<!--__PROJECT_PATH__-->", &escape_html(project))
         .replace("<!--__METRICS__-->", &summary)
         .replace("<!--__STATES__-->", &show_state_chart(progress.as_ref()))
+        .replace("<!--__DEPENDENCIES__-->", &show_dependency_inspection(&metrics))
         .replace(
             "<!--__WORKSTREAMS__-->",
             &show_workstreams(progress.as_ref()),
@@ -684,10 +645,10 @@ mod tests {
             "scan_scope": {"status": "COMPLETE"},
             "limitations": []
         });
-        let progress = DeclaredProgress::from_report(&report).expect("valid ledger");
+        let progress = DeclaredProgress::from_metrics(&actual_metrics(&report)).expect("valid ledger");
         assert_eq!(progress.total, 5);
-        assert_eq!(progress.applicable(), 4);
-        assert_eq!(progress.percent(), Some(50));
+        assert_eq!(progress.applicable, 4);
+        assert_eq!(progress.percent, Some(50));
         assert_eq!(progress.counts, [2, 1, 1, 0, 1]);
         let html = render(&report);
         assert!(html.contains("2/4 declared verified"));
@@ -716,7 +677,7 @@ mod tests {
             "scan_scope":{"status":"COMPLETE"},
             "limitations":[]
         });
-        assert!(DeclaredProgress::from_report(&report).is_none());
+        assert!(DeclaredProgress::from_metrics(&actual_metrics(&report)).is_none());
         let html = render(&report);
         assert!(html.contains("UNKNOWN"));
         assert!(html.contains("a structurally valid work index is required"));
@@ -756,9 +717,9 @@ mod tests {
                 "contracts":[{"id":"WORK-CANCELLED","status":"cancelled","workstream":"archived"}]
             }
         });
-        let progress = DeclaredProgress::from_report(&report).unwrap();
-        assert_eq!(progress.applicable(), 0);
-        assert_eq!(progress.percent(), None);
+        let progress = DeclaredProgress::from_metrics(&actual_metrics(&report)).unwrap();
+        assert_eq!(progress.applicable, 0);
+        assert_eq!(progress.percent, None);
         let html = render(&report);
         assert!(html.contains("NOT_APPLICABLE"));
         assert!(html.contains("UNKNOWN"));
