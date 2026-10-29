@@ -25,7 +25,7 @@ fn scan(name: &str) -> Value {
 #[test]
 fn current_version_reads_structured_work_without_claiming_conformance() {
     let report = scan("current");
-    assert_eq!(report["schema_version"], "0.4.0");
+    assert_eq!(report["schema_version"], "0.4.1");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     assert_eq!(report["compatibility"]["protocol"]["value"], "2.7.1");
     assert_eq!(report["compatibility"]["format"], "READABLE");
@@ -35,6 +35,55 @@ fn current_version_reads_structured_work_without_claiming_conformance() {
         .as_array()
         .expect("conflicts")
         .is_empty());
+}
+
+#[test]
+fn cli_and_html_share_recorded_metric_provenance_without_claiming_verification() {
+    let report = scan("current");
+    assert_eq!(report["metrics"]["rule_version"], "declared-metrics-v1");
+    assert_eq!(report["metrics"]["delivery"]["state"], "KNOWN");
+    assert_eq!(report["metrics"]["delivery"]["completed"], 1);
+    assert_eq!(report["metrics"]["delivery"]["applicable"], 1);
+    assert_eq!(report["metrics"]["delivery"]["percent"], 100);
+    assert_eq!(report["metrics"]["references"]["state"], "NOT_APPLICABLE");
+    assert!(report["metrics"]["references"]["percent"].is_null());
+    assert_eq!(report["metrics"]["dependencies"]["declared_edges"], 0);
+    assert_eq!(report["metrics"]["independently_verified"], "NOT_ASSESSED");
+    assert_eq!(report["metrics"]["historical_trend"], "NOT_ASSESSED");
+
+    let run = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("report")
+        .arg(fixture("current"))
+        .arg("--output")
+        .arg(std::env::temp_dir().join(format!("observatory-metrics-{}.html", std::process::id())))
+        .output()
+        .expect("offline report");
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let output =
+        std::env::temp_dir().join(format!("observatory-metrics-{}.html", std::process::id()));
+    let page = fs::read_to_string(&output).expect("offline report bytes");
+    assert!(page.contains("Declared completion"));
+    assert!(page.contains("100%"));
+    assert!(page.contains("Dependency visibility"));
+    assert!(page.contains("No compatible saved snapshots"));
+    assert!(page.contains("NOT_ASSESSED"));
+    assert!(page.contains("connect-src 'none'"));
+    fs::remove_file(output).unwrap();
+}
+
+#[test]
+fn unknown_work_index_does_not_create_false_metric_percentages() {
+    for name in ["partial", "malformed", "future"] {
+        let report = scan(name);
+        assert_eq!(report["metrics"]["delivery"]["state"], "UNKNOWN");
+        assert!(report["metrics"]["delivery"]["percent"].is_null());
+        assert!(report["metrics"]["references"]["percent"].is_null());
+        assert_eq!(report["metrics"]["dependencies"]["state"], "UNKNOWN");
+    }
 }
 
 #[test]
