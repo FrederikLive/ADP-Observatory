@@ -54,8 +54,10 @@ fn run() -> Result<(), String> {
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
-    let metrics = metrics::analyze(&serde_json::to_value(&work_index)
-        .map_err(|e| format!("Could not derive project metrics: {e}"))?);
+    let metrics = metrics::analyze(
+        &serde_json::to_value(&work_index)
+            .map_err(|e| format!("Could not derive project metrics: {e}"))?,
+    );
     let report = Report {
         schema_version: "0.4.1",
         analyzer_version: env!("CARGO_PKG_VERSION"),
@@ -128,12 +130,29 @@ fn print_text(report: &Report) {
         println!("  - {marker}");
     }
     println!("Work index: {}", report.work_index.status);
-    println!("Declared completion: {} ({}/{}, source: {})",
-        report.metrics.delivery.percent.map(|p| format!("{p}%")).unwrap_or_else(|| report.metrics.delivery.state.clone()),
-        report.metrics.delivery.completed, report.metrics.delivery.applicable, report.metrics.delivery.source);
-    println!("Contract reference presence: {} ({}/{})",
-        report.metrics.references.percent.map(|p| format!("{p}%")).unwrap_or_else(|| report.metrics.references.state.clone()),
-        report.metrics.references.present, report.metrics.references.expected);
+    println!(
+        "Declared completion: {} ({}/{}, source: {})",
+        report
+            .metrics
+            .delivery
+            .percent
+            .map(|p| format!("{p}%"))
+            .unwrap_or_else(|| report.metrics.delivery.state.clone()),
+        report.metrics.delivery.completed,
+        report.metrics.delivery.applicable,
+        report.metrics.delivery.source
+    );
+    println!(
+        "Contract reference presence: {} ({}/{})",
+        report
+            .metrics
+            .references
+            .percent
+            .map(|p| format!("{p}%"))
+            .unwrap_or_else(|| report.metrics.references.state.clone()),
+        report.metrics.references.present,
+        report.metrics.references.expected
+    );
     println!("Semantic scope: {}", report.compatibility.semantic_scope);
     for reference in &report.work_index.contract_files {
         println!(
