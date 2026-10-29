@@ -55,17 +55,16 @@ fn cli_and_html_share_recorded_metric_provenance_without_claiming_verification()
         .arg("report")
         .arg(fixture("current"))
         .arg("--output")
-        .arg(std::env::temp_dir().join(format!(
-            "observatory-metrics-{}.html",
-            std::process::id()
-        )))
+        .arg(std::env::temp_dir().join(format!("observatory-metrics-{}.html", std::process::id())))
         .output()
         .expect("offline report");
-    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
-    let output = std::env::temp_dir().join(format!(
-        "observatory-metrics-{}.html",
-        std::process::id()
-    ));
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let output =
+        std::env::temp_dir().join(format!("observatory-metrics-{}.html", std::process::id()));
     let page = fs::read_to_string(&output).expect("offline report bytes");
     assert!(page.contains("Declared completion"));
     assert!(page.contains("100%"));
