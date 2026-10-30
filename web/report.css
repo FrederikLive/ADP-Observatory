@@ -117,3 +117,11 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 .contract-detail .section-help{margin:14px 0 12px}
 @media(max-width:500px){.contract-summary{align-items:flex-start;flex-wrap:wrap}.contract-summary .tag{margin-left:23px}}
 @media(prefers-reduced-motion:reduce){.contract-summary::before{transition:none}}
+
+/* Explain unusable source data near the headline instead of silently hiding charts. */
+.v2-shell .data-warning{display:flex;justify-content:space-between;gap:18px;align-items:center;margin:0 0 18px;padding:16px 19px;border-radius:12px;border:1px solid #ebd0a8;background:#fff8ec;color:#6b4a23}
+.v2-shell .data-warning strong{font-size:13px;color:#734b1d}
+.v2-shell .data-warning p{font-size:12px;line-height:1.6;margin:6px 0 0;overflow-wrap:anywhere}
+.v2-shell .data-warning a{white-space:nowrap;font-size:12px;font-weight:750;color:#78501e}
+.v2-shell .provisional-note{font-size:12px;font-weight:680;line-height:1.65;color:#80612d;background:#fff8eb;border:1px solid #f0dfb6;padding:10px 12px;border-radius:8px;margin:12px 0}
+@media(max-width:700px){.v2-shell .data-warning{flex-direction:column;align-items:flex-start}}

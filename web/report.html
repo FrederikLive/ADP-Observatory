@@ -39,11 +39,12 @@
         <div class="project-source"><span class="label">Analyzed project</span><code><!--__PROJECT_PATH__--></code></div>
       </section>
       <section class="notice v2-snapshot" role="note"><span class="notice-icon">i</span><div><strong>Snapshot, not live data · Conformance is not assessed.</strong><p>WORK.json is the project's own record of work; a status named “verified” does not mean Observatory verified the result. Missing optional files and unsupported inputs are shown explicitly.</p></div></section>
+      <!--__DATA_DIAGNOSTICS__-->
       <section class="metrics" aria-label="Recorded project scorecard"><!--__METRICS__--></section>
       <section class="v2-top-panels" id="progress" aria-label="Delivery visualizations">
         <article class="panel v2-chart-panel">
           <div class="panel-head"><div><p class="eyebrow">DECLARED DISTRIBUTION</p><h2>Work state breakdown</h2></div><span class="tag neutral"><!--__WORK_STATUS__--></span></div>
-          <p class="section-help">Mutually exclusive statuses from the recorded contract ledger; cancelled work is excluded from the completion denominator.</p>
+          <p class="section-help">Mutually exclusive recorded contract statuses. The dashboard labels charts PROVISIONAL if only dependency-record errors invalidate the ledger; it never treats statuses as independently verified.</p>
           <!--__STATES__-->
           <details class="v2-methods"><summary>How is completion calculated?</summary><p><strong>Declared completion = recorded “verified” contracts / non-cancelled declared contracts.</strong> In-progress, blocked, ready, candidate and deferred work remain in the denominator. This is not independent verification or an estimate of remaining engineering effort. An invalid or missing ledger yields UNKNOWN.</p></details>
         </article>

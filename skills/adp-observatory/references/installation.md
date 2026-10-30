@@ -26,7 +26,7 @@ cannot be satisfied by a previously approved local installation**.
 
 ## Current distribution status
 
-As of 2026-10-21, Observatory 0.4.0 is a development executable; an official
+As of 2026-10-30, Observatory 0.5.x is a development executable; an official
 protected, tagged, OS-code-signed public release is **not published**. CI
 produces temporary provenance-attested artifacts, not a stable install channel.
 Do not advertise a `latest` download command, assume temporary CI artifacts

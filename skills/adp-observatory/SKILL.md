@@ -73,7 +73,8 @@ The CLI distinguishes `Browser launch: REQUESTED`, `FAILED`, and
    approval for first-time installation when not already covered by a trusted
    authorization policy. If verification/install capability is absent, explain
    the limitation and offer the supported manual route; don't claim success.
-5. **Report what actually happened.** The helper emits one JSON result,
+5. **Separate launch success from usable dashboard metrics.** A valid report path, 59 discovered files, source-read bytes or `BROWSER_OPEN_REQUESTED` do **not** establish that optional `.project/WORK.json` was valid or that charts have data. After viewing, check whether the report presents `INVALID`, `UNKNOWN`, `PARTIAL` or `NOT_ASSESSED` and state the limitation plainly; never call a discovery count project completion. When the user explicitly asks *why* graphs are missing, run **at most one** additional read-only diagnostic `adp-observatory scan /absolute/project --json` using the **same selected executable**. Inspect `work_index.status`, group `work_index.findings` by `code` and summarize the first relevant errors, and review `metrics.delivery.state` and `metrics.delivery.percent`. Redact sensitive paths/content from messages where practical. Do not edit, regenerate, normalize or deduplicate project records merely to produce progress; ask for a separate authorized project-maintenance workflow if necessary. Label any `PARTIAL` percentage provisional, not verified completion.
+6. **Report what actually happened.** The helper emits one JSON result,
    including `report_path`, `executable`, `browser_launch_status`, and
    `alternate_installations` if another executable is present. Use only
    the executable actually selected. Do not silently delete, overwrite,

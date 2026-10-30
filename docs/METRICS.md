@@ -78,3 +78,13 @@ The Rust analyzer computes `metrics` deterministically from the already-parsed o
 When optional WORK.json is invalid, missing or unsupported, the delivery state is `UNKNOWN`; numeric zeroes in the serialized structure are placeholders for unavailable counts and **must never be presented** as known observations. `NOT_APPLICABLE` is used when a valid ledger has only cancelled work or no applicable references.
 
 Threat-model caveat: `PRESENT` describes prior path metadata observation, not safely opened source bytes. The separate bounded reader and legacy-reader hardening issues remain independent security work.
+
+## Recoverable invalid dependency ledgers — provisional recorded distribution (rule v2)
+
+When `WORK.json` remains `INVALID` **solely** because the scanner found duplicate `depends_on` entries or references to missing contract IDs, Observatory may still show the underlying, recognizable **recorded status distribution**. This is explicitly marked `PARTIAL`, and the UI labels its percentage **Recorded verified share — provisional**, never validated completion or independently verified progress. All contract IDs must still be unique, well-formed and linked to recognized status names, with a matching record count.
+
+- The source work index stays **INVALID**, and its original validation findings are retained and summarized above the dashboard. Observable statuses cannot repair missing contract IDs or accepted dependency evidence.
+- `delivery.state=PARTIAL` and `delivery.percent` expresses a provisional status-label ratio, **not** completed effort or project acceptance.
+- Reference metadata is `PARTIAL` with no coverage percentage while its parent work index is invalid. Dependencies are also `PARTIAL`, with repeated edges deduplicated in metrics; raw duplicates remain in WORK.json findings.
+- Any other structural error, missing status, malformed or duplicate ID, missing contracts, unknown schema, or inconsistent counts continues to produce `UNKNOWN` without a computed completion percentage.
+- This rule does not edit the scanned project, supply missing records, or downgrade canonical ADP validation. All examples in tests are synthetic.
