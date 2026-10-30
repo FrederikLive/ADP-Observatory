@@ -119,7 +119,12 @@ fn run() -> Result<(), String> {
             println!("Delivery metric state: {}", report.metrics.delivery.state);
             println!(
                 "Work index errors: {}",
-                report.work_index.findings.iter().filter(|f| f.severity == "error").count()
+                report
+                    .work_index
+                    .findings
+                    .iter()
+                    .filter(|f| f.severity == "error")
+                    .count()
             );
             if auto_open {
                 match output::open_browser(&destination) {
