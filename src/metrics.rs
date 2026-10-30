@@ -2,9 +2,9 @@
 //! optional WORK index. Never reads the target project or executes commands.
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
-pub const RULE_VERSION: &str = "declared-metrics-v1";
+pub const RULE_VERSION: &str = "declared-metrics-v2";
 pub const SOURCE: &str = ".project/WORK.json#/contracts";
 pub const MAX_DEPENDENCY_DETAILS: usize = 200;
 
@@ -145,7 +145,28 @@ pub fn analyze(work: &Value) -> Metrics {
         independently_verified: "NOT_ASSESSED".into(),
         historical_trend: "NOT_ASSESSED".into(),
     };
-    if work.get("status").and_then(Value::as_str) != Some("STRUCTURALLY_VALID") {
+    let work_status = work.get("status").and_then(Value::as_str);
+    // A malformed dependency graph must not hide *observed* contract states.
+    // Only duplicate/missing dependency errors permit an explicitly provisional
+    // distribution; all other invalid/missing/unknown ledger types fail closed.
+    let recoverable_dependencies = work_status == Some("INVALID")
+        && work
+            .get("findings")
+            .and_then(Value::as_array)
+            .is_some_and(|findings| {
+                let errors: Vec<_> = findings
+                    .iter()
+                    .filter(|f| f.get("severity").and_then(Value::as_str) == Some("error"))
+                    .collect();
+                !errors.is_empty()
+                    && errors.iter().all(|f| {
+                        matches!(
+                            f.get("code").and_then(Value::as_str),
+                            Some("work.duplicate_dependency" | "work.missing_dependency")
+                        )
+                    })
+            });
+    if work_status != Some("STRUCTURALLY_VALID") && !recoverable_dependencies {
         return result;
     }
     let Some(contracts) = work.get("contracts").and_then(Value::as_array) else {
@@ -167,7 +188,13 @@ pub fn analyze(work: &Value) -> Metrics {
         let Some(id) = contract.get("id").and_then(Value::as_str) else {
             return result;
         };
-        if states.insert(id, status).is_some() {
+        if !id.starts_with("WORK-")
+            || id.len() <= 5
+            || !id[5..]
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+            || states.insert(id, status).is_some()
+        {
             return result;
         }
         let stream = contract
@@ -183,7 +210,9 @@ pub fn analyze(work: &Value) -> Metrics {
     if counts.total() != contracts.len() {
         return result;
     }
-    result.delivery.state = if counts.applicable() == 0 {
+    result.delivery.state = if recoverable_dependencies {
+        "PARTIAL"
+    } else if counts.applicable() == 0 {
         "NOT_APPLICABLE"
     } else {
         "KNOWN"
@@ -225,6 +254,7 @@ pub fn analyze(work: &Value) -> Metrics {
             .get("reference_inspection_limited")
             .and_then(Value::as_bool)
             != Some(true)
+            && !recoverable_dependencies
             && items.len() == expected
         {
             result.references.state = "KNOWN".into();
@@ -238,7 +268,13 @@ pub fn analyze(work: &Value) -> Metrics {
         }
     }
 
-    result.dependencies.state = "KNOWN".into();
+    result.dependencies.state = if recoverable_dependencies {
+        "PARTIAL"
+    } else {
+        "KNOWN"
+    }
+    .into();
+    let mut distinct_links = HashSet::new();
     for contract in contracts {
         let id = contract.get("id").and_then(Value::as_str).unwrap_or("");
         if let Some(edges) = contract.get("depends_on").and_then(Value::as_array) {
@@ -247,6 +283,11 @@ pub fn analyze(work: &Value) -> Metrics {
                     result.dependencies.state = "PARTIAL".into();
                     continue;
                 };
+                // Invalid duplicate edges are reported by the parser; they
+                // must not inflate the dependency graph or blocker counts.
+                if !distinct_links.insert((id, target)) {
+                    continue;
+                }
                 result.dependencies.declared_edges += 1;
                 if let Some(target_state) = states.get(target) {
                     if *target_state != "verified" {
@@ -322,6 +363,51 @@ mod tests {
         assert_eq!(m.delivery.percent, None);
         assert_eq!(m.references.state, "NOT_APPLICABLE");
     }
+    #[test]
+    fn dependency_only_invalid_ledger_yields_explicit_provisional_statuses() {
+        let index = json!({"status":"INVALID","contract_count":3,
+            "contracts":[
+                {"id":"WORK-A","status":"verified","workstream":"core","contract_file":"a.md","depends_on":[]},
+                {"id":"WORK-B","status":"in_progress","workstream":"core","contract_file":"b.md",
+                 "depends_on":["WORK-A","WORK-A","WORK-MISSING"]},
+                {"id":"WORK-C","status":"candidate","workstream":"ux","depends_on":["WORK-B"]}
+            ],
+            "findings":[
+                {"code":"work.duplicate_dependency","severity":"error","message":"duplicate"},
+                {"code":"work.missing_dependency","severity":"error","message":"missing"}
+            ],
+            "contract_files":[{"status":"PRESENT"},{"status":"MISSING"}],
+            "reference_inspection_limited":false
+        });
+        let metrics = analyze(&index);
+        assert_eq!(metrics.delivery.state, "PARTIAL");
+        assert_eq!(metrics.delivery.percent, Some(33));
+        assert_eq!(metrics.delivery.statuses.total(), 3);
+        assert_eq!(metrics.references.state, "PARTIAL");
+        assert_eq!(metrics.references.percent, None);
+        assert_eq!(metrics.dependencies.state, "PARTIAL");
+        assert_eq!(metrics.dependencies.declared_edges, 3);
+        assert_eq!(metrics.dependencies.pending_by_recorded_status, 1);
+        assert_eq!(metrics.independently_verified, "NOT_ASSESSED");
+    }
+
+    #[test]
+    fn unrelated_invalid_work_is_never_provisionally_scored() {
+        for code in [
+            "work.duplicate_id",
+            "work.contract_status",
+            "work.execution_field",
+        ] {
+            let index = json!({"status":"INVALID","contract_count":1,
+                "contracts":[{"id":"WORK-A","status":"verified","depends_on":[]}],
+                "findings":[{"code":code,"severity":"error","message":"invalid"}]
+            });
+            let metrics = analyze(&index);
+            assert_eq!(metrics.delivery.state, "UNKNOWN");
+            assert_eq!(metrics.delivery.percent, None);
+        }
+    }
+
     #[test]
     fn reference_budget_cannot_be_reported_as_full_coverage() {
         let index = json!({"status":"STRUCTURALLY_VALID","contract_count":2,

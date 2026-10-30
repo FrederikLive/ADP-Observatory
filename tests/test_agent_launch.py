@@ -93,6 +93,25 @@ class AgentLaunchTests(unittest.TestCase):
         self.assertEqual(answer["status"], "REPORT_SAVED")
         self.assertEqual(answer["browser_launch_status"], "UNKNOWN")
 
+    def test_launch_reports_invalid_ledger_without_extra_scans(self):
+        output = subprocess.CompletedProcess(
+            [], 0,
+            "Local ADP report: " + str(self.report) +
+            "\nWork index status: INVALID\nDelivery metric state: PARTIAL\n"
+            "Work index errors: 92\nBrowser launch: REQUESTED (visibility not confirmed)\n",
+            ""
+        )
+        with mock.patch.object(launch, "find_executable", return_value=(self.binary, "")):
+            with mock.patch.object(launch, "browser_capable", return_value=True):
+                with mock.patch.object(subprocess, "run", return_value=output) as runner:
+                    answer, code = launch.launch(self.project, None, False, 10)
+        self.assertEqual(code, 0)
+        self.assertEqual(answer["work_index_status"], "INVALID")
+        self.assertEqual(answer["delivery_metric_state"], "PARTIAL")
+        self.assertEqual(answer["work_index_error_count"], 92)
+        self.assertEqual(answer["status"], "BROWSER_OPEN_REQUESTED")
+        runner.assert_called_once()
+
     def test_only_generates_one_report_per_launch_request(self):
         output = subprocess.CompletedProcess(
             [], 0, "Local ADP report: " + str(self.report) + "\nBrowser launch: NOT_REQUESTED\n", ""

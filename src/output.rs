@@ -231,7 +231,12 @@ pub fn open_browser(path: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::{
+        sync::atomic::{AtomicU64, Ordering},
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    static NEXT_OUTPUT_TEST: AtomicU64 = AtomicU64::new(0);
 
     fn roots() -> (PathBuf, PathBuf) {
         let nonce = SystemTime::now()
@@ -239,8 +244,9 @@ mod tests {
             .expect("clock")
             .as_nanos();
         let base = env::temp_dir().join(format!(
-            "adp-observatory-output-{}-{nonce}",
-            std::process::id()
+            "adp-observatory-output-{}-{nonce}-{}",
+            std::process::id(),
+            NEXT_OUTPUT_TEST.fetch_add(1, Ordering::Relaxed)
         ));
         let project = base.join("project");
         let destination = base.join("report");

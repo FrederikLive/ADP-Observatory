@@ -85,7 +85,7 @@ fn row(title: &str, detail: &str, status: &str, filterable: bool) -> String {
 
 /// Dashboard-only, explicitly *declared* progress. This does not assess
 /// evidence, source quality, independently verified work, or overall project
-/// readiness. Any invalid ledger suppresses all derived percentages.
+/// readiness. Dependency-only invalid ledgers can yield clearly provisional\n/// recorded state ratios, never a validated completion verdict.
 struct DeclaredProgress {
     counts: [usize; 5],
     total: usize,
@@ -95,7 +95,10 @@ struct DeclaredProgress {
 }
 impl DeclaredProgress {
     fn from_metrics(metrics: &crate::metrics::Metrics) -> Option<Self> {
-        if !matches!(metrics.delivery.state.as_str(), "KNOWN" | "NOT_APPLICABLE") {
+        if !matches!(
+            metrics.delivery.state.as_str(),
+            "KNOWN" | "NOT_APPLICABLE" | "PARTIAL"
+        ) {
             return None;
         }
         let counts = &metrics.delivery.statuses;
@@ -141,16 +144,22 @@ fn show_live_metrics(m: &crate::metrics::Metrics, progress: Option<&DeclaredProg
     let mut results = Vec::new();
     match progress {
         Some(work) => {
+            let provisional = m.delivery.state == "PARTIAL";
             let value = work
                 .percent
                 .map(|amount| format!("{amount}%"))
                 .unwrap_or_else(|| "UNKNOWN".into());
             results.push(metric(
-                "Declared completion",
+                if provisional { "Recorded verified share · provisional" } else { "Declared completion" },
                 &value,
                 &format!(
-                    "{}/{} declared verified / non-cancelled contracts; {} cancelled excluded. Declared records; statuses are not independently verified",
-                    work.counts[0], work.applicable, work.counts[4]
+                    "{}/{} recorded verified / non-cancelled contracts; {} cancelled excluded. {}",
+                    work.counts[0], work.applicable, work.counts[4],
+                    if provisional {
+                        "WORK.json INVALID: dependency errors; not validated completion or independent verification"
+                    } else {
+                        "Project-declared statuses; not independently verified"
+                    }
                 ),
             ));
             results.push(metric(
@@ -201,13 +210,16 @@ fn show_live_metrics(m: &crate::metrics::Metrics, progress: Option<&DeclaredProg
 }
 
 fn show_dependency_inspection(m: &crate::metrics::Metrics) -> String {
-    if m.dependencies.state != "KNOWN" {
-        return "<div class=\"empty\">Dependency coverage UNKNOWN or PARTIAL: check the work index findings.</div>".into();
+    if m.dependencies.state == "UNKNOWN" {
+        return "<div class=\"empty\">Dependency coverage UNKNOWN: check the work index findings.</div>".into();
     }
     let mut html = format!(
         "<div class=\"dependency-summary\"><strong>{}</strong> explicitly declared dependency links · <strong>{}</strong> target records not marked verified</div>",
         m.dependencies.declared_edges, m.dependencies.pending_by_recorded_status
     );
+    if m.dependencies.state == "PARTIAL" {
+        html.push_str("<p class=\"provisional-note\">PARTIAL — invalid dependency records. Unique edges counted; missing references or duplicate entries must be resolved in the source ledger.</p>");
+    }
     if m.dependencies.details.is_empty() {
         html.push_str("<p class=\"section-help\">No pending-by-recorded-status dependencies are declared. This does not verify completion or prove absence of blockers.</p>");
     }
@@ -227,7 +239,41 @@ fn show_dependency_inspection(m: &crate::metrics::Metrics) -> String {
     html
 }
 
-fn show_state_chart(progress: Option<&DeclaredProgress>) -> String {
+fn show_work_diagnostics(report: &Value) -> String {
+    if at(report, "/work_index/status", "") != "INVALID" {
+        return String::new();
+    }
+    let mut codes = BTreeMap::<String, usize>::new();
+    if let Some(findings) = report
+        .pointer("/work_index/findings")
+        .and_then(Value::as_array)
+    {
+        for finding in findings {
+            if at(finding, "/severity", "") == "error" {
+                *codes
+                    .entry(at(finding, "/code", "unknown_error").to_owned())
+                    .or_default() += 1;
+            }
+        }
+    }
+    let errors: usize = codes.values().sum();
+    let summaries: Vec<String> = codes
+        .iter()
+        .take(5)
+        .map(|(code, number)| format!("{} ({number})", escape_html(code)))
+        .collect();
+    let tail = if codes.len() > 5 {
+        format!(" and {} other error categories", codes.len() - 5)
+    } else {
+        String::new()
+    };
+    format!(
+        "<section class=\"data-warning\" role=\"note\" aria-label=\"Work index errors\"><div><strong>WORK.json INVALID · {errors} recorded errors</strong><p>{}{tail}. The project files were not modified. Open Findings for details; source-file discovery does not validate the ledger.</p></div><a href=\"#findings\">See findings</a></section>",
+        if summaries.is_empty() { "Unknown reason".to_owned() } else { summaries.join(", ") }
+    )
+}
+
+fn show_state_chart(progress: Option<&DeclaredProgress>, provisional: bool) -> String {
     let Some(work) = progress else {
         return "<div class=\"empty\">UNKNOWN — a structurally valid work index is required before drawing contract-state charts.</div>".into();
     };
@@ -261,12 +307,14 @@ fn show_state_chart(progress: Option<&DeclaredProgress>) -> String {
         ));
     }
     format!(
-        "<div class=\"state-chart\" role=\"img\" aria-label=\"Declared work-state distribution, {} contracts\"><div class=\"state-number\">{} <small>recorded contracts</small></div><div class=\"state-bar\">{bars}</div><div class=\"state-legend\">{legend}</div></div>",
+        "{}<div class=\"state-chart\" role=\"img\" aria-label=\"{} work-state distribution, {} contracts\"><div class=\"state-number\">{} <small>recorded contracts</small></div><div class=\"state-bar\">{bars}</div><div class=\"state-legend\">{legend}</div></div>",
+        if provisional { "<p class=\"provisional-note\">PROVISIONAL — recorded statuses shown despite invalid dependency records. Not validated project completion.</p>" } else { "" },
+        if provisional { "Provisional recorded" } else { "Declared" },
         work.total, work.total
     )
 }
 
-fn show_workstreams(progress: Option<&DeclaredProgress>) -> String {
+fn show_workstreams(progress: Option<&DeclaredProgress>, provisional: bool) -> String {
     let Some(work) = progress else {
         return "<div class=\"empty\">Workstream progress is UNKNOWN without a valid contract index.</div>".into();
     };
@@ -291,7 +339,11 @@ fn show_workstreams(progress: Option<&DeclaredProgress>) -> String {
             counts[4]
         ));
     }
-    rows
+    if provisional {
+        format!("<p class=\"provisional-note\">PROVISIONAL — workstream ratios count recorded statuses; the dependency ledger is invalid.</p>{rows}")
+    } else {
+        rows
+    }
 }
 
 fn show_contracts(report: &Value) -> String {
@@ -621,19 +673,27 @@ pub fn render(report: &Value) -> String {
     let progress = DeclaredProgress::from_metrics(&metrics);
     let summary = show_live_metrics(&metrics, progress.as_ref());
     let (findings, finding_count) = append_findings(report);
+    let provisional = metrics.delivery.state == "PARTIAL";
     TEMPLATE
         .replace("/*__STYLES__*/", STYLE)
         .replace("/*__SCRIPT__*/", SCRIPT)
         .replace("<!--__PROJECT_PATH__-->", &escape_html(project))
+        .replace(
+            "<!--__DATA_DIAGNOSTICS__-->",
+            &show_work_diagnostics(report),
+        )
         .replace("<!--__METRICS__-->", &summary)
-        .replace("<!--__STATES__-->", &show_state_chart(progress.as_ref()))
+        .replace(
+            "<!--__STATES__-->",
+            &show_state_chart(progress.as_ref(), provisional),
+        )
         .replace(
             "<!--__DEPENDENCIES__-->",
             &show_dependency_inspection(&metrics),
         )
         .replace(
             "<!--__WORKSTREAMS__-->",
-            &show_workstreams(progress.as_ref()),
+            &show_workstreams(progress.as_ref(), provisional),
         )
         .replace("<!--__ADP_VERSION__-->", &escape_html(version))
         .replace("<!--__SCAN_STATUS__-->", &escape_html(scope))
@@ -747,7 +807,7 @@ mod tests {
         assert_eq!(progress.percent, Some(50));
         assert_eq!(progress.counts, [2, 1, 1, 0, 1]);
         let html = render(&report);
-        assert!(html.contains("2/4 declared verified"));
+        assert!(html.contains("2/4 recorded verified"));
         assert!(html.contains("50%"));
         assert!(html.contains("Cancelled"));
         assert!(html.contains("core"));
@@ -779,6 +839,39 @@ mod tests {
         assert!(html.contains("a structurally valid work index is required"));
         assert!(html.contains("<span class=\"metric-value\">UNKNOWN</span>"));
         assert!(!html.contains("<span class=\"metric-value\">50%</span>"));
+    }
+
+    #[test]
+    fn dependency_invalid_report_shows_provisional_graphs_and_diagnostic_counts() {
+        let report = json!({
+            "work_index": {
+                "status":"INVALID", "contract_count":2,
+                "contracts":[
+                    {"id":"WORK-A","title":"Contract A","status":"verified","workstream":"core","depends_on":[]},
+                    {"id":"WORK-B","title":"Contract B","status":"in_progress","workstream":"ui","depends_on":["WORK-A","WORK-A","WORK-MISSING"]}
+                ],
+                "contract_files":[],
+                "findings":[
+                    {"severity":"error","code":"work.duplicate_dependency","message":"duplicate"},
+                    {"severity":"error","code":"work.missing_dependency","message":"missing"}
+                ]
+            },
+            "compatibility":{"protocol":{"limitations":[]},"conformance":"NOT_ASSESSED"},
+            "context":{"records":[],"conflicts":[]},
+            "scan_scope":{"status":"COMPLETE"},
+            "limitations":[]
+        });
+        let html = render(&report);
+        assert!(html.contains("Recorded verified share · provisional"));
+        assert!(html.contains("PROVISIONAL"));
+        assert!(html.contains("50%"));
+        assert!(html.contains("2 recorded errors"));
+        assert!(html.contains("work.duplicate_dependency (1)"));
+        assert!(html.contains("work.missing_dependency (1)"));
+        assert!(html.contains("See findings"));
+        assert!(html.contains("core"));
+        assert!(!html.contains("<span class=\"metric-label\">Declared completion</span>"));
+        assert!(html.contains("NOT_ASSESSED"));
     }
 
     #[test]

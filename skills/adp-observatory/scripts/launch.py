@@ -130,6 +130,27 @@ def browser_capable() -> bool:
     return True
 
 
+def extract_scan_states(text: str) -> dict:
+    """Read the *same run's* explicit status lines; never infer from file counts."""
+    result: dict[str, object] = {}
+    mapping = {
+        "Work index status: ": "work_index_status",
+        "Delivery metric state: ": "delivery_metric_state",
+        "Work index errors: ": "work_index_error_count",
+    }
+    for line in text.splitlines():
+        for prefix, key in mapping.items():
+            if line.startswith(prefix):
+                val = line[len(prefix):].strip()
+                if key == "work_index_error_count":
+                    if val.isdecimal():
+                        result[key] = int(val)
+                elif val in {"INVALID", "UNKNOWN", "STRUCTURALLY_VALID",
+                             "UNSUPPORTED_SCHEMA", "KNOWN", "PARTIAL", "NOT_APPLICABLE"}:
+                    result[key] = val
+    return result
+
+
 def extract_report_path(text: str) -> Optional[str]:
     for line in text.splitlines():
         prefix = "Local ADP report: "
@@ -202,6 +223,7 @@ def launch(project: Path, explicit: Optional[str], no_open: bool, timeout: int) 
         browser_open_attempted=can_open, browser_launch_status=marker,
         alternate_installations=alternatives,
         detail=detail,
+        **extract_scan_states(run.stdout),
     ), 0
 
 
