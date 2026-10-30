@@ -156,7 +156,12 @@ fn print_text(report: &Report) {
         report.source_inspection.status
     );
     println!(
-        "Declared completion: {} ({}/{}, source: {})",
+        "{}: {} ({}/{}, source: {})",
+        if report.metrics.delivery.state == "PARTIAL" {
+            "Recorded verified share (PROVISIONAL; WORK.json INVALID)"
+        } else {
+            "Declared completion"
+        },
         report
             .metrics
             .delivery

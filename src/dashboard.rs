@@ -210,13 +210,16 @@ fn show_live_metrics(m: &crate::metrics::Metrics, progress: Option<&DeclaredProg
 }
 
 fn show_dependency_inspection(m: &crate::metrics::Metrics) -> String {
-    if m.dependencies.state != "KNOWN" {
-        return "<div class=\"empty\">Dependency coverage UNKNOWN or PARTIAL: check the work index findings.</div>".into();
+    if m.dependencies.state == "UNKNOWN" {
+        return "<div class=\"empty\">Dependency coverage UNKNOWN: check the work index findings.</div>".into();
     }
     let mut html = format!(
         "<div class=\"dependency-summary\"><strong>{}</strong> explicitly declared dependency links · <strong>{}</strong> target records not marked verified</div>",
         m.dependencies.declared_edges, m.dependencies.pending_by_recorded_status
     );
+    if m.dependencies.state == "PARTIAL" {
+        html.push_str("<p class=\"provisional-note\">PARTIAL — invalid dependency records. Unique edges counted; missing references or duplicate entries must be resolved in the source ledger.</p>");
+    }
     if m.dependencies.details.is_empty() {
         html.push_str("<p class=\"section-help\">No pending-by-recorded-status dependencies are declared. This does not verify completion or prove absence of blockers.</p>");
     }
