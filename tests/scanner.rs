@@ -76,6 +76,60 @@ fn cli_and_html_share_recorded_metric_provenance_without_claiming_verification()
 }
 
 #[test]
+fn dependency_only_invalid_workspace_has_provisional_charts_without_mutations() {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let tick = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+    let root = std::env::temp_dir().join(format!(
+        "observatory-partial-metrics-{}-{tick}", std::process::id()
+    ));
+    fs::create_dir_all(root.join(".project")).unwrap();
+    let path = root.join(".project/WORK.json");
+    let original = serde_json::to_vec(&serde_json::json!({
+        "schema_version": 1,
+        "project": "Synthetic dependency-drift fixture",
+        "active_contract": "WORK-B",
+        "contracts": [
+            {"id":"WORK-A","title":"A","status":"verified","workstream":"core","depends_on":[]},
+            {"id":"WORK-B","title":"B","status":"in_progress","workstream":"ui",
+             "depends_on":["WORK-A","WORK-A","WORK-MISSING"]}
+        ]
+    })).unwrap();
+    fs::write(&path, &original).unwrap();
+
+    let scan = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("scan").arg(&root).arg("--json").output().expect("scan fixture");
+    assert!(scan.status.success(), "{}", String::from_utf8_lossy(&scan.stderr));
+    let report: Value = serde_json::from_slice(&scan.stdout).unwrap();
+    assert_eq!(report["work_index"]["status"], "INVALID");
+    assert_eq!(report["metrics"]["delivery"]["state"], "PARTIAL");
+    assert_eq!(report["metrics"]["delivery"]["percent"], 50);
+    assert_eq!(report["metrics"]["references"]["percent"], Value::Null);
+    assert_eq!(report["metrics"]["dependencies"]["state"], "PARTIAL");
+    let findings = report["work_index"]["findings"].as_array().unwrap();
+    assert!(findings.iter().any(|f| f["code"] == "work.duplicate_dependency"));
+    assert!(findings.iter().any(|f| f["code"] == "work.missing_dependency"));
+    assert_eq!(fs::read(&path).unwrap(), original);
+
+    let html_path = std::env::temp_dir().join(format!(
+        "observatory-partial-view-{}-{tick}.html", std::process::id()
+    ));
+    let rendered = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("report").arg(&root).arg("--output").arg(&html_path)
+        .output().expect("offline report");
+    assert!(rendered.status.success(), "{}", String::from_utf8_lossy(&rendered.stderr));
+    let html = fs::read_to_string(&html_path).unwrap();
+    assert!(html.contains("Recorded verified share · provisional"));
+    assert!(html.contains("work.duplicate_dependency"));
+    assert!(html.contains("work.missing_dependency"));
+    assert!(html.contains("50%"));
+    assert!(html.contains("PROVISIONAL"));
+    assert!(html.contains("Source text in report"));
+    assert_eq!(fs::read(&path).unwrap(), original);
+    fs::remove_file(html_path).unwrap();
+    fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
 fn unknown_work_index_does_not_create_false_metric_percentages() {
     for name in ["partial", "malformed", "future"] {
         let report = scan(name);
