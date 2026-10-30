@@ -115,6 +115,12 @@ fn run() -> Result<(), String> {
                 output::report_location(&destination)
             );
             println!("Analysis is read-only. ADP conformance has not been assessed.");
+            println!("Work index status: {}", report.work_index.status);
+            println!("Delivery metric state: {}", report.metrics.delivery.state);
+            println!(
+                "Work index errors: {}",
+                report.work_index.findings.iter().filter(|f| f.severity == "error").count()
+            );
             if auto_open {
                 match output::open_browser(&destination) {
                     Ok(()) => println!("Browser launch: REQUESTED (visibility not confirmed)"),
