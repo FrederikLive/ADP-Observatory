@@ -146,7 +146,12 @@ pub fn inspect(root: &Path, id: &str, index: usize, raw: &str) -> ContractFileRe
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::{
+        sync::atomic::{AtomicU64, Ordering},
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    static NEXT_TEST_ROOT: AtomicU64 = AtomicU64::new(0);
 
     fn with_root(test: impl FnOnce(&Path)) {
         let nonce = SystemTime::now()
@@ -154,8 +159,9 @@ mod tests {
             .expect("clock")
             .as_nanos();
         let root = std::env::temp_dir().join(format!(
-            "adp-observatory-reference-{}-{nonce}",
-            std::process::id()
+            "adp-observatory-reference-{}-{nonce}-{}",
+            std::process::id(),
+            NEXT_TEST_ROOT.fetch_add(1, Ordering::Relaxed)
         ));
         fs::create_dir_all(root.join("docs/work")).expect("directory");
         fs::write(root.join("docs/work/WORK-A.md"), "contract").expect("contract");

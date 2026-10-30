@@ -102,3 +102,18 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 .v2-dependencies .dependency-row{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) auto;align-items:center;gap:8px;padding:11px 9px;border-top:1px solid #edf0f7;font-size:11px;color:#455675;overflow-wrap:anywhere}
 .v2-dependencies .dependency-row small{font-size:10px;color:#7c8aa1}
 @media(max-width:610px){.v2-dependencies .dependency-row{grid-template-columns:1fr 18px 1fr}.v2-dependencies .dependency-row small{grid-column:1/-1}}
+
+/* Accessible native contract disclosure; no executable project content. */
+.contract-item{padding:0;overflow:hidden}
+.contract-summary{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;list-style:none}
+.contract-summary::-webkit-details-marker{display:none}
+.contract-summary::before{content:"›";font-size:19px;line-height:1;color:#6c83a5;flex:none;transition:transform .15s}
+.contract-summary .row-title{flex:1}
+.contract-summary:focus-visible{outline:3px solid #5787d8;outline-offset:-3px;border-radius:9px}
+.contract-item[open] .contract-summary::before{transform:rotate(90deg)}
+.contract-detail{border-top:1px solid #e8edf5;background:#fafcff;padding:13px 16px 4px}
+.contract-detail .keyvalues{margin-top:0;gap:8px}
+.contract-detail .keyval{font-size:11px}
+.contract-detail .section-help{margin:14px 0 12px}
+@media(max-width:500px){.contract-summary{align-items:flex-start;flex-wrap:wrap}.contract-summary .tag{margin-left:23px}}
+@media(prefers-reduced-motion:reduce){.contract-summary::before{transition:none}}
