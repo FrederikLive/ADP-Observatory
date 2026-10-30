@@ -97,8 +97,8 @@ class AgentLaunchTests(unittest.TestCase):
         output = subprocess.CompletedProcess(
             [], 0,
             "Local ADP report: " + str(self.report) +
-            "\\nWork index status: INVALID\\nDelivery metric state: PARTIAL\\n"
-            "Work index errors: 92\\nBrowser launch: REQUESTED (visibility not confirmed)\\n",
+            "\nWork index status: INVALID\nDelivery metric state: PARTIAL\n"
+            "Work index errors: 92\nBrowser launch: REQUESTED (visibility not confirmed)\n",
             ""
         )
         with mock.patch.object(launch, "find_executable", return_value=(self.binary, "")):
