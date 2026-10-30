@@ -18,6 +18,10 @@ The current [ADP main revision](https://github.com/FrederikLive/ADP/commit/9b5ab
 
 With a previously approved installed binary, a local agent can invoke the skill's [offline launch helper](skills/adp-observatory/scripts/launch.py). Browser opening depends on real local desktop/process access; hosted agents cannot guarantee a window on the user's desktop. First-time automatic installation remains blocked on verified official release governance; no download is executed merely because the project uses ADP.
 
+## Design direction
+
+**Approved Dashboard V2 visual baseline:** [DESIGN.md](DESIGN.md) · [interactive HTML example](design_examples/observatory-dashboard-v2.html) · [research and metric semantics](docs/research/DASHBOARD-V2-RESEARCH.md). The standalone design example uses fictional values; the production V2 report renders only available project records, with UNKNOWN for invalid ledgers, source-presence counts instead of proof, and no fictional historical trend. No independent project completion verification is implied.
+
 ## Core objectives
 
 1. **Observe, never interfere.** Analyze the existing ADP project **read-only by default**. Do not rewrite project files, change task statuses, update Git, edit `.gitignore`, execute project scripts, or require changes to the project's structure.

@@ -11,66 +11,101 @@
 </style>
 </head>
 <body>
-<div class="shell">
-  <header class="topbar">
-    <div class="identity"><div class="logo" aria-hidden="true">◉</div><div><strong>ADP Observatory</strong><small>LOCAL PROJECT REPORT</small></div></div>
-    <span class="privacy"><span class="privacy-dot"></span> Read-only · Offline · No upload</span>
-  </header>
-  <main>
-    <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">PROJECT OVERVIEW</p>
-      <h1 id="page-title">A clearer view of your project.</h1>
-      <p class="summary">A locally generated overview of the available Agent Development Protocol records. No completeness, compliance, or verification is implied by file discovery.</p>
-      <div class="project-source"><span class="label">Analyzed project</span><code><!--__PROJECT_PATH__--></code></div>
-    </section>
-    <section class="metrics" aria-label="Scan summary"><!--__METRICS__--></section>
-    <section class="notice" role="note"><span class="notice-icon">i</span><div><strong>Conformance is not assessed.</strong><p>These are evidence-backed discovery results, not a pass/fail certification. Absent optional ADP files do not automatically indicate a problem.</p></div></section>
-    <div class="columns">
-      <div class="primary">
-        <section class="panel" aria-labelledby="contracts-title">
-          <div class="panel-head"><div><p class="eyebrow">WORK STATE</p><h2 id="contracts-title">Work contracts</h2></div><span class="tag neutral"><!--__WORK_STATUS__--></span></div>
-          <p class="section-help">Statuses shown here are claims recorded by the project in optional WORK.json—not independently verified completion. A referenced file marked PRESENT only means that file exists.</p>
-          <div class="toolbar"><label for="contract-search">Filter work contracts</label><input id="contract-search" type="search" placeholder="Filter by contract, file or state" autocomplete="off"></div>
-          <div id="contract-list" class="item-list"><!--__CONTRACTS__--></div>
-          <p class="empty-filter" id="contract-filter-empty" hidden>No matching references.</p>
-        </section>
-        <section class="panel" aria-labelledby="findings-title">
-          <div class="panel-head"><div><p class="eyebrow">WHAT NEEDS ATTENTION</p><h2 id="findings-title">Findings and limitations</h2></div><span class="tag neutral"><!--__FINDING_COUNT__--> listed</span></div>
-          <div id="findings-list" class="item-list"><!--__FINDINGS__--></div>
-        </section>
+<div class="shell v2-shell">
+  <aside class="sidebar" aria-label="Report navigation">
+    <div class="brand"><div class="brand-symbol" aria-hidden="true">◉</div><div><strong>ADP Observatory</strong><small>PROJECT INTELLIGENCE</small></div></div>
+    <span class="sidebar-label">YOUR PROJECT</span>
+    <nav class="report-nav" aria-label="Sections">
+      <a class="nav-link current" href="#overview">▦ <span>Overview</span></a>
+      <a class="nav-link" href="#progress">◴ <span>Delivery progress</span></a>
+      <a class="nav-link" href="#workstreams">▤ <span>Workstreams</span></a>
+      <a class="nav-link" href="#dependencies">⤳ <span>Dependencies</span></a>
+      <a class="nav-link" href="#contracts">☷ <span>Contract Explorer</span></a>
+      <a class="nav-link" href="#findings">◇ <span>Findings</span></a>
+      <a class="nav-link" href="#scope">⚙ <span>Scope &amp; trust</span></a>
+    </nav>
+    <div class="side-foot"><strong>Read-only snapshot</strong><p>This standalone report cannot edit, test, or publish a project. All data stays local.</p><span>Offline · No upload</span></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="identity"><div class="logo" aria-hidden="true">◉</div><div><strong>Project overview</strong><small>ADP <!--__ADP_VERSION__--> · Local report</small></div></div>
+      <span class="privacy"><span class="privacy-dot"></span> Read-only · Offline · No upload</span>
+    </header>
+    <main>
+      <section class="intro" id="overview" aria-labelledby="page-title">
+        <p class="eyebrow">PROJECT INTELLIGENCE</p>
+        <h1 id="page-title">Your project, at a glance.</h1>
+        <p class="summary">A clearer view of your project. Recorded work, source coverage and limitations—without claiming that work is independently verified.</p>
+        <div class="project-source"><span class="label">Analyzed project</span><code><!--__PROJECT_PATH__--></code></div>
+      </section>
+      <section class="notice v2-snapshot" role="note"><span class="notice-icon">i</span><div><strong>Snapshot, not live data · Conformance is not assessed.</strong><p>WORK.json is the project's own record of work; a status named “verified” does not mean Observatory verified the result. Missing optional files and unsupported inputs are shown explicitly.</p></div></section>
+      <section class="metrics" aria-label="Recorded project scorecard"><!--__METRICS__--></section>
+      <section class="v2-top-panels" id="progress" aria-label="Delivery visualizations">
+        <article class="panel v2-chart-panel">
+          <div class="panel-head"><div><p class="eyebrow">DECLARED DISTRIBUTION</p><h2>Work state breakdown</h2></div><span class="tag neutral"><!--__WORK_STATUS__--></span></div>
+          <p class="section-help">Mutually exclusive statuses from the recorded contract ledger; cancelled work is excluded from the completion denominator.</p>
+          <!--__STATES__-->
+          <details class="v2-methods"><summary>How is completion calculated?</summary><p><strong>Declared completion = recorded “verified” contracts / non-cancelled declared contracts.</strong> In-progress, blocked, ready, candidate and deferred work remain in the denominator. This is not independent verification or an estimate of remaining engineering effort. An invalid or missing ledger yields UNKNOWN.</p></details>
+        </article>
+        <article class="panel v2-chart-panel">
+          <div class="panel-head"><div><p class="eyebrow">HISTORICAL PROGRESS</p><h2>Delivery over time</h2></div><span class="tag neutral">NOT_ASSESSED</span></div>
+          <div class="no-history"><div class="history-icon" aria-hidden="true">◷</div><strong>No compatible saved snapshots</strong><p>Trends will appear only when Observatory has recorded real, compatible historical scans. The demo graph is not production data.</p></div>
+          <p class="section-help">No synthetic history, no inferred time estimates and no background tracking.</p>
+        </article>
+      </section>
+      <section class="panel v2-streams" id="workstreams" aria-labelledby="workstreams-title">
+        <div class="panel-head"><div><p class="eyebrow">PROJECT DELIVERY</p><h2 id="workstreams-title">Progress by workstream</h2></div><span class="tag neutral">DECLARED</span></div>
+        <p class="section-help">Completed / applicable contracts per recorded workstream; a progress bar reflects declared status, not verification quality or time spent.</p>
+        <div class="workstream-list"><!--__WORKSTREAMS__--></div>
+      </section>
+      <section class="panel v2-dependencies" id="dependencies" aria-labelledby="dependencies-title">
+        <div class="panel-head"><div><p class="eyebrow">RECORDED RELATIONSHIPS</p><h2 id="dependencies-title">Dependency visibility</h2></div><span class="tag neutral">DECLARED</span></div>
+        <p class="section-help">Explicit WORK.json dependency links. “Pending” means the referenced contract's recorded status is not verified. This is not a critical-path analysis or a proven blocker.</p>
+        <div class="dependency-list"><!--__DEPENDENCIES__--></div>
+      </section>
+      <div class="columns">
+        <div class="primary">
+          <section class="panel" id="contracts" aria-labelledby="contracts-title">
+            <div class="panel-head"><div><p class="eyebrow">SOURCE-BACKED NAVIGATION</p><h2 id="contracts-title">Contract Explorer</h2></div><span class="tag neutral"><!--__WORK_STATUS__--></span></div>
+            <p class="section-help">Declared records; statuses are not independently verified. A reference marked PRESENT indicates only file presence. Open details in future Explorer slices after bounded source-reading review.</p>
+            <div class="toolbar"><label for="contract-search">Search contracts</label><input id="contract-search" type="search" placeholder="Find contract, workstream or state" autocomplete="off"></div>
+            <div id="contract-list" class="item-list"><!--__CONTRACTS__--></div>
+            <p class="empty-filter" id="contract-filter-empty" hidden>No matching references.</p>
+          </section>
+          <section class="panel" id="findings" aria-labelledby="findings-title">
+            <div class="panel-head"><div><p class="eyebrow">ATTENTION AND LIMITATIONS</p><h2 id="findings-title">Findings &amp; blockers</h2></div><span class="tag neutral"><!--__FINDING_COUNT__--> listed</span></div>
+            <div id="findings-list" class="item-list"><!--__FINDINGS__--></div>
+          </section>
+        </div>
+        <aside class="secondary" aria-label="Technical details">
+          <section class="panel" aria-labelledby="compat-title">
+            <p class="eyebrow">COMPATIBILITY</p><h2 id="compat-title">Interpretation scope</h2>
+            <div class="keyvalues"><!--__COMPATIBILITY__--></div>
+            <p class="section-help">Format readability, semantic support and ADP conformance coverage are separate dimensions.</p>
+          </section>
+          <section class="panel" aria-labelledby="actions-title">
+            <p class="eyebrow">OPTIONAL · FOR YOUR CODING AGENT</p>
+            <h2 id="actions-title">ADP Actions</h2>
+            <p class="section-help">Natural-language suggestions for your coding agent, not commands that this report executes.</p>
+            <div class="item-list" aria-label="Example ADP Actions">
+              <div class="list-row"><span class="row-title">Show project blockers</span><p class="row-desc">Explain blockers using their recorded evidence.</p></div>
+              <div class="list-row"><span class="row-title">Why did we make this decision?</span><p class="row-desc">Find documented decision rationale, or acknowledge missing history.</p></div>
+              <div class="list-row"><span class="row-title">Check documentation consistency</span><p class="row-desc">Compare source, documents and verification without automatic edits.</p></div>
+              <div class="list-row"><span class="row-title">What changed since the last milestone?</span><p class="row-desc">Request a source-backed comparison if a baseline exists.</p></div>
+              <div class="list-row"><span class="row-title">Check ADP for updates</span><p class="row-desc">Read-only protocol comparison; updating requires a separate request.</p></div>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="records-title"><p class="eyebrow">PROJECT MEMORY</p><h2 id="records-title">Available records</h2><div class="item-list"><!--__RECORDS__--></div></section>
+          <section class="panel" id="scope" aria-labelledby="scan-title">
+            <p class="eyebrow">TRANSPARENCY</p><h2 id="scan-title">Scan coverage</h2>
+            <div class="keyvalues"><!--__SCAN_SCOPE__--></div>
+            <p class="section-help">Scan: <!--__SCAN_STATUS__--> · semantics: <!--__SEMANTIC_STATUS__-->. Exclusions and missing supported inputs remain visible.</p>
+          </section>
+        </aside>
       </div>
-      <aside class="secondary" aria-label="Technical details">
-        <section class="panel" aria-labelledby="compat-title">
-          <p class="eyebrow">COMPATIBILITY</p><h2 id="compat-title">Interpretation scope</h2>
-          <div class="keyvalues"><!--__COMPATIBILITY__--></div>
-          <p class="section-help">Format readability, semantic support, and ADP conformance coverage are separate dimensions.</p>
-        </section>
-        <section class="panel" aria-labelledby="actions-title">
-          <p class="eyebrow">OPTIONAL · FOR YOUR CODING AGENT</p>
-          <h2 id="actions-title">ADP Actions</h2>
-          <p class="section-help">Try asking your ADP-aware coding agent. These are natural-language requests, not commands executed by this report. They do not require extra project files.</p>
-          <div class="item-list" aria-label="Example ADP Actions">
-            <div class="list-row"><span class="row-title">Show project blockers</span><p class="row-desc">Ask the agent to explain confirmed blockers and their evidence.</p></div>
-            <div class="list-row"><span class="row-title">Why did we make this decision?</span><p class="row-desc">Find documented decision rationale or acknowledge missing history.</p></div>
-            <div class="list-row"><span class="row-title">Check documentation consistency</span><p class="row-desc">Compare source, documentation, and verification without automatic edits.</p></div>
-            <div class="list-row"><span class="row-title">What changed since the last milestone?</span><p class="row-desc">Ask for a source-backed milestone comparison, when a baseline exists.</p></div>
-            <div class="list-row"><span class="row-title">Check ADP for updates</span><p class="row-desc">Read-only protocol version comparison; updating is a separate request.</p></div>
-          </div>
-          <p class="section-help">Observatory itself remains read-only. Availability of these agent requests depends on your agent's access and the project's records.</p>
-        </section>
-        <section class="panel" aria-labelledby="records-title">
-          <p class="eyebrow">PROJECT MEMORY</p><h2 id="records-title">Available records</h2>
-          <div class="item-list"><!--__RECORDS__--></div>
-        </section>
-        <section class="panel" aria-labelledby="scan-title">
-          <p class="eyebrow">TRANSPARENCY</p><h2 id="scan-title">Scan coverage</h2>
-          <div class="keyvalues"><!--__SCAN_SCOPE__--></div>
-          <p class="section-help">A scan can complete under its exclusion policy while still leaving some sources or semantics unassessed.</p>
-        </section>
-      </aside>
-    </div>
-  </main>
-  <footer>ADP Observatory · Generated locally from an existing project · <strong>No external resources or network requests</strong></footer>
+    </main>
+    <footer>ADP Observatory · Locally generated project snapshot · <strong>No external resources or network requests</strong></footer>
+  </div>
 </div>
 <script>
 /*__SCRIPT__*/
