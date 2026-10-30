@@ -6,6 +6,7 @@ mod metrics;
 mod output;
 mod records;
 mod references;
+mod source_reader;
 mod work;
 
 use serde::Serialize;
@@ -20,6 +21,7 @@ struct Report {
     files_examined: usize,
     files_skipped: usize,
     scan_scope: discovery::ScanScope,
+    source_inspection: source_reader::SourceInspection,
     adp_markers: Vec<String>,
     work_index: work::WorkInspection,
     metrics: metrics::Metrics,
@@ -54,18 +56,35 @@ fn run() -> Result<(), String> {
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
+    let active_file = work_index.active_contract.as_deref().and_then(|id| {
+        work_index
+            .contracts
+            .iter()
+            .find(|contract| contract.id == id)
+            .and_then(|contract| contract.contract_file.clone())
+    });
+    let source_inspection = source_reader::inspect(
+        &root,
+        active_file.into_iter().chain(
+            work_index
+                .contracts
+                .iter()
+                .filter_map(|c| c.contract_file.clone()),
+        ),
+    );
     let metrics = metrics::analyze(
         &serde_json::to_value(&work_index)
             .map_err(|e| format!("Could not derive project metrics: {e}"))?,
     );
     let report = Report {
-        schema_version: "0.4.1",
+        schema_version: "0.5.0",
         analyzer_version: env!("CARGO_PKG_VERSION"),
         target: root.display().to_string(),
         scan_complete: discovery.scope.status != "PARTIAL",
         files_examined: discovery.files_examined,
         files_skipped: discovery.files_skipped,
         scan_scope: discovery.scope,
+        source_inspection,
         adp_markers: discovery.markers,
         work_index,
         metrics,
@@ -130,6 +149,12 @@ fn print_text(report: &Report) {
         println!("  - {marker}");
     }
     println!("Work index: {}", report.work_index.status);
+    println!(
+        "Markdown: {} documents; {} bytes ({})",
+        report.source_inspection.documents.len(),
+        report.source_inspection.bytes_read,
+        report.source_inspection.status
+    );
     println!(
         "Declared completion: {} ({}/{}, source: {})",
         report

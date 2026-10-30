@@ -1,6 +1,6 @@
 [package]
 name = "adp-observatory"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 description = "Local-first analysis and visualization companion for Agent Development Protocol projects"
 license = "MIT"
@@ -12,3 +12,7 @@ path = "src/main.rs"
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+cap-std = "=4.0.3"
+cap-fs-ext = "=4.0.3"
+pulldown-cmark = "0.13"
+sha2 = "0.10"

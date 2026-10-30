@@ -73,3 +73,9 @@ Snapshots stay local and user-controlled. Explain stored data and location; prov
 
 ## Security reporting
 Document a private reporting route before public releases. Reproduce and assess reports before publishing exploitable details.
+
+## Development source-reader boundary (2026-10-28; review pending)
+- The new capability-relative Markdown reader walks held directory handles with no-follow operations. It does not open an ambient project filename after a prior metadata-only `PRESENT` check. It checks actual opened-file metadata and uses an extra-byte bounded read to detect growth beyond limits.
+- Budgets: 128 documents, 128 KiB/document, 8 MiB combined, bounded path components, lines, line lengths and headings. Unsupported, escaped, symlinked or unreadable items are isolated. No arbitrary repository command execution.
+- Serialized reports contain filenames, state, counts and SHA-256 hashes, **not Markdown content**. Even metadata, paths and digests may be sensitive; reports remain local/exported deliberately.
+- These are implementation safeguards awaiting independent Windows reparse-point and rename-race review. No claim of full symlink/race immunity or unreviewed safe publication should be made before cross-platform adversarial acceptance.
