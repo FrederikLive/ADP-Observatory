@@ -57,13 +57,19 @@ fn run() -> Result<(), String> {
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
     let active_file = work_index.active_contract.as_deref().and_then(|id| {
-        work_index.contracts.iter().find(|contract| contract.id == id)
+        work_index
+            .contracts
+            .iter()
+            .find(|contract| contract.id == id)
             .and_then(|contract| contract.contract_file.clone())
     });
     let source_inspection = source_reader::inspect(
         &root,
         active_file.into_iter().chain(
-            work_index.contracts.iter().filter_map(|c| c.contract_file.clone()),
+            work_index
+                .contracts
+                .iter()
+                .filter_map(|c| c.contract_file.clone()),
         ),
     );
     let metrics = metrics::analyze(
@@ -143,10 +149,12 @@ fn print_text(report: &Report) {
         println!("  - {marker}");
     }
     println!("Work index: {}", report.work_index.status);
-    println!("Markdown: {} documents; {} bytes ({})",
+    println!(
+        "Markdown: {} documents; {} bytes ({})",
         report.source_inspection.documents.len(),
         report.source_inspection.bytes_read,
-        report.source_inspection.status);
+        report.source_inspection.status
+    );
     println!(
         "Declared completion: {} ({}/{}, source: {})",
         report

@@ -551,12 +551,24 @@ fn show_scope(report: &Value) -> String {
         .map(|(key, value)| keyval(key, &value))
         .collect::<String>();
     if let Some(source) = report.get("source_inspection") {
-        let readable = source["documents"].as_array().map(|files| {
-            files.iter().filter(|file| file["state"] == "READABLE").count()
-        }).unwrap_or(0);
+        let readable = source["documents"]
+            .as_array()
+            .map(|files| {
+                files
+                    .iter()
+                    .filter(|file| file["state"] == "READABLE")
+                    .count()
+            })
+            .unwrap_or(0);
         output.push_str(&keyval("Markdown snapshots", &readable.to_string()));
-        output.push_str(&keyval("Markdown scan state", at(source, "/status", "UNKNOWN")));
-        output.push_str(&keyval("Source bytes analyzed", &count(&source["bytes_read"])));
+        output.push_str(&keyval(
+            "Markdown scan state",
+            at(source, "/status", "UNKNOWN"),
+        ));
+        output.push_str(&keyval(
+            "Source bytes analyzed",
+            &count(&source["bytes_read"]),
+        ));
         output.push_str(&keyval("Source text in report", "None (metadata only)"));
     }
     output
