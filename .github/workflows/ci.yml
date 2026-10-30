@@ -27,19 +27,22 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_agent_launch.py -v
       - name: Build
         run: cargo build --release
-      - name: Check out pinned current ADP Actions distribution (no project modification)
+      - name: Check out pinned ADP 2.8.0 distribution (no project modification)
         uses: actions/checkout@v4
         with:
           repository: FrederikLive/ADP
-          ref: 9b5ab4694321735e83b93962e1b9975cced130bf
+          ref: 226e8010b892efcaa1d3be8922210fb1af0952c7
           path: upstream-adp-fixture
           persist-credentials: false
-      - name: Test scanner against current real ADP and optional Actions guidance
+      - name: Test scanner against real ADP 2.8.0 and optional guidance
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C upstream-adp-fixture rev-parse HEAD)" = "9b5ab4694321735e83b93962e1b9975cced130bf"
+          test "$(git -C upstream-adp-fixture rev-parse HEAD)" = "226e8010b892efcaa1d3be8922210fb1af0952c7"
           test -f upstream-adp-fixture/docs/COMMANDS.md
+          test -f upstream-adp-fixture/docs/AGENT_ORCHESTRATION.md
+          test -f upstream-adp-fixture/schema/agent-policy.schema.json
+          test -f upstream-adp-fixture/schema/work.schema.json
           test -f upstream-adp-fixture/docs/UPDATING_ADP.md
           test -f upstream-adp-fixture/templates/AGENTS.md.template
           test -f upstream-adp-fixture/ADP.min.md
@@ -54,7 +57,7 @@ jobs:
           report=json.loads(pathlib.Path(sys.argv[1]).read_text())
           html=pathlib.Path(sys.argv[2]).read_text()
           assert report["compatibility"]["protocol"]["status"]=="KNOWN",report
-          assert report["compatibility"]["protocol"]["value"]=="2.7.1",report
+          assert report["compatibility"]["protocol"]["value"]=="2.8.0",report
           assert report["compatibility"]["format"]=="NOT_PRESENT",report
           assert report["work_index"]["status"]=="UNKNOWN",report
           assert report["compatibility"]["semantics"]=="NOT_ASSESSED",report

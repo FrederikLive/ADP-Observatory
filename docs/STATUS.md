@@ -44,3 +44,10 @@ Complete M1 real-project scanner calibration and fix only reproducible compatibi
 - Remote GitHub HEAD/CI should be inspected before the next code mutation; API access cannot attest the state of a local checkout.
 - The upstream ADP integration baseline is pinned in CI to the exact tested commit. Updating that pin requires reviewing the new upstream diff, not blindly following a moving branch.
 - No tag, official release, destructive Git rewrite, target-project mutation or ADP normative change was performed for this compatibility work.
+
+## ADP 2.8.0 compatibility update — CI verified on review branch (2026-10-28)
+- Upstream ADP changed on 2026-10-23 to 2.8.0 at `226e8010b892efcaa1d3be8922210fb1af0952c7`, adding optional `execution.assignment` metadata inside WORK schema v1. The old scanner's strict execution-key check incorrectly rejected this legitimate optional field.
+- Proposed branch fix: accept canonical nullable assignment with known nonempty string fields, recognize 2.8.0 semantic support **only** for WORK schema v1, and retain 2.7.1 compatibility. Unknown future versions and independent conformance remain unsupported/not assessed.
+- Regression tests cover valid and invalid assignments and a CLI 2.8.0 fixture. CI is pinned to this reviewed upstream commit. Verified on branch at CI run [40756821398](https://github.com/FrederikLive/ADP-Observatory/actions/runs/40756821398) (format, Clippy, tests, build, real ADP 2.8.0 scan). Draft PR #4 remains unmerged; release/browser issues remain separate.
+- M1 next: calibrate against additional permissioned real consumer projects and audit a safe bounded read-time API before starting deferred Contract & Evidence Explorer.
+

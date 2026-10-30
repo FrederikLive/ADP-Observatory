@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "project": "Fixture ADP 2.8.0",
+  "active_contract": "WORK-ASSIGN",
+  "contracts": [
+    {
+      "id": "WORK-ASSIGN",
+      "title": "Optional capability-aware assignment",
+      "status": "in_progress",
+      "depends_on": [],
+      "execution": {
+        "mode": "delegated",
+        "mutation": "read_only",
+        "branch": null,
+        "assignment": {
+          "role": "assistant_programmer",
+          "provider": "google",
+          "model": "fixture-model",
+          "selection_basis": "capability_based"
+        }
+      }
+    }
+  ]
+}

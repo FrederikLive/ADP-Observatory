@@ -113,3 +113,10 @@ Validation: https://github.com/FrederikLive/ADP-Observatory/actions/runs/3957343
 
 **Next action:** expand independent real-project fixtures and false-positive
 analysis without introducing a mandatory canonical ADP data interface.
+
+## ADP 2.8.0 compatibility regression slice (2026-10-28; CI passed on PR branch)
+- Observed concrete mismatch: schema-v1 `execution.assignment` was newly legal in ADP 2.8.0, but Observatory rejected its key and treated valid work as invalid.
+- Branch changes validate optional nullable assignment and recognized fields, add end-to-end fixture and unit tests, and pin CI to reviewed upstream 2.8.0 commit.
+- Supports format/semantics for the tested WORK schema-v1 subset only; independent ADP conformance is still NOT_ASSESSED. Does not start the deferred document explorer or add agent runtime instrumentation.
+- Branch CI passed at [40756821398](https://github.com/FrederikLive/ADP-Observatory/actions/runs/40756821398); PR #4 remains draft. Next evidence: independent consumer project calibration, followed by scoped safe read-time source inspection.
+
