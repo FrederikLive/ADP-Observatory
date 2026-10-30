@@ -91,8 +91,3 @@ ADP remains the agent-first normative protocol; Observatory is optional, human-f
 - Branch CI passed at [run 40756821398](https://github.com/FrederikLive/ADP-Observatory/actions/runs/40756821398), including Rust format/lint/tests/build and real ADP 2.8.0 scan. PR #4 remains draft/unmerged; no release or merge was authorized.
 - Next exact action: review/merge PR #4 through normal governance, calibrate a real consumer-project scan and bound secure document reads before scheduling `WORK-EXPLORER-001` Slice 1.
 
-## 2026-10-28 source reader slice (stacked branch; review pending)
-- Continuing user-directed work under issue #5 after ADP 2.8.0 compatibility PR #4. Work is on `feat/bounded-markdown-reader-20261028`, branched from PR #4 head, not main. Neither PR was merged and no target ADP project files were edited.
-- Implemented source-reader foundation: capability-relative no-follow directory traversal and final-file open; explicit path and UTF-8 rejection; per-file/total/count limits; SHA-256 and source line/heading counts; in-memory document headings; optional WORK absence does not block context reads.
-- Report JSON 0.5.0 and dashboard show **metadata only**, not source text. No background scans, external APIs, agent work, filesystem writes in target or automatic verification.
-- Cross-platform Rust/CLI CI PASS at run 40759004986. Git-tree metadata calibration: 55 candidate documents / 411,030 bytes in Trumpdup and 8 / 25,920 bytes in ADP-Harness, all within proposed budgets, but NOT actual runtime scans. Exact next action: independent Windows reparse/race review, real runtime pilot with unchanged Git state, then plan opt-in Explorer Slice 1. After accepted PR #5, take Explorer issue #3 Slice 1 in a separate PR.

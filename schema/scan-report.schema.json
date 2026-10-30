@@ -16,6 +16,7 @@
     "compatibility",
     "context",
     "scan_scope",
+    "metrics",
     "source_inspection"
   ],
   "properties": {
@@ -476,6 +477,286 @@
         }
       },
       "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "rule_version",
+        "delivery",
+        "references",
+        "dependencies",
+        "independently_verified",
+        "historical_trend"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "delivery": {
+          "type": "object",
+          "required": [
+            "state",
+            "completed",
+            "applicable",
+            "cancelled_excluded",
+            "percent",
+            "statuses",
+            "workstreams",
+            "source"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "enum": [
+                "KNOWN",
+                "UNKNOWN",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "completed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "applicable": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cancelled_excluded": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "percent": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 100
+            },
+            "statuses": {
+              "type": "object",
+              "required": [
+                "verified",
+                "underway",
+                "blocked",
+                "planned",
+                "cancelled"
+              ],
+              "properties": {
+                "verified": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "underway": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "blocked": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "planned": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "cancelled": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "workstreams": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "statuses",
+                  "applicable",
+                  "percent"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "statuses": {
+                    "type": "object",
+                    "required": [
+                      "verified",
+                      "underway",
+                      "blocked",
+                      "planned",
+                      "cancelled"
+                    ],
+                    "properties": {
+                      "verified": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "underway": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "blocked": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "planned": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "cancelled": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "applicable": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "percent": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                }
+              }
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        },
+        "references": {
+          "type": "object",
+          "required": [
+            "state",
+            "expected",
+            "inspected",
+            "present",
+            "missing",
+            "denied_or_unsupported",
+            "percent",
+            "source"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "enum": [
+                "KNOWN",
+                "PARTIAL",
+                "NOT_ASSESSED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "expected": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "inspected": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "present": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "missing": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "denied_or_unsupported": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "percent": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 100
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        },
+        "dependencies": {
+          "type": "object",
+          "required": [
+            "state",
+            "declared_edges",
+            "pending_by_recorded_status",
+            "details",
+            "omitted_details",
+            "source"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "enum": [
+                "KNOWN",
+                "PARTIAL",
+                "UNKNOWN"
+              ]
+            },
+            "declared_edges": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pending_by_recorded_status": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "details": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "contract_id",
+                  "depends_on",
+                  "target_recorded_status"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "contract_id": {
+                    "type": "string"
+                  },
+                  "depends_on": {
+                    "type": "string"
+                  },
+                  "target_recorded_status": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "omitted_details": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        },
+        "independently_verified": {
+          "const": "NOT_ASSESSED"
+        },
+        "historical_trend": {
+          "const": "NOT_ASSESSED"
+        }
+      }
     },
     "source_inspection": {
       "type": "object",

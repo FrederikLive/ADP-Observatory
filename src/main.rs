@@ -2,6 +2,7 @@ mod cli;
 mod compatibility;
 mod dashboard;
 mod discovery;
+mod metrics;
 mod output;
 mod records;
 mod references;
@@ -23,6 +24,7 @@ struct Report {
     source_inspection: source_reader::SourceInspection,
     adp_markers: Vec<String>,
     work_index: work::WorkInspection,
+    metrics: metrics::Metrics,
     compatibility: compatibility::Compatibility,
     context: records::ContextInspection,
     limitations: Vec<String>,
@@ -54,7 +56,6 @@ fn run() -> Result<(), String> {
     let work_index = work::inspect(&root);
     let compatibility = compatibility::inspect(&root, &work_index);
     let context = records::inspect(&root, &work_index);
-    // A document-count budget must not silently exclude the active contract.
     let active_file = work_index.active_contract.as_deref().and_then(|id| {
         work_index
             .contracts
@@ -68,8 +69,12 @@ fn run() -> Result<(), String> {
             work_index
                 .contracts
                 .iter()
-                .filter_map(|contract| contract.contract_file.clone()),
+                .filter_map(|c| c.contract_file.clone()),
         ),
+    );
+    let metrics = metrics::analyze(
+        &serde_json::to_value(&work_index)
+            .map_err(|e| format!("Could not derive project metrics: {e}"))?,
     );
     let report = Report {
         schema_version: "0.5.0",
@@ -82,6 +87,7 @@ fn run() -> Result<(), String> {
         source_inspection,
         adp_markers: discovery.markers,
         work_index,
+        metrics,
         compatibility,
         context,
         limitations: vec![
@@ -144,10 +150,33 @@ fn print_text(report: &Report) {
     }
     println!("Work index: {}", report.work_index.status);
     println!(
-        "Source documents: {} ({} bytes; {})",
+        "Markdown: {} documents; {} bytes ({})",
         report.source_inspection.documents.len(),
         report.source_inspection.bytes_read,
         report.source_inspection.status
+    );
+    println!(
+        "Declared completion: {} ({}/{}, source: {})",
+        report
+            .metrics
+            .delivery
+            .percent
+            .map(|p| format!("{p}%"))
+            .unwrap_or_else(|| report.metrics.delivery.state.clone()),
+        report.metrics.delivery.completed,
+        report.metrics.delivery.applicable,
+        report.metrics.delivery.source
+    );
+    println!(
+        "Contract reference presence: {} ({}/{})",
+        report
+            .metrics
+            .references
+            .percent
+            .map(|p| format!("{p}%"))
+            .unwrap_or_else(|| report.metrics.references.state.clone()),
+        report.metrics.references.present,
+        report.metrics.references.expected
     );
     println!("Semantic scope: {}", report.compatibility.semantic_scope);
     for reference in &report.work_index.contract_files {

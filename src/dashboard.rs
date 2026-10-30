@@ -1,4 +1,5 @@
 use serde_json::Value;
+use std::collections::BTreeMap;
 
 const TEMPLATE: &str = include_str!("../web/report.html");
 const STYLE: &str = include_str!("../web/report.css");
@@ -80,6 +81,217 @@ fn row(title: &str, detail: &str, status: &str, filterable: bool) -> String {
         tag(status),
         escape_html(detail)
     )
+}
+
+/// Dashboard-only, explicitly *declared* progress. This does not assess
+/// evidence, source quality, independently verified work, or overall project
+/// readiness. Any invalid ledger suppresses all derived percentages.
+struct DeclaredProgress {
+    counts: [usize; 5],
+    total: usize,
+    streams: BTreeMap<String, [usize; 5]>,
+    applicable: usize,
+    percent: Option<u64>,
+}
+impl DeclaredProgress {
+    fn from_metrics(metrics: &crate::metrics::Metrics) -> Option<Self> {
+        if !matches!(metrics.delivery.state.as_str(), "KNOWN" | "NOT_APPLICABLE") {
+            return None;
+        }
+        let counts = &metrics.delivery.statuses;
+        let values = [
+            counts.verified,
+            counts.underway,
+            counts.blocked,
+            counts.planned,
+            counts.cancelled,
+        ];
+        let streams = metrics
+            .delivery
+            .workstreams
+            .iter()
+            .map(|s| {
+                let c = &s.statuses;
+                (
+                    s.name.clone(),
+                    [c.verified, c.underway, c.blocked, c.planned, c.cancelled],
+                )
+            })
+            .collect();
+        Some(Self {
+            counts: values,
+            total: counts.total(),
+            streams,
+            applicable: metrics.delivery.applicable,
+            percent: metrics.delivery.percent,
+        })
+    }
+}
+
+fn actual_metrics(report: &Value) -> crate::metrics::Metrics {
+    // CLI supplies the serialized metrics; legacy render-only test fixtures
+    // may omit them, in which case the *same* pure metric rule runs locally.
+    report
+        .get("metrics")
+        .and_then(|data| serde_json::from_value(data.clone()).ok())
+        .unwrap_or_else(|| crate::metrics::analyze(&report["work_index"]))
+}
+
+fn show_live_metrics(m: &crate::metrics::Metrics, progress: Option<&DeclaredProgress>) -> String {
+    let mut results = Vec::new();
+    match progress {
+        Some(work) => {
+            let value = work
+                .percent
+                .map(|amount| format!("{amount}%"))
+                .unwrap_or_else(|| "UNKNOWN".into());
+            results.push(metric(
+                "Declared completion",
+                &value,
+                &format!(
+                    "{}/{} declared verified / non-cancelled contracts; {} cancelled excluded. Declared records; statuses are not independently verified",
+                    work.counts[0], work.applicable, work.counts[4]
+                ),
+            ));
+            results.push(metric(
+                "Active contracts",
+                &work.counts[1].to_string(),
+                "Recorded in_progress, implemented or verifying",
+            ));
+            results.push(metric(
+                "Recorded blockers",
+                &work.counts[2].to_string(),
+                "Explicit blocked status only; other findings listed separately",
+            ));
+        }
+        None => {
+            results.push(metric("Declared completion", "UNKNOWN",
+                "Invalid, missing or unsupported work ledger. Declared records; statuses are not independently verified"));
+            results.push(metric(
+                "Active contracts",
+                "UNKNOWN",
+                "No trustworthy contract-state breakdown",
+            ));
+            results.push(metric(
+                "Recorded blockers",
+                "UNKNOWN",
+                "No trustworthy contract-state breakdown",
+            ));
+        }
+    }
+    let references = &m.references;
+    if let Some(pct) = references.percent {
+        results.push(metric(
+            "Reference presence", &format!("{pct}%"),
+            &format!("{}/{} contract-file paths present; {} missing · {} other states. This is not evidence verification",
+                references.present, references.expected,
+                references.missing, references.denied_or_unsupported),
+        ));
+    } else {
+        results.push(metric(
+            "Reference presence",
+            &references.state,
+            &format!(
+                "{}/{} observed paths; {} examined; coverage is not independently verified",
+                references.present, references.expected, references.inspected
+            ),
+        ));
+    }
+    results.join("")
+}
+
+fn show_dependency_inspection(m: &crate::metrics::Metrics) -> String {
+    if m.dependencies.state != "KNOWN" {
+        return "<div class=\"empty\">Dependency coverage UNKNOWN or PARTIAL: check the work index findings.</div>".into();
+    }
+    let mut html = format!(
+        "<div class=\"dependency-summary\"><strong>{}</strong> explicitly declared dependency links · <strong>{}</strong> target records not marked verified</div>",
+        m.dependencies.declared_edges, m.dependencies.pending_by_recorded_status
+    );
+    if m.dependencies.details.is_empty() {
+        html.push_str("<p class=\"section-help\">No pending-by-recorded-status dependencies are declared. This does not verify completion or prove absence of blockers.</p>");
+    }
+    for item in m.dependencies.details.iter().take(12) {
+        html.push_str(&format!(
+            "<div class=\"dependency-row\"><span>{}</span><span aria-hidden=\"true\">→</span><span>{}</span><small>recorded: {}</small></div>",
+            escape_html(&item.contract_id),
+            escape_html(&item.depends_on),
+            escape_html(&item.target_recorded_status)
+        ));
+    }
+    let not_displayed =
+        m.dependencies.details.len().saturating_sub(12) + m.dependencies.omitted_details;
+    if not_displayed > 0 {
+        html.push_str(&format!("<p class=\"section-help\">{not_displayed} additional recorded dependency relationships not shown in this summary.</p>"));
+    }
+    html
+}
+
+fn show_state_chart(progress: Option<&DeclaredProgress>) -> String {
+    let Some(work) = progress else {
+        return "<div class=\"empty\">UNKNOWN — a structurally valid work index is required before drawing contract-state charts.</div>".into();
+    };
+    if work.total == 0 {
+        return "<div class=\"empty\">No declared contracts available for a status distribution.</div>".into();
+    }
+    let names = [
+        "Declared verified",
+        "Underway",
+        "Blocked",
+        "Planned / deferred",
+        "Cancelled",
+    ];
+    let colors = ["#476af3", "#16ad9d", "#d66f79", "#e6ac51", "#a8b5c7"];
+    let mut legend = String::new();
+    let mut bars = String::new();
+    for (index, ((name, color), value)) in names
+        .iter()
+        .zip(colors.iter())
+        .zip(work.counts.iter())
+        .enumerate()
+    {
+        let width = (*value * 100) / work.total;
+        bars.push_str(&format!(
+            "<span class=\"state-segment state-{index}\" style=\"width:{width}%;background:{color}\" title=\"{}: {}\"></span>",
+            name, value
+        ));
+        legend.push_str(&format!(
+            "<div class=\"state-legend-row\"><span class=\"legend-dot\" style=\"background:{color}\"></span><span>{}</span><strong>{value}</strong></div>",
+            escape_html(name)
+        ));
+    }
+    format!(
+        "<div class=\"state-chart\" role=\"img\" aria-label=\"Declared work-state distribution, {} contracts\"><div class=\"state-number\">{} <small>recorded contracts</small></div><div class=\"state-bar\">{bars}</div><div class=\"state-legend\">{legend}</div></div>",
+        work.total, work.total
+    )
+}
+
+fn show_workstreams(progress: Option<&DeclaredProgress>) -> String {
+    let Some(work) = progress else {
+        return "<div class=\"empty\">Workstream progress is UNKNOWN without a valid contract index.</div>".into();
+    };
+    if work.streams.is_empty() {
+        return "<div class=\"empty\">No declared workstreams to compare.</div>".into();
+    }
+    let mut rows = String::new();
+    for (stream, counts) in &work.streams {
+        let total: usize = counts.iter().sum();
+        let applicable = total - counts[4];
+        let (value, pct) = match (counts[0] * 100 + applicable / 2).checked_div(applicable) {
+            Some(pct) => (format!("{} / {} · {pct}%", counts[0], applicable), pct),
+            None => ("NOT_APPLICABLE".into(), 0),
+        };
+        rows.push_str(&format!(
+            "<div class=\"stream-row\"><div class=\"stream-head\"><span class=\"stream-name\">{}</span><span class=\"stream-value\">{}</span></div><div class=\"stream-track\"><span style=\"width:{pct}%\"></span></div><p class=\"stream-note\">{} underway · {} blocked · {} planned/deferred · {} cancelled</p></div>",
+            escape_html(stream),
+            escape_html(&value),
+            counts[1],
+            counts[2],
+            counts[3],
+            counts[4]
+        ));
+    }
+    rows
 }
 
 fn show_contracts(report: &Value) -> String {
@@ -405,39 +617,27 @@ pub fn render(report: &Value) -> String {
     let work = at(report, "/work_index/status", "UNKNOWN");
     let scope = at(report, "/scan_scope/status", "PARTIAL");
     let semantics = at(report, "/compatibility/semantics", "UNKNOWN");
-    let available = report
-        .pointer("/work_index/contract_count")
-        .map(count)
-        .unwrap_or_else(|| "—".into());
-    let summary = [
-        metric(
-            "ADP version",
-            version,
-            "Based on recognized local version declarations",
-        ),
-        metric(
-            "Work contracts",
-            &available,
-            "Declared records; statuses are not independently verified",
-        ),
-        metric(
-            "Scan scope",
-            scope,
-            "Files excluded or unassessed are disclosed",
-        ),
-        metric(
-            "Semantic coverage",
-            semantics,
-            "Not a complete protocol conformance check",
-        ),
-    ]
-    .join("");
+    let metrics = actual_metrics(report);
+    let progress = DeclaredProgress::from_metrics(&metrics);
+    let summary = show_live_metrics(&metrics, progress.as_ref());
     let (findings, finding_count) = append_findings(report);
     TEMPLATE
         .replace("/*__STYLES__*/", STYLE)
         .replace("/*__SCRIPT__*/", SCRIPT)
         .replace("<!--__PROJECT_PATH__-->", &escape_html(project))
         .replace("<!--__METRICS__-->", &summary)
+        .replace("<!--__STATES__-->", &show_state_chart(progress.as_ref()))
+        .replace(
+            "<!--__DEPENDENCIES__-->",
+            &show_dependency_inspection(&metrics),
+        )
+        .replace(
+            "<!--__WORKSTREAMS__-->",
+            &show_workstreams(progress.as_ref()),
+        )
+        .replace("<!--__ADP_VERSION__-->", &escape_html(version))
+        .replace("<!--__SCAN_STATUS__-->", &escape_html(scope))
+        .replace("<!--__SEMANTIC_STATUS__-->", &escape_html(semantics))
         .replace("<!--__WORK_STATUS__-->", &escape_html(work))
         .replace("<!--__CONTRACTS__-->", &show_contracts(report))
         .replace("<!--__FINDING_COUNT__-->", &finding_count.to_string())
@@ -517,6 +717,123 @@ mod tests {
         assert!(page.contains("Declared records; statuses are not independently verified"));
         assert!(!page.contains(r#"<span class="tag ok">verified</span>"#));
         assert!(page.contains("Conformance is not assessed"));
+    }
+
+    #[test]
+    fn declared_completion_uses_valid_recorded_statuses_only() {
+        let report = json!({
+            "work_index": {
+                "status": "STRUCTURALLY_VALID",
+                "contract_count": 5,
+                "contracts": [
+                    {"id":"WORK-A","status":"verified","workstream":"core"},
+                    {"id":"WORK-B","status":"verified","workstream":"core"},
+                    {"id":"WORK-C","status":"in_progress","workstream":"core"},
+                    {"id":"WORK-D","status":"blocked","workstream":"ux"},
+                    {"id":"WORK-E","status":"cancelled","workstream":"ux"}
+                ],
+                "contract_files": [],
+                "findings": []
+            },
+            "compatibility": {"protocol": {"limitations": []}, "conformance": "NOT_ASSESSED"},
+            "context": {"records": [], "conflicts": []},
+            "scan_scope": {"status": "COMPLETE"},
+            "limitations": []
+        });
+        let progress =
+            DeclaredProgress::from_metrics(&actual_metrics(&report)).expect("valid ledger");
+        assert_eq!(progress.total, 5);
+        assert_eq!(progress.applicable, 4);
+        assert_eq!(progress.percent, Some(50));
+        assert_eq!(progress.counts, [2, 1, 1, 0, 1]);
+        let html = render(&report);
+        assert!(html.contains("2/4 declared verified"));
+        assert!(html.contains("50%"));
+        assert!(html.contains("Cancelled"));
+        assert!(html.contains("core"));
+        assert!(html.contains("No compatible saved snapshots"));
+        assert!(html.contains("NOT_ASSESSED"));
+    }
+
+    #[test]
+    fn invalid_ledger_never_shows_pseudoprecise_completion_or_charts() {
+        let report = json!({
+            "work_index": {
+                "status":"INVALID",
+                "contract_count":2,
+                "contracts":[
+                    {"id":"WORK-A","status":"verified"},
+                    {"id":"WORK-B","status":"in_progress"}
+                ],
+                "contract_files":[],
+                "findings":[]
+            },
+            "compatibility":{"protocol":{"limitations":[]},"conformance":"NOT_ASSESSED"},
+            "context":{"records":[],"conflicts":[]},
+            "scan_scope":{"status":"COMPLETE"},
+            "limitations":[]
+        });
+        assert!(DeclaredProgress::from_metrics(&actual_metrics(&report)).is_none());
+        let html = render(&report);
+        assert!(html.contains("UNKNOWN"));
+        assert!(html.contains("a structurally valid work index is required"));
+        assert!(html.contains("<span class=\"metric-value\">UNKNOWN</span>"));
+        assert!(!html.contains("<span class=\"metric-value\">50%</span>"));
+    }
+
+    #[test]
+    fn hostile_workstream_name_is_escaped_in_visual_summary() {
+        let report = json!({
+            "work_index": {
+                "status":"STRUCTURALLY_VALID",
+                "contract_count":1,
+                "contracts":[{
+                    "id":"WORK-A", "title":"Test", "status":"verified",
+                    "workstream":"<img src=x onerror=alert(1)>"
+                }],
+                "contract_files":[], "findings":[]
+            },
+            "compatibility":{"protocol":{"limitations":[]},"conformance":"NOT_ASSESSED"},
+            "context":{"records":[],"conflicts":[]},
+            "scan_scope":{"status":"COMPLETE"},
+            "limitations":[]
+        });
+        let html = render(&report);
+        assert!(html.contains("&lt;img src=x onerror=alert(1)&gt;"));
+        assert!(!html.contains("<img src=x onerror=alert(1)>"));
+        assert!(!html.contains("https://"));
+    }
+
+    #[test]
+    fn no_applicable_contracts_does_not_divide_by_zero() {
+        let report = json!({
+            "work_index": {
+                "status":"STRUCTURALLY_VALID",
+                "contract_count":1,
+                "contracts":[{"id":"WORK-CANCELLED","status":"cancelled","workstream":"archived"}]
+            }
+        });
+        let progress = DeclaredProgress::from_metrics(&actual_metrics(&report)).unwrap();
+        assert_eq!(progress.applicable, 0);
+        assert_eq!(progress.percent, None);
+        let html = render(&report);
+        assert!(html.contains("NOT_APPLICABLE"));
+        assert!(html.contains("UNKNOWN"));
+    }
+
+    #[test]
+    fn forged_ledger_count_or_status_suppresses_derived_progress() {
+        let mut report = json!({
+            "work_index": {
+                "status":"STRUCTURALLY_VALID",
+                "contract_count":2,
+                "contracts":[{"id":"WORK-A","status":"verified"}]
+            }
+        });
+        assert!(DeclaredProgress::from_metrics(&actual_metrics(&report)).is_none());
+        report["work_index"]["contract_count"] = json!(1);
+        report["work_index"]["contracts"][0]["status"] = json!("unrecognized");
+        assert!(DeclaredProgress::from_metrics(&actual_metrics(&report)).is_none());
     }
 
     #[test]
