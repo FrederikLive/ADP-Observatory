@@ -25,7 +25,7 @@ fn scan(name: &str) -> Value {
 #[test]
 fn current_version_reads_structured_work_without_claiming_conformance() {
     let report = scan("current");
-    assert_eq!(report["schema_version"], "0.5.0");
+    assert_eq!(report["schema_version"], "0.5.1");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     assert_eq!(report["compatibility"]["protocol"]["value"], "2.7.1");
     assert_eq!(report["compatibility"]["format"], "READABLE");
@@ -40,7 +40,7 @@ fn current_version_reads_structured_work_without_claiming_conformance() {
 #[test]
 fn cli_and_html_share_recorded_metric_provenance_without_claiming_verification() {
     let report = scan("current");
-    assert_eq!(report["metrics"]["rule_version"], "declared-metrics-v1");
+    assert_eq!(report["metrics"]["rule_version"], "declared-metrics-v2");
     assert_eq!(report["metrics"]["delivery"]["state"], "KNOWN");
     assert_eq!(report["metrics"]["delivery"]["completed"], 1);
     assert_eq!(report["metrics"]["delivery"]["applicable"], 1);

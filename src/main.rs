@@ -77,7 +77,7 @@ fn run() -> Result<(), String> {
             .map_err(|e| format!("Could not derive project metrics: {e}"))?,
     );
     let report = Report {
-        schema_version: "0.5.0",
+        schema_version: "0.5.1",
         analyzer_version: env!("CARGO_PKG_VERSION"),
         target: root.display().to_string(),
         scan_complete: discovery.scope.status != "PARTIAL",

@@ -1,6 +1,6 @@
 [package]
 name = "adp-observatory"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 description = "Local-first analysis and visualization companion for Agent Development Protocol projects"
 license = "MIT"

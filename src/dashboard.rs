@@ -788,7 +788,7 @@ mod tests {
         assert_eq!(progress.percent, Some(50));
         assert_eq!(progress.counts, [2, 1, 1, 0, 1]);
         let html = render(&report);
-        assert!(html.contains("2/4 declared verified"));
+        assert!(html.contains("2/4 recorded verified"));
         assert!(html.contains("50%"));
         assert!(html.contains("Cancelled"));
         assert!(html.contains("core"));
