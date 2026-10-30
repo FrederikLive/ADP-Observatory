@@ -150,19 +150,22 @@ pub fn analyze(work: &Value) -> Metrics {
     // Only duplicate/missing dependency errors permit an explicitly provisional
     // distribution; all other invalid/missing/unknown ledger types fail closed.
     let recoverable_dependencies = work_status == Some("INVALID")
-        && work.get("findings").and_then(Value::as_array).is_some_and(|findings| {
-            let errors: Vec<_> = findings
-                .iter()
-                .filter(|f| f.get("severity").and_then(Value::as_str) == Some("error"))
-                .collect();
-            !errors.is_empty()
-                && errors.iter().all(|f| {
-                    matches!(
-                        f.get("code").and_then(Value::as_str),
-                        Some("work.duplicate_dependency" | "work.missing_dependency")
-                    )
-                })
-        });
+        && work
+            .get("findings")
+            .and_then(Value::as_array)
+            .is_some_and(|findings| {
+                let errors: Vec<_> = findings
+                    .iter()
+                    .filter(|f| f.get("severity").and_then(Value::as_str) == Some("error"))
+                    .collect();
+                !errors.is_empty()
+                    && errors.iter().all(|f| {
+                        matches!(
+                            f.get("code").and_then(Value::as_str),
+                            Some("work.duplicate_dependency" | "work.missing_dependency")
+                        )
+                    })
+            });
     if work_status != Some("STRUCTURALLY_VALID") && !recoverable_dependencies {
         return result;
     }
@@ -185,8 +188,11 @@ pub fn analyze(work: &Value) -> Metrics {
         let Some(id) = contract.get("id").and_then(Value::as_str) else {
             return result;
         };
-        if !id.starts_with("WORK-") || id.len() <= 5
-            || !id[5..].chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+        if !id.starts_with("WORK-")
+            || id.len() <= 5
+            || !id[5..]
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
             || states.insert(id, status).is_some()
         {
             return result;
@@ -262,7 +268,12 @@ pub fn analyze(work: &Value) -> Metrics {
         }
     }
 
-    result.dependencies.state = if recoverable_dependencies { "PARTIAL" } else { "KNOWN" }.into();
+    result.dependencies.state = if recoverable_dependencies {
+        "PARTIAL"
+    } else {
+        "KNOWN"
+    }
+    .into();
     let mut distinct_links = HashSet::new();
     for contract in contracts {
         let id = contract.get("id").and_then(Value::as_str).unwrap_or("");
@@ -382,7 +393,11 @@ mod tests {
 
     #[test]
     fn unrelated_invalid_work_is_never_provisionally_scored() {
-        for code in ["work.duplicate_id", "work.contract_status", "work.execution_field"] {
+        for code in [
+            "work.duplicate_id",
+            "work.contract_status",
+            "work.execution_field",
+        ] {
             let index = json!({"status":"INVALID","contract_count":1,
                 "contracts":[{"id":"WORK-A","status":"verified","depends_on":[]}],
                 "findings":[{"code":code,"severity":"error","message":"invalid"}]

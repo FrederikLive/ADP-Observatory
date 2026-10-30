@@ -95,7 +95,10 @@ struct DeclaredProgress {
 }
 impl DeclaredProgress {
     fn from_metrics(metrics: &crate::metrics::Metrics) -> Option<Self> {
-        if !matches!(metrics.delivery.state.as_str(), "KNOWN" | "NOT_APPLICABLE" | "PARTIAL") {
+        if !matches!(
+            metrics.delivery.state.as_str(),
+            "KNOWN" | "NOT_APPLICABLE" | "PARTIAL"
+        ) {
             return None;
         }
         let counts = &metrics.delivery.statuses;
@@ -238,17 +241,24 @@ fn show_work_diagnostics(report: &Value) -> String {
         return String::new();
     }
     let mut codes = BTreeMap::<String, usize>::new();
-    if let Some(findings) = report.pointer("/work_index/findings").and_then(Value::as_array) {
+    if let Some(findings) = report
+        .pointer("/work_index/findings")
+        .and_then(Value::as_array)
+    {
         for finding in findings {
             if at(finding, "/severity", "") == "error" {
-                *codes.entry(at(finding, "/code", "unknown_error").to_owned()).or_default() += 1;
+                *codes
+                    .entry(at(finding, "/code", "unknown_error").to_owned())
+                    .or_default() += 1;
             }
         }
     }
     let errors: usize = codes.values().sum();
-    let summaries: Vec<String> = codes.iter().take(5).map(|(code, number)| {
-        format!("{} ({number})", escape_html(code))
-    }).collect();
+    let summaries: Vec<String> = codes
+        .iter()
+        .take(5)
+        .map(|(code, number)| format!("{} ({number})", escape_html(code)))
+        .collect();
     let tail = if codes.len() > 5 {
         format!(" and {} other error categories", codes.len() - 5)
     } else {
@@ -665,9 +675,15 @@ pub fn render(report: &Value) -> String {
         .replace("/*__STYLES__*/", STYLE)
         .replace("/*__SCRIPT__*/", SCRIPT)
         .replace("<!--__PROJECT_PATH__-->", &escape_html(project))
-        .replace("<!--__DATA_DIAGNOSTICS__-->", &show_work_diagnostics(report))
+        .replace(
+            "<!--__DATA_DIAGNOSTICS__-->",
+            &show_work_diagnostics(report),
+        )
         .replace("<!--__METRICS__-->", &summary)
-        .replace("<!--__STATES__-->", &show_state_chart(progress.as_ref(), provisional))
+        .replace(
+            "<!--__STATES__-->",
+            &show_state_chart(progress.as_ref(), provisional),
+        )
         .replace(
             "<!--__DEPENDENCIES__-->",
             &show_dependency_inspection(&metrics),
