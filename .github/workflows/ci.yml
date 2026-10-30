@@ -99,17 +99,3 @@ jobs:
           assert project not in report.parents, report
           assert "ADP Observatory" in report.read_text(encoding="utf-8")
           PY
-
-  source-reader-platform:
-    name: Bounded source reader on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Run source-reader and existing tests
-        run: cargo test --all-targets --all-features

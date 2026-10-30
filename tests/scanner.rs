@@ -25,7 +25,7 @@ fn scan(name: &str) -> Value {
 #[test]
 fn current_version_reads_structured_work_without_claiming_conformance() {
     let report = scan("current");
-    assert_eq!(report["schema_version"], "0.5.0");
+    assert_eq!(report["schema_version"], "0.4.1");
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     assert_eq!(report["compatibility"]["protocol"]["value"], "2.7.1");
     assert_eq!(report["compatibility"]["format"], "READABLE");
@@ -35,6 +35,55 @@ fn current_version_reads_structured_work_without_claiming_conformance() {
         .as_array()
         .expect("conflicts")
         .is_empty());
+}
+
+#[test]
+fn cli_and_html_share_recorded_metric_provenance_without_claiming_verification() {
+    let report = scan("current");
+    assert_eq!(report["metrics"]["rule_version"], "declared-metrics-v1");
+    assert_eq!(report["metrics"]["delivery"]["state"], "KNOWN");
+    assert_eq!(report["metrics"]["delivery"]["completed"], 1);
+    assert_eq!(report["metrics"]["delivery"]["applicable"], 1);
+    assert_eq!(report["metrics"]["delivery"]["percent"], 100);
+    assert_eq!(report["metrics"]["references"]["state"], "NOT_APPLICABLE");
+    assert!(report["metrics"]["references"]["percent"].is_null());
+    assert_eq!(report["metrics"]["dependencies"]["declared_edges"], 0);
+    assert_eq!(report["metrics"]["independently_verified"], "NOT_ASSESSED");
+    assert_eq!(report["metrics"]["historical_trend"], "NOT_ASSESSED");
+
+    let run = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
+        .arg("report")
+        .arg(fixture("current"))
+        .arg("--output")
+        .arg(std::env::temp_dir().join(format!("observatory-metrics-{}.html", std::process::id())))
+        .output()
+        .expect("offline report");
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let output =
+        std::env::temp_dir().join(format!("observatory-metrics-{}.html", std::process::id()));
+    let page = fs::read_to_string(&output).expect("offline report bytes");
+    assert!(page.contains("Declared completion"));
+    assert!(page.contains("100%"));
+    assert!(page.contains("Dependency visibility"));
+    assert!(page.contains("No compatible saved snapshots"));
+    assert!(page.contains("NOT_ASSESSED"));
+    assert!(page.contains("connect-src 'none'"));
+    fs::remove_file(output).unwrap();
+}
+
+#[test]
+fn unknown_work_index_does_not_create_false_metric_percentages() {
+    for name in ["partial", "malformed", "future"] {
+        let report = scan(name);
+        assert_eq!(report["metrics"]["delivery"]["state"], "UNKNOWN");
+        assert!(report["metrics"]["delivery"]["percent"].is_null());
+        assert!(report["metrics"]["references"]["percent"].is_null());
+        assert_eq!(report["metrics"]["dependencies"]["state"], "UNKNOWN");
+    }
 }
 
 #[test]
@@ -157,25 +206,6 @@ fn referenced_contract_files_are_checked_without_interpreting_them_as_conformanc
 }
 
 #[test]
-fn source_snapshot_report_contains_only_bounded_metadata() {
-    let report = scan("references");
-    let source = &report["source_inspection"];
-    assert_eq!(source["source_text_embedded"], false);
-    assert_eq!(source["document_limit"], 128);
-    assert_eq!(source["per_document_byte_limit"], 131072);
-    let documents = source["documents"].as_array().expect("source documents");
-    let present = documents
-        .iter()
-        .find(|doc| doc["path"] == "docs/work/WORK-A.md")
-        .expect("referenced Markdown");
-    assert_eq!(present["state"], "READABLE");
-    assert_eq!(present["sha256"].as_str().unwrap().len(), 64);
-    assert!(present.get("content").is_none());
-    assert!(present.get("headings").is_none());
-    assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
-}
-
-#[test]
 fn scan_scope_reports_exclusions_separately_from_failures() {
     let report = scan("current");
     assert_eq!(report["scan_scope"]["status"], "COMPLETE");
@@ -203,16 +233,7 @@ fn observatory_can_inspect_its_own_adp_work_records() {
         .output()
         .expect("run repository self-scan");
     assert!(output.status.success());
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let watched = [".project/WORK.json", "docs/STATUS.md", "docs/CONTINUITY.md"];
-    let before: Vec<_> = watched
-        .iter()
-        .map(|path| fs::read(root.join(path)).unwrap())
-        .collect();
     let report: Value = serde_json::from_slice(&output.stdout).expect("JSON output");
-    for (index, path) in watched.iter().enumerate() {
-        assert_eq!(fs::read(root.join(path)).unwrap(), before[index]);
-    }
     assert_eq!(report["work_index"]["status"], "STRUCTURALLY_VALID");
     let refs = report["work_index"]["contract_files"]
         .as_array()
@@ -221,96 +242,6 @@ fn observatory_can_inspect_its_own_adp_work_records() {
     assert!(refs.iter().all(|r| r["status"] == "PRESENT"));
     assert_eq!(report["compatibility"]["conformance"], "NOT_ASSESSED");
     assert_eq!(report["context"]["conflicts"].as_array().unwrap().len(), 0);
-}
-
-#[test]
-fn large_work_ledger_is_bounded_and_preserves_target_bytes() {
-    use std::time::{SystemTime, UNIX_EPOCH};
-    let stamp = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_nanos();
-    let root =
-        std::env::temp_dir().join(format!("observatory-large-{}-{stamp}", std::process::id()));
-    fs::create_dir_all(root.join(".project")).unwrap();
-    fs::create_dir_all(root.join("docs/work")).unwrap();
-    fs::write(
-        root.join("docs/STATUS.md"),
-        "# Status\nNo certification claimed.\n",
-    )
-    .unwrap();
-    fs::write(
-        root.join("docs/CONTINUITY.md"),
-        "# Continuity\nNo automatic execution.\n",
-    )
-    .unwrap();
-
-    let mut contracts = Vec::new();
-    let mut before = Vec::new();
-    for number in 0..300 {
-        let id = format!("WORK-{number:03}");
-        let path = format!("docs/work/{id}.md");
-        let bytes = format!("# {id}\n\nSECRET_BODY_ONLY_{number:03}\n").into_bytes();
-        fs::write(root.join(&path), &bytes).unwrap();
-        before.push(bytes);
-        contracts.push(serde_json::json!({
-            "id": id, "title": "Bounded fixture", "status": "ready",
-            "depends_on": [], "contract_file": path
-        }));
-    }
-    let work_path = root.join(".project/WORK.json");
-    let original = serde_json::to_vec(&serde_json::json!({
-        "schema_version": 1, "project": "Synthetic performance fixture",
-        "active_contract": "WORK-299", "contracts": contracts
-    }))
-    .unwrap();
-    fs::write(&work_path, &original).unwrap();
-    let run = || {
-        let result = Command::new(env!("CARGO_BIN_EXE_adp-observatory"))
-            .arg("scan")
-            .arg(&root)
-            .arg("--json")
-            .output()
-            .expect("invoke CLI");
-        assert!(
-            result.status.success(),
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
-        );
-        assert!(result.stdout.len() < 1024 * 1024);
-        assert!(!String::from_utf8_lossy(&result.stdout).contains("SECRET_BODY_ONLY"));
-        serde_json::from_slice::<Value>(&result.stdout).unwrap()
-    };
-    let first = run();
-    assert_eq!(
-        first,
-        run(),
-        "same project should produce deterministic scan"
-    );
-    assert_eq!(
-        first["source_inspection"]["documents"]
-            .as_array()
-            .unwrap()
-            .len(),
-        128
-    );
-    assert_eq!(first["source_inspection"]["omitted_documents"], 174);
-    assert_eq!(first["source_inspection"]["status"], "PARTIAL");
-    assert_eq!(
-        first["source_inspection"]["documents"][2]["path"], "docs/work/WORK-299.md",
-        "active contract must remain in bounded source collection"
-    );
-    assert_eq!(first["source_inspection"]["source_text_embedded"], false);
-    assert_eq!(first["compatibility"]["conformance"], "NOT_ASSESSED");
-    assert_eq!(fs::read(&work_path).unwrap(), original);
-    for (number, expected) in before.iter().enumerate() {
-        assert_eq!(
-            fs::read(root.join(format!("docs/work/WORK-{number:03}.md"))).unwrap(),
-            *expected
-        );
-    }
-    assert_eq!(fs::read_dir(root.join("docs/work")).unwrap().count(), 300);
-    fs::remove_dir_all(root).unwrap();
 }
 
 #[test]

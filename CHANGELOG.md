@@ -4,12 +4,6 @@ All notable changes to ADP-Observatory will be documented here.
 
 ## [Unreleased]
 
-### CI-tested 0.5.0 Markdown inspection (stacked review branch)
-- Added a capability-relative, no-follow, bounded local Markdown reader for explicitly referenced work documents plus independent STATUS/CONTINUITY records. The reader parses headings in memory but exports **metadata only** (states, sizes, SHA-256, heading and line counts).
-- Added resource limits, unsafe/invalid path and malformed-content tests, and Windows/macOS CI test jobs. Dashboard coverage now states Markdown read status and that no source text is embedded.
-- Advanced development report schema, Cargo and VERSION to 0.5.0. Linux/Windows/macOS CI passed; still requires independent security/real-project review before merge; interactive Contract & Evidence Explorer is not yet implemented.
-
-
 ### ADP 2.8.0 compatibility (CI verified on draft branch)
 - Recognize ADP 2.8.0 as semantically supported **only for the existing optional WORK.json schema-v1 structural subset**, retaining ADP 2.7.1 support and keeping full conformance NOT_ASSESSED.
 - Allow and validate optional `execution.assignment` snapshots using the canonical ADP 2.8.0 schema, including nullable assignment and rejecting unknown or invalid nested fields. Assignment is historical project metadata, not a running agent or quota signal.

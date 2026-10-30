@@ -120,8 +120,3 @@ analysis without introducing a mandatory canonical ADP data interface.
 - Supports format/semantics for the tested WORK schema-v1 subset only; independent ADP conformance is still NOT_ASSESSED. Does not start the deferred document explorer or add agent runtime instrumentation.
 - Branch CI passed at [40756821398](https://github.com/FrederikLive/ADP-Observatory/actions/runs/40756821398); PR #4 remains draft. Next evidence: independent consumer project calibration, followed by scoped safe read-time source inspection.
 
-## Bounded source reading slice — 2026-10-28 (CI passed; review pending)
-- Introduced capability-relative Markdown inspection with strict resource budgets, content digests, line/heading counts and explicit error states. Unlike the previous `PRESENT` reference check, this opens document handles under the selected root and declines to follow symlinks at each component.
-- Added unit fixtures for hostile paths, symlinks, large content, malformed UTF-8 and absent optional WORK.json. No Markdown body/heading text is exported yet; this deliberately precedes the opt-in Explorer feature.
-- Report v0.5.0 surfaces metadata-only source coverage. The new Windows/macOS CI jobs and Linux checks passed in run 40759004986, but this is not a substitute for adversarial race/security review and 30/300-contract performance sampling.
-- Gate: complete independent security and real-project review before treating the reader as VERIFIED or activating the deferred Explorer contract.

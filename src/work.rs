@@ -442,23 +442,15 @@ pub fn inspect(root: &Path) -> WorkInspection {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{
-        sync::atomic::{AtomicU64, Ordering},
-        time::{SystemTime, UNIX_EPOCH},
-    };
-
-    static NEXT_TEST_ROOT: AtomicU64 = AtomicU64::new(0);
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn with_work(content: &str, test: impl FnOnce(&Path)) {
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("clock")
             .as_nanos();
-        let dir = std::env::temp_dir().join(format!(
-            "adp-observatory-{}-{nonce}-{}",
-            std::process::id(),
-            NEXT_TEST_ROOT.fetch_add(1, Ordering::Relaxed)
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("adp-observatory-{}-{nonce}", std::process::id()));
         fs::create_dir_all(dir.join(".project")).expect("create");
         fs::write(dir.join(".project/WORK.json"), content).expect("write");
         test(&dir);

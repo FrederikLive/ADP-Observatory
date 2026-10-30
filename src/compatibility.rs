@@ -165,12 +165,7 @@ fn extract_version(text: &str, compact: bool) -> Option<String> {
 mod tests {
     use super::*;
     use crate::work;
-    use std::{
-        sync::atomic::{AtomicU64, Ordering},
-        time::{SystemTime, UNIX_EPOCH},
-    };
-
-    static NEXT_TEST_ROOT: AtomicU64 = AtomicU64::new(0);
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn with_project(test: impl FnOnce(&Path)) {
         let nonce = SystemTime::now()
@@ -178,9 +173,8 @@ mod tests {
             .expect("clock")
             .as_nanos();
         let root = std::env::temp_dir().join(format!(
-            "adp-observatory-compat-{}-{nonce}-{}",
-            std::process::id(),
-            NEXT_TEST_ROOT.fetch_add(1, Ordering::Relaxed)
+            "adp-observatory-compat-{}-{nonce}",
+            std::process::id()
         ));
         fs::create_dir_all(&root).expect("create root");
         test(&root);
